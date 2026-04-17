@@ -491,18 +491,26 @@
     }
 
     .crumb-btn {
-      background: none;
-      border: none;
+      background: var(--s2);
+      border: 1px solid var(--border);
       color: var(--accent2);
       font-family: var(--font-mono);
       font-size: .68rem;
       cursor: pointer;
-      padding: 3px 4px;
-      border-radius: 5px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      transition: background .15s, border-color .15s;
+    }
+
+    .crumb-btn:hover {
+      background: var(--s3);
+      border-color: var(--accent2);
     }
 
     .crumb-btn:active {
-      background: var(--s3);
+      background: var(--accent2);
+      color: var(--bg);
+      border-color: var(--accent2);
     }
 
     .crumb-sep {
@@ -514,7 +522,10 @@
       color: var(--text);
       font-weight: 600;
       font-size: .68rem;
-      padding: 3px 4px;
+      padding: 3px 9px;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      border-radius: 100px;
     }
 
     .folder-item {
@@ -645,6 +656,44 @@
     .site-item:hover {
       border-color: var(--accent2);
       background: var(--s2);
+    }
+
+    .event-item {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .event-item:hover {
+      border-color: var(--accent2);
+      background: var(--s2);
+    }
+
+    .event-item.active-event {
+      border-color: var(--accent);
+      background: var(--s2);
+    }
+
+    .event-edit-block {
+      margin-bottom: 10px;
+    }
+
+    .event-edit-btn {
+      flex-shrink: 0;
+      font-size: .8rem;
+      padding: 5px 8px;
+      opacity: .6;
+    }
+
+    .event-item:hover .event-edit-btn {
+      opacity: 1;
     }
 
     .site-icon {
@@ -1746,54 +1795,66 @@
         </div>
         <div id="collect-content" style="display:none;">
           <div id="collect-site-header" class="card" style="margin-bottom:14px;"></div>
-          <div class="card" id="new-event-card" style="margin-bottom:14px;">
-            <div class="card-title">New Event</div>
-            <div class="field">
-              <label>Event Name</label>
-              <input type="text" id="new-event-name" placeholder="e.g. Spring 2026 Survey">
+
+          <!-- ＋ New Event toggle button -->
+          <button class="btn btn-primary btn-full" id="new-event-toggle-btn" style="margin-bottom:14px;">＋ New
+            Event</button>
+
+          <!-- New event form — hidden until button pressed -->
+          <div id="new-event-form" style="display:none;margin-bottom:14px;">
+            <div class="card">
+              <div class="card-title">New Event
+                <button id="new-event-cancel-btn"
+                  style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1;"
+                  title="Cancel">✕</button>
+              </div>
+              <div class="field">
+                <label>Event Name</label>
+                <input type="text" id="new-event-name" placeholder="e.g. Spring 2026 Survey">
+              </div>
+              <div class="field">
+                <label>Date</label>
+                <input type="date" id="new-event-date">
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Transects</label>
+                  <input type="number" id="new-event-transects" value="4" min="1" max="20">
+                </div>
+                <div class="field">
+                  <label>Samples / Transect</label>
+                  <input type="number" id="new-event-samples" value="50" min="1" max="200">
+                </div>
+              </div>
+              <div class="row3">
+                <div class="field">
+                  <label>Transect Length</label>
+                  <input type="number" id="new-event-length" value="100" min="1">
+                </div>
+                <div class="field">
+                  <label>Unit</label>
+                  <select id="new-event-unit">
+                    <option value="m">m</option>
+                    <option value="ft">ft</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Cover Pts/Sample</label>
+                  <input type="number" id="new-event-coverpts" value="2" min="1" max="10">
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Frame Width (cm)</label>
+                  <input type="number" id="new-event-fw" value="40" min="1">
+                </div>
+                <div class="field">
+                  <label>Frame Height (cm)</label>
+                  <input type="number" id="new-event-fh" value="40" min="1">
+                </div>
+              </div>
+              <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
             </div>
-            <div class="field">
-              <label>Date</label>
-              <input type="date" id="new-event-date">
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Transects</label>
-                <input type="number" id="new-event-transects" value="4" min="1" max="20">
-              </div>
-              <div class="field">
-                <label>Samples / Transect</label>
-                <input type="number" id="new-event-samples" value="50" min="1" max="200">
-              </div>
-            </div>
-            <div class="row3">
-              <div class="field">
-                <label>Transect Length</label>
-                <input type="number" id="new-event-length" value="100" min="1">
-              </div>
-              <div class="field">
-                <label>Unit</label>
-                <select id="new-event-unit">
-                  <option value="m">m</option>
-                  <option value="ft">ft</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Cover Pts/Sample</label>
-                <input type="number" id="new-event-coverpts" value="2" min="1" max="10">
-              </div>
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Frame Width (cm)</label>
-                <input type="number" id="new-event-fw" value="40" min="1">
-              </div>
-              <div class="field">
-                <label>Frame Height (cm)</label>
-                <input type="number" id="new-event-fh" value="40" min="1">
-              </div>
-            </div>
-            <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
           </div>
           <div id="event-list"></div>
         </div>
@@ -1946,6 +2007,20 @@
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="wipe-db-cancel-btn">Cancel</button>
         <button class="btn btn-danger btn-full" id="wipe-db-confirm-btn">Wipe Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete event modal -->
+  <div class="modal-backdrop" id="del-event-modal">
+    <div class="modal">
+      <div class="modal-title" style="color:var(--danger);">Delete Event?</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;">This will permanently delete the event and
+        <strong>all collected samples</strong> within it. This cannot be undone.
+      </p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="del-event-cancel-btn">Cancel</button>
+        <button class="btn btn-danger btn-full" id="del-event-confirm-btn">Delete</button>
       </div>
     </div>
   </div>
@@ -2479,12 +2554,9 @@
       updateCreateLocationHint(folders,path);
 
       // ── Sub-folders at current level ──
-      const subFolders=folders.filter(f => f.parentId===currentFolderId).sort((a,b) => {
-        // localOnly (Practice) always at bottom
-        if(a.localOnly&&!b.localOnly) return 1;
-        if(!a.localOnly&&b.localOnly) return -1;
-        return a.name.localeCompare(b.name);
-      });
+      const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
+      const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
+      const localFolders=allSubFolders.filter(f => f.localOnly);
       let html='';
 
       subFolders.forEach(f => {
@@ -2516,7 +2588,7 @@
       const archived=levelSites.filter(s => s.archived);
       const visible=showArchived? archived:active;
 
-      if(!visible.length&&!subFolders.length) {
+      if(!visible.length&&!subFolders.length&&!localFolders.length) {
         if(!allSites.length&&!folders.length) {
           html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
         } else {
@@ -2555,6 +2627,24 @@
             <span class="site-arrow">›</span>
           </div>`;
         }
+      });
+
+      // ── Local-only folders at the very bottom, after sites ──
+      localFolders.forEach(f => {
+        const subCount=folders.filter(sf => sf.parentId===f.id).length;
+        const siteCount=countSitesInFolder(f.id,folders,allSites);
+        const icon='🧪';
+        const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
+        const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
+        html+=`<div class="folder-item" data-folder-id="${f.id}">
+          <div class="folder-icon">${icon}</div>
+          <div class="folder-meta">
+            <div class="folder-name">${esc(f.name)}${localBadge}</div>
+            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' · ':''}${siteCount} site${siteCount!==1? 's':''}</div>
+          </div>
+          ${actions}
+        <span class="site-arrow" style="margin-left:4px;">›</span>
+        </div>`;
       });
 
       // Archive toggle footer
@@ -2672,6 +2762,7 @@
       };
     }
     document.getElementById('del-cancel-btn').onclick=() => document.getElementById('del-modal').classList.remove('open');
+    document.getElementById('del-event-cancel-btn').onclick=() => document.getElementById('del-event-modal').classList.remove('open');
 
     async function restoreSite(siteId) {
       const site=await dbGet('sites',siteId);
@@ -2711,6 +2802,17 @@
     // ══════════════════════════════════════════════════════
     //  COLLECT PAGE
     // ══════════════════════════════════════════════════════
+    function openNewEventForm() {
+      document.getElementById('new-event-form').style.display='';
+      document.getElementById('new-event-toggle-btn').style.display='none';
+      document.getElementById('new-event-name').focus();
+    }
+    function closeNewEventForm() {
+      document.getElementById('new-event-form').style.display='none';
+      document.getElementById('new-event-toggle-btn').style.display='';
+    }
+    document.getElementById('new-event-toggle-btn').addEventListener('click',openNewEventForm);
+    document.getElementById('new-event-cancel-btn').addEventListener('click',closeNewEventForm);
     async function renderCollect() {
       const noSite=document.getElementById('collect-no-site');
       const content=document.getElementById('collect-content');
@@ -2721,7 +2823,12 @@
       const allEvents=await dbGetByIndex('events','siteId',activeSiteId);
       const sampleMap={};
       allSamples.forEach(s => sampleMap[s.id]=s);
-      allEvents.sort((a,b) => b.createdAt-a.createdAt);
+      allEvents.sort((a,b) => {
+        const da=a.eventDate||new Date(a.createdAt).toISOString().slice(0,10);
+        const db=b.eventDate||new Date(b.createdAt).toISOString().slice(0,10);
+        if(db!==da) return db.localeCompare(da); // newest date first
+        return (a.name||'').localeCompare(b.name||'');  // then A-Z
+      });
 
       // Site header
       const hdr=document.getElementById('collect-site-header');
@@ -2754,65 +2861,59 @@
           const evDone=evSamples.filter(s => s.hasData).length;
           const evTotal=(ev.transects||4)*(ev.samples||50);
           const pct=evTotal? Math.round(evDone/evTotal*100):0;
-          const isOpen=activeEventId===ev.id;
-          return `<div class="event-header${isOpen? ' event-active':''}" data-eid="${ev.id}">
-            <div style="flex:1;min-width:0;">
-              <div class="event-name">${esc(ev.name)}</div>
-              <div class="event-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
+          const isActive=activeEventId===ev.id;
+          const cfgStr=`${ev.transects||4}T × ${ev.samples||50}S · ${ev.length||100}${ev.unit||'m'} · ${ev.coverPts||2} cover pts · frame ${ev.frameW||40}×${ev.frameH||40}cm`;
+          return `
+          <div class="event-item${isActive? ' active-event':''}" data-eid="${ev.id}">
+            <div class="site-icon" style="font-size:1.1rem;">📅</div>
+            <div class="site-meta">
+              <div class="site-name">${esc(ev.name)}</div>
+              <div class="site-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
               <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
             </div>
-            <div class="event-chevron${isOpen? ' open':''}" id="echev-${ev.id}">›</div>
+            <button class="event-edit-btn btn btn-ghost btn-sm" data-edit-eid="${ev.id}" title="Edit event">✏️</button>
+            <span class="site-arrow" style="pointer-events:none;">›</span>
           </div>
-          <div id="eblock-${ev.id}" style="display:${isOpen? 'block':'none'};">
-            <div class="card" style="margin-bottom:8px;">
-              <div class="card-title" style="margin-bottom:8px;">Event Details</div>
+          <div class="event-edit-block" id="eedit-${ev.id}" style="display:none;">
+            <div class="card" style="margin-bottom:10px;border-color:var(--accent2);">
+              <div class="card-title" style="font-size:.82rem;margin-bottom:10px;">Edit Event</div>
               <div class="field" style="margin-bottom:8px;">
                 <label>Name</label>
-                <input type="text" id="ename-${ev.id}" value="${esc(ev.name)}" style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-ui);font-size:.85rem;outline:none;">
+                <input type="text" id="ename-${ev.id}" value="${esc(ev.name)}">
               </div>
               <div class="field" style="margin-bottom:8px;">
                 <label>Date</label>
-                <input type="date" id="edate-${ev.id}" value="${ev.eventDate||''}" style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-mono);font-size:.85rem;outline:none;">
+                <input type="date" id="edate-${ev.id}" value="${ev.eventDate||''}">
               </div>
-              <div class="field" style="margin-bottom:4px;">
+              <div class="row2" style="margin-bottom:8px;">
+                <div class="field">
+                  <label>Transects</label>
+                  <input type="number" id="etransects-${ev.id}" value="${ev.transects||4}" min="1" max="20">
+                </div>
+                <div class="field">
+                  <label>Samples / Transect</label>
+                  <input type="number" id="esamples-${ev.id}" value="${ev.samples||50}" min="1" max="200">
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:8px;">
                 <label>Notes</label>
-                <textarea id="enotes-${ev.id}" rows="2" placeholder="Weather, observer, conditions…" style="width:100%;resize:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-mono);font-size:.85rem;outline:none;">${esc(ev.notes||'')}</textarea>
+                <textarea id="enotes-${ev.id}" rows="2" placeholder="Weather, observer, conditions…">${esc(ev.notes||'')}</textarea>
               </div>
-              <div style="display:flex;gap:8px;margin-top:6px;">
-                <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}">Save</button>
-                <button class="btn btn-primary btn-sm event-open-btn" data-eid="${ev.id}" style="flex:1;">▶ Open Transects</button>
+              <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:6px 8px;background:var(--s2);border-radius:6px;">${cfgStr}</div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-ghost btn-sm" data-close-eid="${ev.id}">Cancel</button>
+                <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}" style="flex:1;">Save</button>
+                <button class="btn btn-danger btn-sm event-delete-btn" data-del-eid="${ev.id}" title="Delete event">🗑</button>
               </div>
             </div>
           </div>`;
         }).join('');
 
-        // Wire event expand/collapse
-        evList.querySelectorAll('.event-header').forEach(hd => {
-          hd.addEventListener('click',() => {
-            const eid=hd.dataset.eid;
-            const was=activeEventId===eid;
-            if(activeEventId) {
-              const prev=document.getElementById('eblock-'+activeEventId);
-              const prevChev=document.getElementById('echev-'+activeEventId);
-              if(prev) prev.style.display='none';
-              if(prevChev) prevChev.classList.remove('open');
-              document.querySelector('.event-header.event-active')?.classList.remove('event-active');
-            }
-            if(was) {activeEventId=null; activeEvent=null; updateCrumb(); return;}
-            activeEventId=eid;
-            activeEvent=allEvents.find(e => e.id===eid)||null;
-            hd.classList.add('event-active');
-            document.getElementById('eblock-'+eid).style.display='block';
-            document.getElementById('echev-'+eid).classList.add('open');
-            updateCrumb();
-          });
-        });
-
-        // "Open Transects" button — jump to first incomplete sample (or T0·S0)
-        evList.querySelectorAll('.event-open-btn').forEach(btn => {
-          btn.addEventListener('click',e => {
-            e.stopPropagation();
-            const eid=btn.dataset.eid;
+        // Row click → open transects
+        evList.querySelectorAll('.event-item').forEach(row => {
+          row.addEventListener('click',e => {
+            if(e.target.closest('.event-edit-btn')) return; // handled separately
+            const eid=row.dataset.eid;
             activeEventId=eid;
             activeEvent=allEvents.find(ev => ev.id===eid)||null;
             updateCrumb();
@@ -2828,17 +2929,61 @@
           });
         });
 
-        // Details save buttons
+        // Edit button toggle
+        evList.querySelectorAll('.event-edit-btn').forEach(btn => {
+          btn.addEventListener('click',e => {
+            e.stopPropagation();
+            const eid=btn.dataset.editEid;
+            const block=document.getElementById('eedit-'+eid);
+            const isShown=block.style.display!=='none';
+            // close all other open edit blocks
+            evList.querySelectorAll('.event-edit-block').forEach(b => b.style.display='none');
+            block.style.display=isShown? 'none':'';
+          });
+        });
+
+        // Cancel button
+        evList.querySelectorAll('[data-close-eid]').forEach(btn => {
+          btn.addEventListener('click',e => {
+            e.stopPropagation();
+            document.getElementById('eedit-'+btn.dataset.closeEid).style.display='none';
+          });
+        });
+
+        // Delete event button
+        evList.querySelectorAll('.event-delete-btn').forEach(btn => {
+          btn.addEventListener('click',e => {
+            e.stopPropagation();
+            const eid=btn.dataset.delEid;
+            document.getElementById('del-event-modal').classList.add('open');
+            document.getElementById('del-event-confirm-btn').onclick=async () => {
+              document.getElementById('del-event-modal').classList.remove('open');
+              // Delete the event and all its samples
+              await dbDelete('events',eid);
+              const evSamples=allSamples.filter(s => s.eventId===eid);
+              for(const s of evSamples) await dbDelete('samples',s.id);
+              if(activeEventId===eid) {activeEventId=null; activeEvent=null; updateCrumb();}
+              toast('Event deleted','ok');
+              renderCollect();
+            };
+          });
+        });
+
+        // Save button
         evList.querySelectorAll('.event-details-save').forEach(btn => {
-          btn.addEventListener('click',async () => {
+          btn.addEventListener('click',async e => {
+            e.stopPropagation();
             const eid=btn.dataset.eid;
             const ev=allEvents.find(e => e.id===eid);
             if(!ev) return;
             const newName=document.getElementById('ename-'+eid).value.trim();
-            const newDate=document.getElementById('edate-'+eid).value;
             if(newName) ev.name=newName;
-            ev.eventDate=newDate;
+            ev.eventDate=document.getElementById('edate-'+eid).value;
             ev.notes=document.getElementById('enotes-'+eid).value;
+            const newT=parseInt(document.getElementById('etransects-'+eid).value)||ev.transects||4;
+            const newS=parseInt(document.getElementById('esamples-'+eid).value)||ev.samples||50;
+            ev.transects=newT;
+            ev.samples=newS;
             await dbPut('events',ev);
             toast('Saved','ok');
             renderCollect();
@@ -2914,6 +3059,7 @@
       activeEventId=ev.id;
       activeEvent=ev;
       document.getElementById('new-event-name').value='';
+      closeNewEventForm();
       updateCrumb();
       toast('Event created','ok');
       renderCollect();
@@ -3666,6 +3812,14 @@
         const all=await dbGetAll(store);
         for(const rec of all) await dbDelete(store,rec.id);
       }
+      // Re-seed the permanent Practice folder
+      await dbPut('folders',{
+        id: 'folder_local_practice',
+        name: 'Practice (Not Syncable)',
+        parentId: null,
+        localOnly: true,
+        createdAt: 0
+      });
       // Reset in-memory state
       activeSiteId=null; activeSite=null; activeEventId=null; activeEvent=null;
       renderSiteList();
@@ -3859,11 +4013,14 @@
       if(!existing) {
         await dbPut('folders',{
           id: 'folder_local_practice',
-          name: 'Practice (Local Only)',
+          name: 'Practice (Not Syncable)',
           parentId: null,
           localOnly: true,
           createdAt: 0
         });
+      } else if(existing.name==='Practice (Local Only)') {
+        // Migrate old name
+        await dbPut('folders',{...existing,name: 'Practice (Not Syncable)'});
       }
       loadSpeciesDB();
       renderSiteList();
