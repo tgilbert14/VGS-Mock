@@ -1,0 +1,16 @@
+{
+  "name": "field-observer-api",
+  "version": "1.0.0",
+  "description": "Azure Function backend for Field Observer app",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "mssql": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>EcoPlot Field Collector</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c09;
+      --s1: #101610;
+      --s2: #182018;
+      --s3: #1f2a1f;
+      --border: #263026;
+      --accent: #7ecb6f;
+      --accent2: #4fa83d;
+      --gold: #d4a843;
+      --warn: #e07c3a;
+      --danger: #d95555;
+      --info: #5baad4;
+      --text: #ddeedd;
+      --muted: #567056;
+      --dim: #3a4a3a;
+      --radius: 12px;
+      --font-ui: 'Syne', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    /* ── Shell ── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
+
+    /* ── Header ── */
+    #topbar {
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: -.02em;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .logo sup {
+      font-size: .5rem;
+      color: var(--muted);
+      font-weight: 400;
+      vertical-align: super;
+      letter-spacing: .06em;
+    }
+
+    #topbar-center {
+      flex: 1;
+      min-width: 0;
+    }
+
+    #site-crumb {
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #site-crumb strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .signal {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .6rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--s2);
+      flex-shrink: 0;
+    }
+
+    .signal .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--danger);
+    }
+
+    .signal.online .dot {
+      background: var(--accent);
+      box-shadow: 0 0 5px var(--accent2);
+    }
+
+    .signal.online {
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    /* ── Nav tabs ── */
+    #nav {
+      display: flex;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      flex: 1;
+      padding: 10px 4px 9px;
+      text-align: center;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .nav-tab .tab-icon {
+      font-size: 1rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ── Pages ── */
+    #pages {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      padding: 16px;
+      display: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .7rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-title .badge {
+      font-size: .58rem;
+      padding: 3px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--accent2);
+      color: var(--accent);
+      background: transparent;
+      letter-spacing: .06em;
+    }
+
+    /* ── Form elements ── */
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    input[type=text],
+    input[type=number],
+    input[type=url],
+    input[type=password],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: .85rem;
+      outline: none;
+      transition: border-color .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent2);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23567056' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    textarea {
+      resize: none;
+      line-height: 1.5;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .78rem;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #080c09;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--accent2);
+      color: var(--accent);
+    }
+
+    .btn-outline:hover {
+      background: var(--s3);
+    }
+
+    .btn-ghost {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: .68rem;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Site list ── */
+    .site-item {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .site-item:active,
+    .site-item:hover {
+      border-color: var(--accent2);
+      background: var(--s2);
+    }
+
+    .site-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .site-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .site-name {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .site-sub {
+      font-size: .65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .site-arrow {
+      color: var(--dim);
+      font-size: 1.1rem;
+    }
+
+    /* ── Transect + sample grid ── */
+    .transect-header {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .transect-header:active {
+      background: var(--s3);
+    }
+
+    .transect-label {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .85rem;
+      flex: 1;
+    }
+
+    .transect-prog {
+      font-size: .65rem;
+      color: var(--muted);
+    }
+
+    .transect-chevron {
+      color: var(--muted);
+      font-size: .9rem;
+      transition: transform .2s;
+    }
+
+    .transect-chevron.open {
+      transform: rotate(90deg);
+    }
+
+    .sample-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+      gap: 6px;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+
+    .sample-dot {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .65rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .sample-dot:active {
+      transform: scale(.92);
+    }
+
+    .sample-dot.has-data {
+      background: var(--s3);
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    .sample-dot.current {
+      border-color: var(--gold);
+      background: rgba(212, 168, 67, .12);
+      color: var(--gold);
+    }
+
+    .sample-dot.complete {
+      background: rgba(79, 168, 61, .15);
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .sample-dot .dot-pip {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent2);
+      display: none;
+    }
+
+    .sample-dot.has-data .dot-pip {
+      display: block;
+    }
+
+    /* ── Sample entry panel ── */
+    #sample-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    #sample-panel.open {
+      transform: translateY(0);
+    }
+
+    #sample-panel-header {
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #sample-panel-title {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: .95rem;
+      flex: 1;
+    }
+
+    #sample-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #sample-panel-footer {
+      background: var(--s1);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── Species search ── */
+    #species-search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    #species-input {
+      padding-right: 40px;
+    }
+
+    #species-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    #species-dropdown {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      margin-top: 4px;
+    }
+
+    #species-dropdown.open {
+      display: block;
+    }
+
+    .species-opt {
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .species-opt:last-child {
+      border-bottom: none;
+    }
+
+    .species-opt:active,
+    .species-opt:hover {
+      background: var(--s3);
+    }
+
+    .species-common {
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .species-sci {
+      font-size: .62rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .species-native {
+      font-size: .58rem;
+      padding: 2px 6px;
+      border-radius: 100px;
+    }
+
+    .native-yes {
+      background: rgba(79, 168, 61, .2);
+      color: var(--accent);
+      border: 1px solid var(--accent2);
+    }
+
+    .native-no {
+      background: rgba(217, 85, 85, .2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .native-unk {
+      background: var(--s3);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Species chip list ── */
+    .species-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      min-height: 32px;
+    }
+
+    .species-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--s3);
+      border: 1px solid var(--accent2);
+      border-radius: 100px;
+      padding: 5px 10px 5px 12px;
+      font-size: .7rem;
+      color: var(--accent);
+      animation: chipIn .15s ease;
+    }
+
+    .species-chip.invasive {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(217, 85, 85, .1);
+    }
+
+    @keyframes chipIn {
+      from {
+        transform: scale(.8);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: .9rem;
+      opacity: .7;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .chip-remove:hover {
+      opacity: 1;
+    }
+
+    /* ── Ground cover buttons ── */
+    .cover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .cover-btn {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: .72rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      line-height: 1.4;
+    }
+
+    .cover-btn:active {
+      transform: scale(.95);
+    }
+
+    .cover-btn.selected {
+      background: rgba(79, 168, 61, .12);
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    .cover-btn .cover-icon {
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cover-btn .cover-count {
+      font-size: .9rem;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      color: var(--gold);
+      display: block;
+    }
+
+    /* ── Cover hit log ── */
+    .hit-log {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .hit-chip {
+      font-size: .6rem;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hit-chip button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .7rem;
+      padding: 0;
+    }
+
+    /* ── Progress bar ── */
+    .prog-bar-wrap {
+      height: 4px;
+      background: var(--s3);
+      border-radius: 2px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .prog-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width .4s;
+    }
+
+    /* ── Summary stats ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: var(--accent);
+    }
+
+    .stat-lbl {
+      font-size: .58rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-top: 3px;
+    }
+
+    /* ── Cover summary table ── */
+    .cover-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .75rem;
+    }
+
+    .cover-table th {
+      text-align: left;
+      color: var(--muted);
+      font-size: .6rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cover-table td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .cover-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pct-bar {
+      height: 6px;
+      background: var(--s3);
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .pct-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .pct-fill.invasive {
+      background: var(--danger);
+    }
+
+    /* ── Sync page ── */
+    .sync-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sync-status-row:last-child {
+      border-bottom: none;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sd-pending {
+      background: var(--warn);
+    }
+
+    .sd-synced {
+      background: var(--accent);
+    }
+
+    .sd-failed {
+      background: var(--danger);
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+    }
+
+    .empty .e-icon {
+      font-size: 2.8rem;
+      display: block;
+      margin-bottom: 12px;
+      opacity: .4;
+    }
+
+    .empty p {
+      font-size: .8rem;
+      line-height: 1.8;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 20px;
+      font-size: .75rem;
+      color: var(--text);
+      opacity: 0;
+      transition: all .25s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.ok {
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    #toast.err {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 300;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      padding: 20px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 16px;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--dim);
+      border-radius: 2px;
+    }
+
+    /* ── Panel load flash ── */
+    @keyframes panelFlash {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    #sample-panel-body.loading {
+      animation: panelFlash .18s ease both;
+    }
+
+    /* ── Panel header two-line title ── */
+    #sample-panel-title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .spt-main {
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--gold);
+      letter-spacing: -.01em;
+    }
+
+    .spt-sub {
+      font-size: .6rem;
+      color: var(--muted);
+      margin-top: 1px;
+      letter-spacing: .04em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- Top bar -->
+    <div id="topbar">
+      <div class="logo">EcoPlot<sup>FIELD</sup></div>
+      <div id="topbar-center">
+        <div id="site-crumb">No site selected</div>
+      </div>
+      <div class="signal" id="signal-pill">
+        <div class="dot"></div><span id="signal-lbl">OFF</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div id="nav">
+      <div class="nav-tab active" data-page="sites">
+        <span class="tab-icon">🗺</span>Sites
+      </div>
+      <div class="nav-tab" data-page="collect">
+        <span class="tab-icon">📋</span>Collect
+      </div>
+      <div class="nav-tab" data-page="summary">
+        <span class="tab-icon">📊</span>Summary
+      </div>
+      <div class="nav-tab" data-page="sync">
+        <span class="tab-icon">☁️</span>Sync
+      </div>
+    </div>
+
+    <!-- Pages -->
+    <div id="pages">
+
+      <!-- ═══ SITES PAGE ═══ -->
+      <div class="page active" id="page-sites">
+
+        <div class="card">
+          <div class="card-title">New Site</div>
+          <div class="field">
+            <label>Site Name</label>
+            <input type="text" id="new-site-name" placeholder="e.g. Meadow Ridge A">
+          </div>
+          <div class="field">
+            <label>Location / Description</label>
+            <input type="text" id="new-site-desc" placeholder="e.g. North slope, riparian buffer">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Transects</label>
+              <input type="number" id="new-site-transects" value="4" min="1" max="20">
+            </div>
+            <div class="field">
+              <label>Samples / Transect</label>
+              <input type="number" id="new-site-samples" value="50" min="1" max="200">
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label>Transect Length</label>
+              <input type="number" id="new-site-length" value="100" min="1">
+            </div>
+            <div class="field">
+              <label>Unit</label>
+              <select id="new-site-unit">
+                <option value="ft">ft</option>
+                <option value="m">m</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Cover Pts/Sample</label>
+              <input type="number" id="new-site-coverpts" value="2" min="1" max="10">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Frame Width (cm)</label>
+              <input type="number" id="new-site-fw" value="40" min="1">
+            </div>
+            <div class="field">
+              <label>Frame Height (cm)</label>
+              <input type="number" id="new-site-fh" value="40" min="1">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" id="create-site-btn">＋ Create Site</button>
+        </div>
+
+        <div class="card-title" style="padding:0 4px;margin-bottom:10px;">Saved Sites</div>
+        <div id="site-list">
+          <div class="empty"><span class="e-icon">🌾</span>
+            <p>No sites yet.<br>Create one above.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ COLLECT PAGE ═══ -->
+      <div class="page" id="page-collect">
+        <div id="collect-no-site" class="empty" style="display:none;">
+          <span class="e-icon">📍</span>
+          <p>Select a site from the Sites tab<br>to start collecting data.</p>
+        </div>
+        <div id="collect-content" style="display:none;">
+          <div id="collect-site-header" class="card" style="margin-bottom:14px;"></div>
+          <div class="card" id="new-event-card" style="margin-bottom:14px;">
+            <div class="card-title">New Event</div>
+            <div class="field">
+              <label>Event Name</label>
+              <input type="text" id="new-event-name" placeholder="e.g. Spring 2026 Survey">
+            </div>
+            <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
+          </div>
+          <div id="event-list"></div>
+        </div>
+      </div>
+
+      <!-- ═══ SUMMARY PAGE ═══ -->
+      <div class="page" id="page-summary">
+        <div id="summary-no-site" class="empty">
+          <span class="e-icon">📊</span>
+          <p>Select a site to view summary statistics.</p>
+        </div>
+        <div id="summary-content" style="display:none;"></div>
+      </div>
+
+      <!-- ═══ SYNC PAGE ═══ -->
+      <div class="page" id="page-sync">
+        <div class="card">
+          <div class="card-title">Species Database <span class="badge" id="species-db-badge">Built-in list</span></div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
+          <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
+          <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
+        </div>
+        <div class="card">
+          <div class="card-title">Azure Connection</div>
+          <div class="field">
+            <label>Azure Function URL</label>
+            <input type="url" id="cfg-url" placeholder="https://yourapp.azurewebsites.net/api/ecoplot">
+          </div>
+          <div class="field">
+            <label>API Key (x-functions-key)</label>
+            <input type="password" id="cfg-key" placeholder="optional">
+          </div>
+          <button class="btn btn-outline btn-sm" id="save-cfg-btn">Save Settings</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Sync Status <span class="badge" id="pending-badge">0 pending</span></div>
+          <div id="sync-site-list"></div>
+          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Pending</button>
+        </div>
+      </div>
+
+    </div><!-- /pages -->
+  </div><!-- /app -->
+
+  <!-- ══════════════ SAMPLE ENTRY PANEL ══════════════ -->
+  <div id="sample-panel">
+    <div id="sample-panel-header">
+      <button class="btn btn-ghost btn-sm" id="sample-close-btn">✕</button>
+      <div id="sample-panel-title">
+        <div class="spt-main" id="spt-main">—</div>
+        <div class="spt-sub" id="spt-sub"></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" id="sample-prev-btn">◀ Prev</button>
+        <button class="btn btn-ghost btn-sm" id="sample-next-btn">Next ▶</button>
+      </div>
+    </div>
+    <div id="sample-panel-body">
+
+      <!-- Quadrat species -->
+      <div class="card">
+        <div class="card-title">Quadrat Species
+          <span id="quadrat-size-badge" class="badge">40×40 cm</span>
+        </div>
+        <div id="species-search-wrap">
+          <input type="text" id="species-input" placeholder="Search USDA plant name or symbol…" autocomplete="off"
+            autocorrect="off" spellcheck="false">
+          <button id="species-clear" style="display:none;">✕</button>
+        </div>
+        <div id="species-dropdown"></div>
+        <div id="species-chips" class="species-chips"></div>
+      </div>
+
+      <!-- Ground cover -->
+      <div class="card">
+        <div class="card-title">
+          Ground Cover Hits
+          <span id="cover-pts-badge" class="badge">2 pts / sample</span>
+        </div>
+        <div id="cover-hit-progress"></div>
+        <div class="cover-grid" id="cover-grid"></div>
+        <div id="hit-log" class="hit-log"></div>
+      </div>
+
+    </div>
+    <div id="sample-panel-footer">
+      <button class="btn btn-ghost" id="sample-clear-btn" style="flex-shrink:0;">Clear</button>
+      <button class="btn btn-primary btn-full" id="sample-save-btn">Save Sample</button>
+    </div>
+  </div>
+
+  <!-- Archive confirm modal -->
+  <div class="modal-backdrop" id="del-modal">
+    <div class="modal">
+      <div class="modal-title">Archive Site?</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;">The site and all its data will be hidden and
+        removed from the sync queue. Nothing is deleted — you can restore it anytime.</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="del-cancel-btn">Cancel</button>
+        <button class="btn btn-danger btn-full" id="del-confirm-btn">Archive</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // ══════════════════════════════════════════════════════
+    //  USDA PLANT DATABASE — removed, import via CSV on Sync tab
+    // ══════════════════════════════════════════════════════
+    const USDA_PLANTS=[];
+    const COVER_CATS=[
+      {id: "bare_soil",label: "Bare Soil",icon: "🟤"},
+      {id: "rock",label: "Rock",icon: "⬛"},
+      {id: "herb_litter",label: "Herb Litter",icon: "🍂"},
+      {id: "woody_litter",label: "Woody Litter",icon: "🪵"},
+      {id: "live_basal",label: "Live Basal Veg",icon: "🌿"},
+    ];
+
+    // ══════════════════════════════════════════════════════
+    //  INDEXEDDB
+    // ══════════════════════════════════════════════════════
+    const DB_NAME='ecoplot2';
+    const DB_VER=3;
+
+    function openDB() {
+      return new Promise((res,rej) => {
+        const r=indexedDB.open(DB_NAME,DB_VER);
+        r.onupgradeneeded=e => {
+          const db=e.target.result;
+          const tx=e.target.transaction;
+          if(!db.objectStoreNames.contains('sites'))
+            db.createObjectStore('sites',{keyPath: 'id'});
+          if(!db.objectStoreNames.contains('samples')) {
+            const s=db.createObjectStore('samples',{keyPath: 'id'});
+            s.createIndex('siteId','siteId',{unique: false});
+            s.createIndex('eventId','eventId',{unique: false});
+          } else {
+            const s=tx.objectStore('samples');
+            if(!s.indexNames.contains('eventId'))
+              s.createIndex('eventId','eventId',{unique: false});
+          }
+          if(!db.objectStoreNames.contains('species'))
+            db.createObjectStore('species',{keyPath: 'symbol'});
+          if(!db.objectStoreNames.contains('events')) {
+            const ev=db.createObjectStore('events',{keyPath: 'id'});
+            ev.createIndex('siteId','siteId',{unique: false});
+          }
+        };
+        r.onsuccess=e => res(e.target.result);
+        r.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbPut(store,obj) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readwrite');
+        tx.objectStore(store).put(obj);
+        tx.oncomplete=() => res();
+        tx.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbGetAll(store) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readonly');
+        const req=tx.objectStore(store).getAll();
+        req.onsuccess=e => res(e.target.result);
+        req.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbGet(store,id) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readonly');
+        const req=tx.objectStore(store).get(id);
+        req.onsuccess=e => res(e.target.result);
+        req.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbDelete(store,id) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readwrite');
+        tx.objectStore(store).delete(id);
+        tx.oncomplete=() => res();
+        tx.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbGetByIndex(store,indexName,val) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readonly');
+        const req=tx.objectStore(store).index(indexName).getAll(val);
+        req.onsuccess=e => res(e.target.result);
+        req.onerror=e => rej(e.target.error);
+      });
+    }
+
+    async function dbBulkPut(store,items) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readwrite');
+        const os=tx.objectStore(store);
+        items.forEach(item => os.put(item));
+        tx.oncomplete=() => res();
+        tx.onerror=e => rej(e.target.error);
+      });
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  SPECIES DATABASE
+    // ══════════════════════════════════════════════════════
+    // Empty until user imports a CSV via the Sync tab
+    let speciesDB=[];
+
+    function parseNativeStatus(s) {
+      if(!s) return '?';
+      if(s.includes('L48(N)')) return 'Y';
+      if(s.includes('L48(I)')) return 'N';
+      if(s.includes('(N)')) return 'Y';
+      if(s.includes('(I)')) return 'N';
+      return '?';
+    }
+
+    function parseCSVLine(line) {
+      const fields=[]; let cur=''; let inQ=false;
+      for(let i=0;i<line.length;i++) {
+        const c=line[i];
+        if(inQ) {if(c==='"') {if(line[i+1]==='"') {cur+='"'; i++;} else inQ=false;} else cur+=c;}
+        else {if(c==='"') inQ=true; else if(c===',') {fields.push(cur); cur='';} else cur+=c;}
+      }
+      fields.push(cur);
+      return fields;
+    }
+
+    async function loadSpeciesDB() {
+      const all=await dbGetAll('species');
+      if(all.length) {
+        speciesDB=all.map(r => [r.symbol,r.common,r.sci,r.native]);
+      } else {
+        speciesDB=[];
+      }
+      updateSpeciesDBUI(all.length);
+    }
+
+    function updateSpeciesDBUI(count) {
+      const badge=document.getElementById('species-db-badge');
+      const info=document.getElementById('species-db-info');
+      if(!badge) return;
+      if(count) {
+        badge.textContent=count.toLocaleString()+' species';
+        info.textContent='Full USDA database loaded and stored offline.';
+        document.getElementById('import-species-btn').textContent='📂 Re-import CSV';
+      } else {
+        badge.textContent='No list loaded';
+        info.textContent='No species list loaded. Import your speciesList.csv to enable plant search.';
+      }
+      updateSpeciesInputState();
+    }
+
+    function updateSpeciesInputState() {
+      const hasDB=speciesDB.length>0;
+      speciesInput.disabled=!hasDB;
+      speciesInput.placeholder=hasDB
+        ? 'Search by symbol, common name or scientific name…'
+        :'Import a species list on the Sync tab first…';
+    }
+
+    async function importSpeciesCSV(file) {
+      const btn=document.getElementById('import-species-btn');
+      btn.disabled=true; btn.textContent='Parsing…';
+      const reader=new FileReader();
+      reader.onload=async e => {
+        try {
+          const lines=e.target.result.split(/\r?\n/);
+          const entries=[];
+          for(let i=1;i<lines.length;i++) {
+            const line=lines[i].trim();
+            if(!line) continue;
+            const f=parseCSVLine(line);
+            if(f.length<3) continue;
+            const symbol=f[0].trim();
+            const sci=f[1].trim();
+            const common=f[2].trim();
+            if(!symbol||!common) continue;
+            const native=parseNativeStatus(f[10]||'');
+            entries.push({symbol,common,sci,native});
+          }
+          btn.textContent='Saving…';
+          await dbBulkPut('species',entries);
+          speciesDB=entries.map(r => [r.symbol,r.common,r.sci,r.native]);
+          updateSpeciesDBUI(entries.length);
+          toast('Loaded '+entries.length.toLocaleString()+' species','ok');
+        } catch(err) {
+          toast('Import failed: '+err.message,'err');
+        }
+        btn.disabled=false;
+      };
+      reader.onerror=() => {toast('File read error','err'); btn.disabled=false;};
+      reader.readAsText(file);
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  APP STATE
+    // ══════════════════════════════════════════════════════
+    let activeSiteId=null;
+    let activeSite=null;
+    let activeEventId=null;
+    let activeEvent=null;
+    let samplePanelState={
+      transectIdx: 0,
+      sampleIdx: 0,
+      species: [],   // [{symbol,common,sci,native}]
+      coverHits: []  // [{id,label}]
+    };
+    let samplePanelOpen=false;
+
+    // ══════════════════════════════════════════════════════
+    //  NAVIGATION
+    // ══════════════════════════════════════════════════════
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click',() => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('page-'+tab.dataset.page).classList.add('active');
+        if(tab.dataset.page==='collect') renderCollect();
+        if(tab.dataset.page==='summary') renderSummary();
+        if(tab.dataset.page==='sync') renderSync();
+      });
+    });
+
+    // ══════════════════════════════════════════════════════
+    //  SIGNAL
+    // ══════════════════════════════════════════════════════
+    function updateSignal() {
+      const on=navigator.onLine;
+      const pill=document.getElementById('signal-pill');
+      pill.classList.toggle('online',on);
+      document.getElementById('signal-lbl').textContent=on? 'ON':'OFF';
+    }
+    window.addEventListener('online',updateSignal);
+    window.addEventListener('offline',updateSignal);
+    updateSignal();
+
+    // ══════════════════════════════════════════════════════
+    //  TOAST
+    // ══════════════════════════════════════════════════════
+    let _tt;
+    function toast(msg,type='') {
+      const el=document.getElementById('toast');
+      el.textContent=msg; el.className='show '+(type==='ok'? 'ok':type==='err'? 'err':'');
+      clearTimeout(_tt); _tt=setTimeout(() => el.className='',2600);
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  SITES PAGE
+    // ══════════════════════════════════════════════════════
+    document.getElementById('create-site-btn').addEventListener('click',async () => {
+      const name=document.getElementById('new-site-name').value.trim();
+      if(!name) {toast('Site name required','err'); return;}
+      const site={
+        id: 'site_'+Date.now(),
+        name,
+        desc: document.getElementById('new-site-desc').value.trim(),
+        transects: +document.getElementById('new-site-transects').value,
+        samples: +document.getElementById('new-site-samples').value,
+        length: +document.getElementById('new-site-length').value,
+        unit: document.getElementById('new-site-unit').value,
+        coverPts: +document.getElementById('new-site-coverpts').value,
+        frameW: +document.getElementById('new-site-fw').value,
+        frameH: +document.getElementById('new-site-fh').value,
+        createdAt: Date.now(),
+        syncStatus: 'pending'
+      };
+      await dbPut('sites',site);
+      document.getElementById('new-site-name').value='';
+      document.getElementById('new-site-desc').value='';
+      toast('Site created','ok');
+      renderSiteList();
+      // auto-select
+      selectSite(site.id);
+    });
+
+    let showArchived=false;
+
+    async function renderSiteList() {
+      const allSites=await dbGetAll('sites');
+      const all=await dbGetAll('samples');
+      const el=document.getElementById('site-list');
+      const active=allSites.filter(s => !s.archived);
+      const archived=allSites.filter(s => s.archived);
+      const visible=showArchived? archived:active;
+
+      let html='';
+      if(!visible.length&&!allSites.length) {
+        html='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
+      } else if(!visible.length) {
+        html='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites.':'No active sites.')+'</p></div>';
+      } else {
+        html=visible.sort((a,b) => b.createdAt-a.createdAt).map(s => {
+          const total=s.transects*s.samples;
+          const done=all.filter(x => x.siteId===s.id&&x.hasData).length;
+          const pct=total? Math.round(done/total*100):0;
+          const isSel=activeSiteId===s.id;
+          if(s.archived) {
+            return `<div class="site-item" data-id="${s.id}" style="opacity:.55;">
+      <div class="site-icon">📦</div>
+      <div class="site-meta">
+        <div class="site-name">${esc(s.name)}</div>
+        <div class="site-sub">${done}/${total} collected · archived</div>
+      </div>
+      <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
+    </div>`;
+          }
+          return `<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
+      <div class="site-icon">🌿</div>
+      <div class="site-meta">
+        <div class="site-name">${esc(s.name)}</div>
+        <div class="site-sub">${s.transects} transects · ${s.samples} samples · ${done}/${total} collected (${pct}%)</div>
+        <div class="prog-bar-wrap" style="margin-top:6px;margin-bottom:0;height:3px;">
+          <div class="prog-bar" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
+      <span class="site-arrow">›</span>
+    </div>`;
+        }).join('');
+      }
+
+      // Archive toggle footer
+      if(archived.length||showArchived) {
+        html+=`<div style="text-align:center;margin-top:12px;">
+          <button id="toggle-archived-btn" class="btn btn-ghost" style="font-size:.72rem;padding:6px 14px;">
+            ${showArchived? '← Back to active sites':`Show ${archived.length} archived site${archived.length!==1? 's':''}`}
+          </button>
+        </div>`;
+      }
+
+      el.innerHTML=html;
+
+      el.querySelectorAll('.site-item').forEach(item => {
+        item.addEventListener('click',e => {
+          const delBtn=e.target.closest('[data-del]');
+          if(delBtn) {promptDelete(delBtn.dataset.del); return;}
+          const restoreBtn=e.target.closest('[data-restore]');
+          if(restoreBtn) {restoreSite(restoreBtn.dataset.restore); return;}
+          if(!item.querySelector('[data-restore]')) selectSite(item.dataset.id);
+        });
+      });
+
+      const togBtn=document.getElementById('toggle-archived-btn');
+      if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList();});
+    }
+
+    function promptDelete(siteId) {
+      document.getElementById('del-modal').classList.add('open');
+      document.getElementById('del-confirm-btn').onclick=async () => {
+        // delete all samples for site
+        const samples=await dbGetByIndex('samples','siteId',siteId);
+        for(const s of samples) await dbDelete('samples',s.id);
+        await dbDelete('sites',siteId);
+        if(activeSiteId===siteId) {activeSiteId=null; activeSite=null; updateCrumb(); renderCollect();}
+        document.getElementById('del-modal').classList.remove('open');
+        toast('Site deleted');
+        renderSiteList();
+      };
+    }
+    document.getElementById('del-cancel-btn').onclick=() => document.getElementById('del-modal').classList.remove('open');
+
+    async function selectSite(id) {
+      activeSiteId=id;
+      activeSite=await dbGet('sites',id);
+      activeEventId=null;
+      activeEvent=null;
+      updateCrumb();
+      renderSiteList();
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-page="collect"]').classList.add('active');
+      document.getElementById('page-collect').classList.add('active');
+      renderCollect();
+    }
+
+    function updateCrumb() {
+      const el=document.getElementById('site-crumb');
+      if(activeSite&&activeEvent)
+        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> · ${esc(activeEvent.name)}`;
+      else if(activeSite)
+        el.innerHTML=`<strong>${esc(activeSite.name)}</strong>`;
+      else
+        el.textContent='No site selected';
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  COLLECT PAGE
+    // ══════════════════════════════════════════════════════
+    async function renderCollect() {
+      const noSite=document.getElementById('collect-no-site');
+      const content=document.getElementById('collect-content');
+      if(!activeSite) {noSite.style.display=''; content.style.display='none'; return;}
+      noSite.style.display='none'; content.style.display='';
+
+      const allSamples=await dbGetByIndex('samples','siteId',activeSiteId);
+      const allEvents=await dbGetByIndex('events','siteId',activeSiteId);
+      const sampleMap={};
+      allSamples.forEach(s => sampleMap[s.id]=s);
+      allEvents.sort((a,b) => b.createdAt-a.createdAt);
+
+      // Site header
+      const hdr=document.getElementById('collect-site-header');
+      const siteTotalPer=activeSite.transects*activeSite.samples;
+      const totalDone=allSamples.filter(s => s.hasData).length;
+      hdr.innerHTML=`
+        <div class="card-title">${esc(activeSite.name)}
+          <span class="badge">${totalDone} collected</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;">
+          <span>📏 ${activeSite.transects}T × ${activeSite.samples}S</span>
+          <span>🔲 ${activeSite.frameW}×${activeSite.frameH}cm</span>
+          <span>⬤ ${activeSite.coverPts}pts</span>
+          <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
+        </div>`;
+
+      // Event list
+      const evList=document.getElementById('event-list');
+      if(!allEvents.length) {
+        evList.innerHTML='<div class="empty" style="padding:24px 0;"><span class="e-icon">📅</span><p>No events yet.<br>Create one above.</p></div>';
+      } else {
+        evList.innerHTML=allEvents.map(ev => {
+          const evSamples=allSamples.filter(s => s.eventId===ev.id);
+          const evDone=evSamples.filter(s => s.hasData).length;
+          const pct=siteTotalPer? Math.round(evDone/siteTotalPer*100):0;
+          const isOpen=activeEventId===ev.id;
+          return `<div class="event-header${isOpen? ' event-active':''}" data-eid="${ev.id}">
+            <div style="flex:1;min-width:0;">
+              <div class="event-name">${esc(ev.name)}</div>
+              <div class="event-sub">${evDone}/${siteTotalPer} · ${new Date(ev.createdAt).toLocaleDateString()}</div>
+              <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
+            </div>
+            <div class="event-chevron${isOpen? ' open':''}" id="echev-${ev.id}">›</div>
+          </div>
+          <div id="eblock-${ev.id}" style="display:${isOpen? 'block':'none'};">
+            <div class="card" style="margin-bottom:8px;">
+              <div class="card-title" style="margin-bottom:8px;">Event Notes</div>
+              <textarea id="enotes-${ev.id}" rows="3" placeholder="Weather, observer, conditions…" style="width:100%;resize:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font-mono);font-size:.85rem;outline:none;">${esc(ev.notes||'')}</textarea>
+              <button class="btn btn-outline btn-sm event-notes-save" data-eid="${ev.id}" style="margin-top:8px;">Save Notes</button>
+            </div>
+            <div id="tlist-${ev.id}">${buildTransectsHTML(ev.id,sampleMap)}</div>
+          </div>`;
+        }).join('');
+
+        // Wire event expand/collapse
+        evList.querySelectorAll('.event-header').forEach(hd => {
+          hd.addEventListener('click',() => {
+            const eid=hd.dataset.eid;
+            const was=activeEventId===eid;
+            // collapse current
+            if(activeEventId) {
+              const prev=document.getElementById('eblock-'+activeEventId);
+              const prevChev=document.getElementById('echev-'+activeEventId);
+              if(prev) prev.style.display='none';
+              if(prevChev) prevChev.classList.remove('open');
+              document.querySelector('.event-header.event-active')?.classList.remove('event-active');
+            }
+            if(was) {activeEventId=null; activeEvent=null; updateCrumb(); return;}
+            activeEventId=eid;
+            activeEvent=allEvents.find(e => e.id===eid)||null;
+            hd.classList.add('event-active');
+            document.getElementById('eblock-'+eid).style.display='block';
+            document.getElementById('echev-'+eid).classList.add('open');
+            updateCrumb();
+            wireTransects(eid,sampleMap);
+          });
+        });
+
+        // Wire transects for already-open event
+        if(activeEventId&&document.getElementById('eblock-'+activeEventId)) {
+          wireTransects(activeEventId,sampleMap);
+        }
+
+        // Notes save buttons
+        evList.querySelectorAll('.event-notes-save').forEach(btn => {
+          btn.addEventListener('click',async () => {
+            const eid=btn.dataset.eid;
+            const ev=allEvents.find(e => e.id===eid);
+            if(!ev) return;
+            ev.notes=document.getElementById('enotes-'+eid).value;
+            await dbPut('events',ev);
+            toast('Notes saved','ok');
+          });
+        });
+      }
+
+      document.getElementById('create-event-btn').onclick=createEvent;
+    }
+
+    function buildTransectsHTML(eventId,sampleMap) {
+      let html='';
+      for(let t=0;t<activeSite.transects;t++) {
+        let tDone=0;
+        for(let s=0;s<activeSite.samples;s++) {
+          if(sampleMap[sampleId(activeSiteId,eventId,t,s)]?.hasData) tDone++;
+        }
+        html+=`<div class="transect-header" data-t="${t}" data-eid="${eventId}">
+          <div class="transect-label">Transect ${t+1}</div>
+          <div class="transect-prog">${tDone}/${activeSite.samples}</div>
+          <div class="transect-chevron" id="tchev-${eventId}-${t}">›</div>
+        </div>
+        <div id="tsamples-${eventId}-${t}" style="display:none;"><div class="sample-grid">`;
+        for(let s=0;s<activeSite.samples;s++) {
+          const rec=sampleMap[sampleId(activeSiteId,eventId,t,s)];
+          html+=`<div class="sample-dot${rec?.hasData? ' complete':''}" data-t="${t}" data-s="${s}" data-eid="${eventId}">${s+1}<div class="dot-pip"></div></div>`;
+        }
+        html+=`</div></div>`;
+      }
+      return html;
+    }
+
+    function wireTransects(eventId,sampleMap) {
+      const tListEl=document.getElementById('tlist-'+eventId);
+      if(!tListEl) return;
+      tListEl.querySelectorAll('.transect-header').forEach(hd => {
+        hd.addEventListener('click',() => {
+          const t=hd.dataset.t,eid=hd.dataset.eid;
+          const body=document.getElementById(`tsamples-${eid}-${t}`);
+          const chev=document.getElementById(`tchev-${eid}-${t}`);
+          const open=body.style.display==='block';
+          body.style.display=open? 'none':'block';
+          chev.classList.toggle('open',!open);
+        });
+      });
+      tListEl.querySelectorAll('.sample-dot').forEach(dot => {
+        dot.addEventListener('click',() => {
+          activeEventId=dot.dataset.eid;
+          activeEvent=null;
+          openSamplePanel(+dot.dataset.t,+dot.dataset.s);
+        });
+      });
+    }
+
+    async function createEvent() {
+      const name=document.getElementById('new-event-name').value.trim()||
+        `Survey ${new Date().toLocaleDateString()}`;
+      const ev={id: 'evt_'+Date.now(),siteId: activeSiteId,name,notes: '',createdAt: Date.now(),syncStatus: 'pending'};
+      await dbPut('events',ev);
+      activeEventId=ev.id;
+      activeEvent=ev;
+      document.getElementById('new-event-name').value='';
+      updateCrumb();
+      toast('Event created','ok');
+      renderCollect();
+    }
+
+    function sampleId(siteId,eventId,t,s) {return `${siteId}_${eventId}_T${t}_S${s}`;}
+
+    // ══════════════════════════════════════════════════════
+    //  SAMPLE PANEL
+    // ══════════════════════════════════════════════════════
+    async function openSamplePanel(tIdx,sIdx) {
+      samplePanelState.transectIdx=tIdx;
+      samplePanelState.sampleIdx=sIdx;
+      await loadSampleIntoPanel(tIdx,sIdx);
+      document.getElementById('sample-panel').classList.add('open');
+      samplePanelOpen=true;
+    }
+
+    async function loadSampleIntoPanel(tIdx,sIdx) {
+      // ── FIX: always sync state so Save/advance uses the right position ──
+      samplePanelState.transectIdx=tIdx;
+      samplePanelState.sampleIdx=sIdx;
+
+      const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
+      const rec=await dbGet('samples',sid);
+
+      samplePanelState.species=rec?.species||[];
+      samplePanelState.coverHits=rec?.coverHits||[];
+
+      // Header
+      const offset=Math.round((sIdx/(activeSite.samples-1||1))*activeSite.length);
+      document.getElementById('spt-main').textContent=`T${tIdx+1}  ·  S${sIdx+1}`;
+      document.getElementById('spt-sub').textContent=
+        `Sample ${sIdx+1} of ${activeSite.samples}  ·  ${offset} ${activeSite.unit} along transect`;
+      document.getElementById('quadrat-size-badge').textContent=
+        `${activeSite.frameW}×${activeSite.frameH} cm`;
+      document.getElementById('cover-pts-badge').textContent=
+        `${activeSite.coverPts} pts / sample`;
+
+      // nav buttons
+      document.getElementById('sample-prev-btn').disabled=(tIdx===0&&sIdx===0);
+      const lastT=activeSite.transects-1,lastS=activeSite.samples-1;
+      document.getElementById('sample-next-btn').disabled=(tIdx===lastT&&sIdx===lastS);
+
+      // ── Highlight current dot + auto-expand its transect ──
+      document.querySelectorAll('.sample-dot').forEach(d => d.classList.remove('current'));
+      const activeDot=document.querySelector(`.sample-dot[data-eid="${activeEventId}"][data-t="${tIdx}"][data-s="${sIdx}"]`);
+      if(activeDot) {
+        activeDot.classList.add('current');
+        const tBody=document.getElementById(`tsamples-${activeEventId}-${tIdx}`);
+        const tChev=document.getElementById(`tchev-${activeEventId}-${tIdx}`);
+        if(tBody&&tBody.style.display!=='block') {
+          tBody.style.display='block';
+          tChev&&tChev.classList.add('open');
+        }
+      }
+
+      // ── Flash animation + scroll to top ──
+      const body=document.getElementById('sample-panel-body');
+      body.classList.remove('loading');
+      void body.offsetWidth;
+      body.classList.add('loading');
+      body.scrollTop=0;
+
+      renderSpeciesChips();
+      renderCoverGrid();
+      renderHitLog();
+    }
+
+    document.getElementById('sample-close-btn').addEventListener('click',async () => {
+      await saveCurrent(); // auto-save any changes
+      document.getElementById('sample-panel').classList.remove('open');
+      samplePanelOpen=false;
+      renderCollect();
+    });
+
+    // save helper — force:true always writes; force:false skips empty samples
+    async function saveCurrent({force=false}={}) {
+      if(!activeSiteId||!activeEventId) return;
+      const {transectIdx: t,sampleIdx: s}=samplePanelState;
+      const species=JSON.parse(JSON.stringify(samplePanelState.species));
+      const coverHits=JSON.parse(JSON.stringify(samplePanelState.coverHits));
+      const hasData=species.length>0||coverHits.length>0;
+      if(!force&&!hasData) return;
+      const sid=sampleId(activeSiteId,activeEventId,t,s);
+      await dbPut('samples',{
+        id: sid,siteId: activeSiteId,eventId: activeEventId,
+        transectIdx: t,sampleIdx: s,
+        species,coverHits,
+        hasData,savedAt: Date.now(),syncStatus: 'pending'
+      });
+    }
+
+    document.getElementById('sample-save-btn').addEventListener('click',async () => {
+      await saveCurrent({force: true}); // always write, even if clearing
+      toast('Sample saved','ok');
+      await advanceSample(1,{save: false});
+    });
+
+    document.getElementById('sample-clear-btn').addEventListener('click',() => {
+      samplePanelState.species=[];
+      samplePanelState.coverHits=[];
+      renderSpeciesChips();
+      renderCoverGrid();
+      renderHitLog();
+    });
+
+    document.getElementById('sample-prev-btn').addEventListener('click',() => advanceSample(-1));
+    document.getElementById('sample-next-btn').addEventListener('click',() => advanceSample(1));
+
+    let _advanceBusy=false;
+    async function advanceSample(dir,{save=true}={}) {
+      if(_advanceBusy) return;
+      _advanceBusy=true;
+      try {
+        if(save) await saveCurrent(); // skips write if no data entered
+        let {transectIdx: t,sampleIdx: s}=samplePanelState;
+        s+=dir;
+        if(s<0) {
+          t--;
+          if(t<0) {document.getElementById('sample-panel').classList.remove('open'); samplePanelOpen=false; _advanceBusy=false; return;}
+          s=activeSite.samples-1;
+        }
+        if(s>=activeSite.samples) {
+          t++;
+          if(t>=activeSite.transects) {document.getElementById('sample-panel').classList.remove('open'); samplePanelOpen=false; _advanceBusy=false; return;}
+          s=0;
+        }
+        await renderCollect();
+        await loadSampleIntoPanel(t,s);
+      } finally {_advanceBusy=false;}
+    }
+
+    // ── Species search ────────────────────────────────────
+    const speciesInput=document.getElementById('species-input');
+    const speciesDrop=document.getElementById('species-dropdown');
+
+    speciesInput.addEventListener('input',() => {
+      if(!speciesDB.length) return;
+      const q=speciesInput.value.trim().toLowerCase();
+      document.getElementById('species-clear').style.display=q? '':'none';
+      if(q.length<2) {speciesDrop.classList.remove('open'); speciesDrop.innerHTML=''; return;}
+      const results=speciesDB.filter(p =>
+        p[0].toLowerCase().includes(q)||
+        p[1].toLowerCase().includes(q)||
+        p[2].toLowerCase().includes(q)
+      ).slice(0,30);
+      if(!results.length) {speciesDrop.classList.remove('open'); return;}
+      speciesDrop.innerHTML=results.map(p => {
+        const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
+        const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
+        return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}">
+      <div>
+        <div class="species-common">${esc(p[1])}</div>
+        <div class="species-sci">${esc(p[2])} <span style="font-style:normal;color:var(--dim)">[${p[0]}]</span></div>
+      </div>
+      <span class="species-native ${nCls}">${nLbl}</span>
+    </div>`;
+      }).join('');
+      speciesDrop.classList.add('open');
+
+      speciesDrop.querySelectorAll('.species-opt').forEach(opt => {
+        opt.addEventListener('click',() => {
+          const sym=opt.dataset.sym;
+          if(samplePanelState.species.find(x => x.symbol===sym)) {toast('Already added'); return;}
+          samplePanelState.species.push({
+            symbol: opt.dataset.sym,common: opt.dataset.common,
+            sci: opt.dataset.sci,native: opt.dataset.native
+          });
+          renderSpeciesChips();
+          speciesInput.value='';
+          document.getElementById('species-clear').style.display='none';
+          speciesDrop.classList.remove('open');
+          speciesDrop.innerHTML='';
+        });
+      });
+    });
+
+    document.getElementById('species-clear').addEventListener('click',() => {
+      speciesInput.value='';
+      document.getElementById('species-clear').style.display='none';
+      speciesDrop.classList.remove('open');
+    });
+
+    function renderSpeciesChips() {
+      const el=document.getElementById('species-chips');
+      el.innerHTML=samplePanelState.species.map(sp => {
+        const invasive=sp.native==='N';
+        return `<div class="species-chip${invasive? ' invasive':''}">
+      ${esc(sp.common)} <span style="opacity:.6;font-size:.6rem">[${sp.symbol}]</span>
+      ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
+      <button class="chip-remove" data-sym="${sp.symbol}">✕</button>
+    </div>`;
+      }).join('')||'<span style="font-size:.7rem;color:var(--muted);">No species added yet</span>';
+      el.querySelectorAll('.chip-remove').forEach(btn => {
+        btn.addEventListener('click',() => {
+          samplePanelState.species=samplePanelState.species.filter(x => x.symbol!==btn.dataset.sym);
+          renderSpeciesChips();
+        });
+      });
+    }
+
+    // ── Cover grid ────────────────────────────────────────
+    function renderCoverGrid() {
+      const maxHits=activeSite? activeSite.coverPts:2;
+      const hitCount={};
+      COVER_CATS.forEach(c => hitCount[c.id]=0);
+      samplePanelState.coverHits.forEach(h => {
+        if(hitCount[h.id]!==undefined) hitCount[h.id]++;
+      });
+      const totalHits=samplePanelState.coverHits.length;
+      const pct=maxHits? Math.round(totalHits/maxHits*100):0;
+
+      document.getElementById('cover-hit-progress').innerHTML=
+        `<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:6px;">
+      <span>Hits recorded: ${totalHits} / ${maxHits}</span>
+      <span style="color:${totalHits>=maxHits? 'var(--accent)':'var(--muted)'}">${pct}%</span>
+    </div>
+    <div class="prog-bar-wrap" style="margin-bottom:10px;">
+      <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
+    </div>`;
+
+      document.getElementById('cover-grid').innerHTML=COVER_CATS.map(c => `
+    <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}">
+      <span class="cover-icon">${c.icon}</span>
+      ${esc(c.label)}
+      <span class="cover-count">${hitCount[c.id]||''}</span>
+    </div>`).join('');
+
+      document.querySelectorAll('.cover-btn').forEach(btn => {
+        btn.addEventListener('click',() => {
+          if(samplePanelState.coverHits.length>=maxHits) {
+            toast(`Max ${maxHits} hits per sample`,'err'); return;
+          }
+          const cat=COVER_CATS.find(c => c.id===btn.dataset.cid);
+          samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
+          renderCoverGrid();
+          renderHitLog();
+        });
+      });
+    }
+
+    function renderHitLog() {
+      const el=document.getElementById('hit-log');
+      el.innerHTML=samplePanelState.coverHits.map((h,i) => `
+    <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
+      el.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click',() => {
+          samplePanelState.coverHits.splice(+btn.dataset.hi,1);
+          renderCoverGrid();
+          renderHitLog();
+        });
+      });
+    }
+
+
+
+    // ══════════════════════════════════════════════════════
+    //  SUMMARY PAGE
+    // ══════════════════════════════════════════════════════
+    async function renderSummary() {
+      const noSite=document.getElementById('summary-no-site');
+      const content=document.getElementById('summary-content');
+      if(!activeSite) {noSite.style.display=''; content.style.display='none'; return;}
+      noSite.style.display='none'; content.style.display='';
+
+      const samples=await dbGetByIndex('samples','siteId',activeSiteId);
+      const filled=samples.filter(s => s.hasData);
+      const total=activeSite.transects*activeSite.samples;
+
+      // Species frequency
+      const speciesFreq={};
+      const speciesMeta={};
+      filled.forEach(s => {
+        (s.species||[]).forEach(sp => {
+          speciesFreq[sp.symbol]=(speciesFreq[sp.symbol]||0)+1;
+          speciesMeta[sp.symbol]=sp;
+        });
+      });
+
+      // Cover totals
+      const coverTotals={};
+      COVER_CATS.forEach(c => coverTotals[c.id]=0);
+      let totalHits=0;
+      filled.forEach(s => {
+        (s.coverHits||[]).forEach(h => {
+          coverTotals[h.id]=(coverTotals[h.id]||0)+1;
+          totalHits++;
+        });
+      });
+
+      const maxFreq=Math.max(...Object.values(speciesFreq),1);
+
+      // Species table
+      const speciesRows=Object.entries(speciesFreq)
+        .sort((a,b) => b[1]-a[1])
+        .map(([sym,count]) => {
+          const meta=speciesMeta[sym];
+          const pct=filled.length? Math.round(count/filled.length*100):0;
+          const invasive=meta.native==='N';
+          return `<tr>
+        <td>
+          <div style="font-size:.78rem;">${esc(meta.common)}</div>
+          <div style="font-size:.6rem;color:var(--muted);font-style:italic;">${esc(meta.sci)}</div>
+        </td>
+        <td style="text-align:right;">
+          <span style="font-family:var(--font-ui);font-weight:700;color:${invasive? 'var(--danger)':'var(--accent)'};">${pct}%</span>
+          <div class="pct-bar"><div class="pct-fill${invasive? ' invasive':''}" style="width:${pct}%"></div></div>
+        </td>
+        <td style="text-align:center;">
+          <span class="species-native ${meta.native==='Y'? 'native-yes':meta.native==='N'? 'native-no':'native-unk'}" style="font-size:.55rem;padding:2px 5px;">${meta.native==='Y'? 'Native':meta.native==='N'? 'Invasive':'?'}</span>
+        </td>
+      </tr>`;
+        }).join('')||'<tr><td colspan="3" style="color:var(--muted);font-size:.75rem;padding:12px 8px;">No species recorded yet</td></tr>';
+
+      const coverRows=COVER_CATS.map(c => {
+        const n=coverTotals[c.id]||0;
+        const pct=totalHits? Math.round(n/totalHits*100):0;
+        return `<tr>
+      <td>${c.icon} ${c.label}</td>
+      <td style="text-align:right;">
+        <span style="font-family:var(--font-ui);font-weight:700;color:var(--gold);">${pct}%</span>
+        <div class="pct-bar"><div class="pct-fill" style="width:${pct}%;background:var(--gold)"></div></div>
+      </td>
+      <td style="text-align:right;color:var(--muted);font-size:.7rem;">${n} hits</td>
+    </tr>`;
+      }).join('');
+
+      const nativeCount=Object.values(speciesMeta).filter(m => m.native==='Y').length;
+      const invasiveCount=Object.values(speciesMeta).filter(m => m.native==='N').length;
+
+      content.innerHTML=`
+    <div class="card">
+      <div class="card-title">${esc(activeSite.name)} — Summary</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val">${filled.length}</div><div class="stat-lbl">Samples</div></div>
+        <div class="stat-box"><div class="stat-val">${Object.keys(speciesFreq).length}</div><div class="stat-lbl">Species</div></div>
+        <div class="stat-box"><div class="stat-val">${totalHits}</div><div class="stat-lbl">Cover Hits</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:4px;">
+        <div class="stat-box" style="flex:1;"><div class="stat-val" style="color:var(--accent);font-size:1.1rem;">${nativeCount}</div><div class="stat-lbl">Native spp.</div></div>
+        <div class="stat-box" style="flex:1;"><div class="stat-val" style="color:var(--danger);font-size:1.1rem;">${invasiveCount}</div><div class="stat-lbl">Non-Native spp.</div></div>
+        <div class="stat-box" style="flex:1;"><div class="stat-val" style="font-size:1.1rem;">${total? Math.round(filled.length/total*100):0}%</div><div class="stat-lbl">Completion</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Species Frequency <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of sampled plots)</span></div>
+      <table class="cover-table"><thead><tr><th>Species</th><th style="text-align:right;">Freq %</th><th style="text-align:center;">Status</th></tr></thead>
+      <tbody>${speciesRows}</tbody></table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ground Cover Frequency</div>
+      <table class="cover-table"><thead><tr><th>Category</th><th style="text-align:right;">% of Hits</th><th style="text-align:right;">Count</th></tr></thead>
+      <tbody>${coverRows}</tbody></table>
+    </div>`;
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  SYNC PAGE
+    // ══════════════════════════════════════════════════════
+    async function renderSync() {
+      const s=getSettings();
+      document.getElementById('cfg-url').value=s.url;
+      document.getElementById('cfg-key').value=s.key;
+
+      const sites=await dbGetAll('sites');
+      const samples=await dbGetAll('samples');
+      const activeSites=sites.filter(s => !s.archived);
+      const archivedIds=new Set(sites.filter(s => s.archived).map(s => s.id));
+      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!archivedIds.has(x.siteId)).length;
+      document.getElementById('pending-badge').textContent=`${pending} pending`;
+
+      const rows=activeSites.map(site => {
+        const sTotal=site.transects*site.samples;
+        const sDone=samples.filter(x => x.siteId===site.id&&x.hasData).length;
+        const sPend=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='pending').length;
+        const sSynced=samples.filter(x => x.siteId===site.id&&x.syncStatus==='synced').length;
+        return `<div class="sync-status-row">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected · ${sPend} pending · ${sSynced} synced</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        ${sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
+        ${sSynced>0? `<div class="status-dot sd-synced" title="Synced"></div>`:''}
+      </div>
+    </div>`;
+      }).join('')||'<div class="empty"><span class="e-icon">📡</span><p>No sites created yet.</p></div>';
+
+      document.getElementById('sync-site-list').innerHTML=rows;
+      document.getElementById('sync-btn').disabled=pending===0||!navigator.onLine;
+    }
+
+    function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||''};}
+
+    document.getElementById('save-cfg-btn').addEventListener('click',() => {
+      localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
+      localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
+      toast('Settings saved','ok');
+    });
+
+    document.getElementById('sync-btn').addEventListener('click',async () => {
+      const {url,key}=getSettings();
+      if(!url) {toast('Set Azure URL first','err'); return;}
+      const samples=await dbGetAll('samples');
+      const sites=await dbGetAll('sites');
+      const archivedSiteIds=new Set(sites.filter(s => s.archived).map(s => s.id));
+      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!archivedSiteIds.has(x.siteId));
+      if(!pending.length) {toast('Nothing to sync'); return;}
+
+      const btn=document.getElementById('sync-btn');
+      btn.disabled=true; btn.textContent='Syncing…';
+
+      let ok=0,fail=0;
+      for(const samp of pending) {
+        const site=sites.find(s => s.id===samp.siteId);
+        try {
+          const hdrs={'Content-Type': 'application/json'};
+          if(key) hdrs['x-functions-key']=key;
+          const res=await fetch(url,{
+            method: 'POST',headers: hdrs,
+            body: JSON.stringify({
+              id: samp.id,
+              siteId: samp.siteId,
+              siteName: site?.name,
+              transectIdx: samp.transectIdx,
+              sampleIdx: samp.sampleIdx,
+              savedAt: new Date(samp.savedAt).toISOString(),
+              species: samp.species,
+              coverHits: samp.coverHits,
+              eventId: samp.eventId,
+              frameW: site?.frameW,
+              frameH: site?.frameH
+            })
+          });
+          samp.syncStatus=res.ok? 'synced':'failed';
+          if(res.ok) ok++; else fail++;
+        } catch {samp.syncStatus='failed'; fail++;}
+        await dbPut('samples',samp);
+      }
+
+      btn.textContent='↑ Sync All Pending';
+      renderSync();
+      if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''}`,'ok');
+      else toast(`${ok} synced, ${fail} failed`,'err');
+    });
+
+    // ══════════════════════════════════════════════════════
+    //  UTILS
+    // ══════════════════════════════════════════════════════
+    function esc(s) {return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+    // Species CSV import button
+    document.getElementById('import-species-btn').addEventListener('click',() => {
+      document.getElementById('species-csv-input').click();
+    });
+    document.getElementById('species-csv-input').addEventListener('change',e => {
+      const file=e.target.files[0];
+      if(file) importSpeciesCSV(file);
+      e.target.value='';
+    });
+
+    // ══════════════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════════════
+    loadSpeciesDB();
+    renderSiteList();
+    document.getElementById('collect-no-site').style.display='';
+  </script>
+</body>
+
+</html>
