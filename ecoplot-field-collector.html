@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="EcoPlot">
+  <meta name="theme-color" content="#080c09">
+  <link rel="manifest" href="manifest.json">
   <title>EcoPlot Field Collector</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
@@ -2730,6 +2733,15 @@
     loadSpeciesDB();
     renderSiteList();
     document.getElementById('collect-no-site').style.display='';
+
+    // ── Service Worker registration ──
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered, scope:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
   </script>
 </body>
 

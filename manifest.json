@@ -1,0 +1,18 @@
+{
+    "name": "EcoPlot Field Collector",
+    "short_name": "EcoPlot",
+    "description": "Offline-first field ecological data collector",
+    "start_url": "./ecoplot-field-collector.html",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#080c09",
+    "theme_color": "#080c09",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23080c09'/><text y='.9em' font-size='80'>🌿</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
