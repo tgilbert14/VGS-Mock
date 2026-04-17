@@ -1657,6 +1657,8 @@
                 <input type="number" id="new-site-lng" placeholder="e.g. -119.4179" step="any">
               </div>
             </div>
+            <button class="btn btn-ghost btn-sm btn-full" id="get-gps-btn" style="margin-bottom:10px;" type="button">📍
+              Use My GPS Location</button>
             <div class="row3">
               <div class="field">
                 <label>Elevation (ft)</label>
@@ -2291,6 +2293,33 @@
     }
     document.getElementById('new-site-toggle-btn').addEventListener('click',openNewSiteForm);
     document.getElementById('new-site-cancel-btn').addEventListener('click',closeNewSiteForm);
+
+    document.getElementById('get-gps-btn').addEventListener('click',() => {
+      if(!navigator.geolocation) {toast('Geolocation not supported on this device','err'); return;}
+      const btn=document.getElementById('get-gps-btn');
+      btn.textContent='📍 Getting location…';
+      btn.disabled=true;
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          document.getElementById('new-site-lat').value=pos.coords.latitude.toFixed(6);
+          document.getElementById('new-site-lng').value=pos.coords.longitude.toFixed(6);
+          if(pos.coords.altitude!==null&&!document.getElementById('new-site-elev').value) {
+            // altitude is in metres; convert to feet
+            document.getElementById('new-site-elev').value=Math.round(pos.coords.altitude*3.28084);
+          }
+          btn.textContent='📍 Use My GPS Location';
+          btn.disabled=false;
+          toast('Location captured','ok');
+        },
+        err => {
+          btn.textContent='📍 Use My GPS Location';
+          btn.disabled=false;
+          const msg={1: 'Permission denied',2: 'Position unavailable',3: 'Timed out'};
+          toast('GPS error: '+(msg[err.code]||err.message),'err');
+        },
+        {enableHighAccuracy: true,timeout: 15000,maximumAge: 0}
+      );
+    });
 
     document.getElementById('create-site-btn').addEventListener('click',async () => {
       const name=document.getElementById('new-site-name').value.trim();
