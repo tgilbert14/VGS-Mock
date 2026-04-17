@@ -418,6 +418,12 @@
       color: var(--danger);
     }
 
+    .btn-warn {
+      background: transparent;
+      border: 1px solid var(--warn);
+      color: var(--warn);
+    }
+
     .btn-sm {
       padding: 7px 12px;
       font-size: .68rem;
@@ -1713,6 +1719,16 @@
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
         </div>
         <div class="card">
+          <div class="card-title">Collection Settings</div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.8rem;color:var(--text);">
+            <input type="checkbox" id="cfg-incomplete-warn" style="width:auto;accent-color:var(--accent);">
+            Warn on incomplete samples
+          </label>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, alerts before advancing past a
+            sample that has no species recorded or fewer cover hits than the site target.</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
+        </div>
+        <div class="card">
           <div class="card-title">Azure Connection</div>
           <div class="field">
             <label>Azure Function URL</label>
@@ -1722,7 +1738,6 @@
             <label>API Key (x-functions-key)</label>
             <input type="password" id="cfg-key" placeholder="optional">
           </div>
-          <button class="btn btn-outline btn-sm" id="save-cfg-btn">Save Settings</button>
         </div>
         <div class="card">
           <div class="card-title">Sync Status <span class="badge" id="pending-badge">0 pending</span></div>
@@ -1784,6 +1799,20 @@
     <div id="sample-panel-footer">
       <button class="btn btn-ghost" id="sample-clear-btn" style="flex-shrink:0;">Clear</button>
       <button class="btn btn-primary btn-full" id="sample-save-btn">Save Sample</button>
+    </div>
+  </div>
+
+  <!-- Incomplete sample warning modal -->
+  <div class="modal-backdrop" id="incomplete-modal">
+    <div class="modal">
+      <div class="modal-title">⚠️ Incomplete Sample</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:6px;" id="incomplete-modal-msg">This sample has
+        incomplete data.</p>
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:16px;">Continue anyway?</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="incomplete-cancel-btn">Go Back</button>
+        <button class="btn btn-warn btn-full" id="incomplete-confirm-btn">Continue</button>
+      </div>
     </div>
   </div>
 
@@ -2828,6 +2857,30 @@
       if(_advanceBusy) return;
       _advanceBusy=true;
       try {
+        // ── Incomplete-sample guard (forward only) ───────
+        if(dir>0&&localStorage.getItem('ep_incomplete_warn')==='1') {
+          const maxHits=activeSite? activeSite.coverPts:0;
+          const totalHits=samplePanelState.coverHits.length;
+          const noSpecies=samplePanelState.species.length===0;
+          const coverShort=maxHits>0&&totalHits<maxHits;
+          if(noSpecies||coverShort) {
+            const reasons=[];
+            if(noSpecies) reasons.push('no species recorded');
+            if(coverShort) reasons.push(`only ${totalHits}/${maxHits} cover hits`);
+            document.getElementById('incomplete-modal-msg').textContent=
+              'This sample has incomplete data: '+reasons.join(', ')+'.';
+            const proceed=await new Promise(resolve => {
+              const modal=document.getElementById('incomplete-modal');
+              modal.classList.add('open');
+              const confirm=document.getElementById('incomplete-confirm-btn');
+              const cancel=document.getElementById('incomplete-cancel-btn');
+              const cleanup=() => {modal.classList.remove('open'); confirm.onclick=null; cancel.onclick=null;};
+              confirm.onclick=() => {cleanup(); resolve(true);};
+              cancel.onclick=() => {cleanup(); resolve(false);};
+            });
+            if(!proceed) {_advanceBusy=false; return;}
+          }
+        }
         if(save) await saveCurrent(); // skips write if no data entered
         let {transectIdx: t,sampleIdx: s}=samplePanelState;
         s+=dir;
@@ -3358,9 +3411,11 @@
 
       document.getElementById('sync-site-list').innerHTML=rows;
       document.getElementById('sync-btn').disabled=pending===0||!navigator.onLine;
+      // load Collection Settings
+      document.getElementById('cfg-incomplete-warn').checked=(localStorage.getItem('ep_incomplete_warn')==='1');
     }
 
-    function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||''};}
+    function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||'',incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1'};}
 
     // Returns a Set of siteIds that live inside localOnly folders (never synced)
     function getLocalOnlySiteIds(folders,sites) {
@@ -3376,6 +3431,7 @@
     document.getElementById('save-cfg-btn').addEventListener('click',() => {
       localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
       localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
+      localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
       toast('Settings saved','ok');
     });
 
