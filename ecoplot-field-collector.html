@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="EcoPlot">
+  <meta name="apple-mobile-web-app-title" content="EcoPlotMobile">
   <meta name="theme-color" content="#080c09">
   <link rel="manifest" href="manifest.json">
-  <title>EcoPlot Field Collector</title>
+  <title>EcoPlotMobile</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
@@ -32,6 +32,24 @@
       --radius: 12px;
       --font-ui: 'Syne', sans-serif;
       --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    /* ── Light mode ── */
+    html.light {
+      --bg: #f2f5f2;
+      --s1: #ffffff;
+      --s2: #eaf0ea;
+      --s3: #dde8dd;
+      --border: #c4d4c4;
+      --accent: #3a8a2a;
+      --accent2: #2d6e20;
+      --gold: #a07820;
+      --warn: #b85c18;
+      --danger: #b83030;
+      --info: #2878a8;
+      --text: #1a2a1a;
+      --muted: #5a7a5a;
+      --dim: #b0c8b0;
     }
 
     * {
@@ -139,6 +157,61 @@
     .signal.online {
       border-color: var(--accent2);
       color: var(--accent);
+    }
+
+    /* ── Theme toggle ── */
+    #theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 9px;
+      font-size: .9rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+      color: var(--text);
+      transition: border-color .2s;
+    }
+
+    #theme-toggle:active {
+      border-color: var(--accent2);
+    }
+
+    /* ── Install banner ── */
+    #install-banner {
+      display: none;
+      background: var(--s2);
+      border-bottom: 1px solid var(--accent2);
+      padding: 10px 16px;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #install-banner.visible {
+      display: flex;
+    }
+
+    #install-banner p {
+      flex: 1;
+      font-size: .7rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    #install-banner strong {
+      color: var(--accent);
+    }
+
+    #install-dismiss {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: .65rem;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
     }
 
     /* ── Nav tabs ── */
@@ -1260,13 +1333,21 @@
 
     <!-- Top bar -->
     <div id="topbar">
-      <div class="logo">EcoPlot<sup>FIELD</sup></div>
+      <div class="logo">EcoPlot<sup>MOBILE</sup></div>
       <div id="topbar-center">
         <div id="site-crumb">No site selected</div>
       </div>
       <div class="signal" id="signal-pill">
         <div class="dot"></div><span id="signal-lbl">OFF</span>
       </div>
+      <button id="theme-toggle" title="Toggle light/dark mode">☀️</button>
+    </div>
+
+    <!-- Install banner (shown only in Safari, not in standalone) -->
+    <div id="install-banner">
+      <p>📲 <strong>Tip:</strong> Tap Share → <strong>Add to Home Screen</strong> to use EcoPlotMobile offline without a
+        connection.</p>
+      <button id="install-dismiss">Got it</button>
     </div>
 
     <!-- Nav -->
@@ -2735,13 +2816,54 @@
     document.getElementById('collect-no-site').style.display='';
 
     // ── Service Worker registration ──
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
+    if('serviceWorker' in navigator) {
+      window.addEventListener('load',() => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW registered, scope:', reg.scope))
-          .catch(err => console.warn('SW registration failed:', err));
+          .then(reg => console.log('SW registered, scope:',reg.scope))
+          .catch(err => console.warn('SW registration failed:',err));
       });
     }
+
+    // ── Theme toggle ──
+    (function initTheme() {
+      const saved=localStorage.getItem('ecoplot-theme');
+      const preferLight=saved? saved==='light'
+        :window.matchMedia('(prefers-color-scheme: light)').matches;
+      if(preferLight) document.documentElement.classList.add('light');
+      updateThemeBtn();
+    })();
+
+    function updateThemeBtn() {
+      const light=document.documentElement.classList.contains('light');
+      const btn=document.getElementById('theme-toggle');
+      if(btn) {btn.textContent=light? '🌙':'☀️'; btn.title=light? 'Switch to dark mode':'Switch to light mode';}
+      // Update Apple status bar meta
+      const meta=document.querySelector('meta[name="theme-color"]');
+      if(meta) meta.content=light? '#f2f5f2':'#080c09';
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click',() => {
+      const light=document.documentElement.classList.toggle('light');
+      localStorage.setItem('ecoplot-theme',light? 'light':'dark');
+      updateThemeBtn();
+    });
+
+    // ── Install banner (iOS Safari, not standalone) ──
+    (function checkInstallBanner() {
+      const isStandalone=window.navigator.standalone===true
+        ||window.matchMedia('(display-mode: standalone)').matches;
+      const dismissed=localStorage.getItem('ecoplot-install-dismissed');
+      const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isSafari=/safari/i.test(navigator.userAgent)&&!/chrome|crios|fxios/i.test(navigator.userAgent);
+      if(!isStandalone&&!dismissed&&isIOS&&isSafari) {
+        document.getElementById('install-banner').classList.add('visible');
+      }
+    })();
+
+    document.getElementById('install-dismiss').addEventListener('click',() => {
+      document.getElementById('install-banner').classList.remove('visible');
+      localStorage.setItem('ecoplot-install-dismissed','1');
+    });
   </script>
 </body>
 

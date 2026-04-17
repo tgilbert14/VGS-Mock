@@ -1,6 +1,6 @@
 {
-    "name": "EcoPlot Field Collector",
-    "short_name": "EcoPlot",
+    "name": "EcoPlotMobile",
+    "short_name": "EcoPlotMobile",
     "description": "Offline-first field ecological data collector",
     "start_url": "./ecoplot-field-collector.html",
     "scope": "./",
