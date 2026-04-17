@@ -1617,6 +1617,57 @@
       <!-- ═══ SITES PAGE ═══ -->
       <div class="page active" id="page-sites">
 
+        <div class="card">
+          <div class="card-title">New Site</div>
+          <div class="field">
+            <label>Site Name</label>
+            <input type="text" id="new-site-name" placeholder="e.g. Meadow Ridge A">
+          </div>
+          <div class="field">
+            <label>Location / Description</label>
+            <input type="text" id="new-site-desc" placeholder="e.g. North slope, riparian buffer">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Transects</label>
+              <input type="number" id="new-site-transects" value="4" min="1" max="20">
+            </div>
+            <div class="field">
+              <label>Samples / Transect</label>
+              <input type="number" id="new-site-samples" value="50" min="1" max="200">
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label>Transect Length</label>
+              <input type="number" id="new-site-length" value="100" min="1">
+            </div>
+            <div class="field">
+              <label>Unit</label>
+              <select id="new-site-unit">
+                <option value="ft">ft</option>
+                <option value="m">m</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Cover Pts/Sample</label>
+              <input type="number" id="new-site-coverpts" value="2" min="1" max="10">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Frame Width (cm)</label>
+              <input type="number" id="new-site-fw" value="40" min="1">
+            </div>
+            <div class="field">
+              <label>Frame Height (cm)</label>
+              <input type="number" id="new-site-fh" value="40" min="1">
+            </div>
+          </div>
+          <div id="create-site-location" class="folder-location-hint">📁 Creating in: <strong>Root</strong></div>
+          <button class="btn btn-primary btn-full" id="create-site-btn">＋ Create Site</button>
+        </div>
+
         <div id="folder-nav-bar">
           <div id="folder-breadcrumb"></div>
           <button class="btn btn-ghost btn-sm" id="new-folder-btn">📁 ＋ Folder</button>
@@ -1627,80 +1678,6 @@
           <button class="btn btn-ghost btn-sm" id="new-folder-cancel">✕</button>
         </div>
         <div id="site-list"></div>
-
-        <!-- ＋ New Site toggle button -->
-        <button class="btn btn-primary btn-full" id="new-site-toggle-btn" style="margin-top:4px;">＋ New Site</button>
-
-        <!-- Create site form — hidden until button pressed -->
-        <div id="new-site-form" style="display:none;margin-top:10px;">
-          <div class="card">
-            <div class="card-title">New Site
-              <button id="new-site-cancel-btn"
-                style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1;"
-                title="Cancel">✕</button>
-            </div>
-            <div class="field">
-              <label>Site Name *</label>
-              <input type="text" id="new-site-name" placeholder="e.g. Meadow Ridge A">
-            </div>
-            <div class="field">
-              <label>Description</label>
-              <input type="text" id="new-site-desc" placeholder="e.g. North slope, riparian buffer">
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Latitude</label>
-                <input type="number" id="new-site-lat" placeholder="e.g. 36.7783" step="any">
-              </div>
-              <div class="field">
-                <label>Longitude</label>
-                <input type="number" id="new-site-lng" placeholder="e.g. -119.4179" step="any">
-              </div>
-            </div>
-            <div class="row3">
-              <div class="field">
-                <label>Elevation (ft)</label>
-                <input type="number" id="new-site-elev" placeholder="e.g. 7200" min="0">
-              </div>
-              <div class="field">
-                <label>Slope (%)</label>
-                <input type="number" id="new-site-slope" placeholder="e.g. 12" min="0" max="100">
-              </div>
-              <div class="field">
-                <label>Aspect (°)</label>
-                <input type="number" id="new-site-aspect" placeholder="e.g. 180" min="0" max="360">
-              </div>
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Site Type</label>
-                <select id="new-site-type">
-                  <option value="None">None</option>
-                  <option value="Key Area">Key Area</option>
-                  <option value="Non-Site">Non-Site</option>
-                  <option value="Other">Other</option>
-                  <option value="Photo Point">Photo Point</option>
-                  <option value="Exclosure">Exclosure</option>
-                  <option value="Critical Area">Critical Area</option>
-                  <option value="DMA">DMA</option>
-                  <option value="Benchmark">Benchmark</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Status</label>
-                <select id="new-site-status">
-                  <option value="Active">Active</option>
-                  <option value="None">None</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-            </div>
-            <div id="create-site-location" class="folder-location-hint">📁 Creating in: <strong>Root</strong></div>
-            <button class="btn btn-primary btn-full" id="create-site-btn">＋ Create Site</button>
-          </div>
-        </div>
 
       </div>
 
@@ -1721,43 +1698,6 @@
             <div class="field">
               <label>Date</label>
               <input type="date" id="new-event-date">
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Transects</label>
-                <input type="number" id="new-event-transects" value="4" min="1" max="20">
-              </div>
-              <div class="field">
-                <label>Samples / Transect</label>
-                <input type="number" id="new-event-samples" value="50" min="1" max="200">
-              </div>
-            </div>
-            <div class="row3">
-              <div class="field">
-                <label>Transect Length</label>
-                <input type="number" id="new-event-length" value="100" min="1">
-              </div>
-              <div class="field">
-                <label>Unit</label>
-                <select id="new-event-unit">
-                  <option value="m">m</option>
-                  <option value="ft">ft</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Cover Pts/Sample</label>
-                <input type="number" id="new-event-coverpts" value="2" min="1" max="10">
-              </div>
-            </div>
-            <div class="row2">
-              <div class="field">
-                <label>Frame Width (cm)</label>
-                <input type="number" id="new-event-fw" value="40" min="1">
-              </div>
-              <div class="field">
-                <label>Frame Height (cm)</label>
-                <input type="number" id="new-event-fh" value="40" min="1">
-              </div>
             </div>
             <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
           </div>
@@ -2280,18 +2220,6 @@
     // ══════════════════════════════════════════════════════
     //  SITES PAGE
     // ══════════════════════════════════════════════════════
-    function openNewSiteForm() {
-      document.getElementById('new-site-form').style.display='';
-      document.getElementById('new-site-toggle-btn').style.display='none';
-      document.getElementById('new-site-name').focus();
-    }
-    function closeNewSiteForm() {
-      document.getElementById('new-site-form').style.display='none';
-      document.getElementById('new-site-toggle-btn').style.display='';
-    }
-    document.getElementById('new-site-toggle-btn').addEventListener('click',openNewSiteForm);
-    document.getElementById('new-site-cancel-btn').addEventListener('click',closeNewSiteForm);
-
     document.getElementById('create-site-btn').addEventListener('click',async () => {
       const name=document.getElementById('new-site-name').value.trim();
       if(!name) {toast('Site name required','err'); return;}
@@ -2300,24 +2228,20 @@
         name,
         folderId: currentFolderId,
         desc: document.getElementById('new-site-desc').value.trim(),
-        lat: document.getElementById('new-site-lat').value.trim()||null,
-        lng: document.getElementById('new-site-lng').value.trim()||null,
-        elev: document.getElementById('new-site-elev').value.trim()||null,
-        slope: document.getElementById('new-site-slope').value.trim()||null,
-        aspect: document.getElementById('new-site-aspect').value.trim()||null,
-        siteType: document.getElementById('new-site-type').value||'None',
-        status: document.getElementById('new-site-status').value||'Active',
+        transects: +document.getElementById('new-site-transects').value,
+        samples: +document.getElementById('new-site-samples').value,
+        length: +document.getElementById('new-site-length').value,
+        unit: document.getElementById('new-site-unit').value,
+        coverPts: +document.getElementById('new-site-coverpts').value,
+        frameW: +document.getElementById('new-site-fw').value,
+        frameH: +document.getElementById('new-site-fh').value,
         createdAt: Date.now(),
         syncStatus: 'pending'
       };
       try {
         await dbPut('sites',site);
-        // reset form
-        ['new-site-name','new-site-desc','new-site-lat','new-site-lng','new-site-elev','new-site-slope'].forEach(id => document.getElementById(id).value='');
-        document.getElementById('new-site-aspect').value='';
-        document.getElementById('new-site-type').value='None';
-        document.getElementById('new-site-status').value='Active';
-        closeNewSiteForm();
+        document.getElementById('new-site-name').value='';
+        document.getElementById('new-site-desc').value='';
         toast('Site created','ok');
         renderSiteList();
         selectSite(site.id);
@@ -2427,22 +2351,16 @@
       }
 
       visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
+        const total=s.transects*s.samples;
         const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
+        const pct=total? Math.round(done/total*100):0;
         const isSel=activeSiteId===s.id;
-        const meta=[];
-        if(s.siteType&&s.siteType!=='None') meta.push(s.siteType);
-        if(s.status&&s.status!=='None') meta.push(s.status);
-        if(s.desc) meta.push(esc(s.desc));
-        if(s.elev) meta.push(`${s.elev} ft`);
-        if(s.aspect) meta.push(s.aspect);
-        if(done) meta.push(`${done} collected`);
-        const subStr=meta.join(' · ')||'No data yet';
         if(s.archived) {
           html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
             <div class="site-icon">📦</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
-              <div class="site-sub">${done} collected · archived</div>
+              <div class="site-sub">${done}/${total} collected · archived</div>
             </div>
             <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
           </div>`;
@@ -2451,7 +2369,10 @@
             <div class="site-icon">🌿</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
-              <div class="site-sub">${subStr}</div>
+              <div class="site-sub">${s.transects} transects · ${s.samples} samples · ${done}/${total} collected (${pct}%)</div>
+              <div class="prog-bar-wrap" style="margin-top:6px;margin-bottom:0;height:3px;">
+                <div class="prog-bar" style="width:${pct}%"></div>
+              </div>
             </div>
             <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
             <span class="site-arrow">›</span>
@@ -2627,15 +2548,16 @@
 
       // Site header
       const hdr=document.getElementById('collect-site-header');
+      const siteTotalPer=activeSite.transects*activeSite.samples;
       const totalDone=allSamples.filter(s => s.hasData).length;
-      const gpsStr=activeSite.lat&&activeSite.lng? `📍 ${activeSite.lat}, ${activeSite.lng}`:'';
       hdr.innerHTML=`
           <div class="card-title">${esc(activeSite.name)}
         <span class="badge">${totalDone} collected</span>
         </div>
           <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;">
-            ${activeSite.desc? `<span style="font-style:italic;">${esc(activeSite.desc)}</span>`:''}
-            ${gpsStr? `<span>${gpsStr}</span>`:''}
+            <span>📏 ${activeSite.transects}T × ${activeSite.samples}S</span>
+            <span>🔲 ${activeSite.frameW}×${activeSite.frameH}cm</span>
+            <span>⬤ ${activeSite.coverPts}pts</span>
             <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
           </div>`;
 
@@ -2647,13 +2569,12 @@
         evList.innerHTML=allEvents.map(ev => {
           const evSamples=allSamples.filter(s => s.eventId===ev.id);
           const evDone=evSamples.filter(s => s.hasData).length;
-          const evTotal=(ev.transects||4)*(ev.samples||50);
-          const pct=evTotal? Math.round(evDone/evTotal*100):0;
+          const pct=siteTotalPer? Math.round(evDone/siteTotalPer*100):0;
           const isOpen=activeEventId===ev.id;
           return `<div class="event-header${isOpen? ' event-active':''}" data-eid="${ev.id}">
             <div style="flex:1;min-width:0;">
               <div class="event-name">${esc(ev.name)}</div>
-              <div class="event-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
+              <div class="event-sub">${evDone}/${siteTotalPer} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
               <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
             </div>
             <div class="event-chevron${isOpen? ' open':''}" id="echev-${ev.id}">›</div>
@@ -2713,9 +2634,8 @@
             updateCrumb();
             // find first incomplete sample
             let startT=0,startS=0;
-            const evCfg=activeEvent||{transects: 4,samples: 50};
-            outer: for(let t=0;t<(evCfg.transects||4);t++) {
-              for(let s=0;s<(evCfg.samples||50);s++) {
+            outer: for(let t=0;t<activeSite.transects;t++) {
+              for(let s=0;s<activeSite.samples;s++) {
                 if(!sampleMap[sampleId(activeSiteId,eid,t,s)]?.hasData) {startT=t; startS=s; break outer;}
               }
             }
@@ -2794,17 +2714,7 @@
       const dateVal=document.getElementById('new-event-date').value||
         new Date().toISOString().slice(0,10);
       document.getElementById('new-event-date').value='';
-      const ev={
-        id: 'evt_'+Date.now(),siteId: activeSiteId,name,eventDate: dateVal,notes: '',
-        transects: +document.getElementById('new-event-transects').value||4,
-        samples: +document.getElementById('new-event-samples').value||50,
-        length: +document.getElementById('new-event-length').value||100,
-        unit: document.getElementById('new-event-unit').value||'m',
-        coverPts: +document.getElementById('new-event-coverpts').value||2,
-        frameW: +document.getElementById('new-event-fw').value||40,
-        frameH: +document.getElementById('new-event-fh').value||40,
-        createdAt: Date.now(),syncStatus: 'pending'
-      };
+      const ev={id: 'evt_'+Date.now(),siteId: activeSiteId,name,eventDate: dateVal,notes: '',createdAt: Date.now(),syncStatus: 'pending'};
       await dbPut('events',ev);
       activeEventId=ev.id;
       activeEvent=ev;
@@ -2833,10 +2743,6 @@
       samplePanelState.sampleIdx=sIdx;
       speciesAlphaSort=false; // reset ABC toggle per sample
 
-      // Ensure activeEvent is loaded (may be null when entering via sample dot click)
-      if(!activeEvent&&activeEventId) activeEvent=await dbGet('events',activeEventId);
-      const ev=activeEvent||{transects: 4,samples: 50,length: 100,unit: 'm',frameW: 40,frameH: 40,coverPts: 2,name: ''};
-
       const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
       const rec=await dbGet('samples',sid);
 
@@ -2844,20 +2750,21 @@
       samplePanelState.coverHits=rec?.coverHits||[];
 
       // Header
-      const offset=Math.round((sIdx/((ev.samples||50)-1||1))*(ev.length||100));
+      const offset=Math.round((sIdx/(activeSite.samples-1||1))*activeSite.length);
       document.getElementById('spt-main').textContent=`T${tIdx+1}  ·  S${sIdx+1} `;
       document.getElementById('spt-sub').textContent=
-        `Sample ${sIdx+1} of ${ev.samples||50}  ·  ${offset} ${ev.unit||'m'} along transect`;
+        `Sample ${sIdx+1} of ${activeSite.samples}  ·  ${offset} ${activeSite.unit} along transect`;
+      const evName=activeEvent?.name||(activeEventId? (await dbGet('events',activeEventId))?.name:null);
       document.getElementById('spt-ctx').textContent=
-        ev.name? `${esc(activeSite.name)}  ·  ${esc(ev.name)} `:esc(activeSite.name);
+        evName? `${esc(activeSite.name)}  ·  ${esc(evName)} `:esc(activeSite.name);
       document.getElementById('quadrat-size-badge').textContent=
-        `${ev.frameW||40}×${ev.frameH||40} cm`;
+        `${activeSite.frameW}×${activeSite.frameH} cm`;
       document.getElementById('cover-pts-badge').textContent=
-        `${ev.coverPts||2} pts/sample`;
+        `${activeSite.coverPts} pts/sample`;
 
       // nav buttons
       document.getElementById('sample-prev-btn').disabled=(tIdx===0&&sIdx===0);
-      const lastT=(ev.transects||4)-1,lastS=(ev.samples||50)-1;
+      const lastT=activeSite.transects-1,lastS=activeSite.samples-1;
       document.getElementById('sample-next-btn').disabled=(tIdx===lastT&&sIdx===lastS);
 
       // ── Highlight current dot + auto-expand its transect ──
@@ -2894,8 +2801,7 @@
       const sm={};
       evSamples.forEach(s => sm[s.id]=s);
       let html=`<div class="psm-row"><div class="psm-label">T${tIdx+1}</div><div class="psm-dots">`;
-      const evSampCount=(activeEvent?.samples||50);
-      for(let s=0;s<evSampCount;s++) {
+      for(let s=0;s<activeSite.samples;s++) {
         const rec=sm[sampleId(activeSiteId,activeEventId,tIdx,s)];
         const isCur=s===sIdx;
         const cls=(rec?.hasData? 'complete':'')+(isCur? ' current':'');
@@ -2957,7 +2863,7 @@
       try {
         // ── Incomplete-sample guard (forward only) ───────
         if(dir>0&&(localStorage.getItem('ep_incomplete_warn')==='1'||localStorage.getItem('ep_incomplete_warn')===null)) {
-          const maxHits=activeEvent? (activeEvent.coverPts||0):(activeSite?.coverPts||0);
+          const maxHits=activeSite? activeSite.coverPts:0;
           const totalHits=samplePanelState.coverHits.length;
           const noSpecies=samplePanelState.species.length===0;
           const coverShort=maxHits>0&&totalHits<maxHits;
@@ -2981,16 +2887,15 @@
         }
         if(save) await saveCurrent(); // skips write if no data entered
         let {transectIdx: t,sampleIdx: s}=samplePanelState;
-        const evCfg=activeEvent||{transects: 4,samples: 50};
         s+=dir;
         if(s<0) {
           t--;
           if(t<0) {document.getElementById('sample-panel').classList.remove('open'); samplePanelOpen=false; _advanceBusy=false; return;}
-          s=(evCfg.samples||50)-1;
+          s=activeSite.samples-1;
         }
-        if(s>=(evCfg.samples||50)) {
+        if(s>=activeSite.samples) {
           t++;
-          if(t>=(evCfg.transects||4)) {document.getElementById('sample-panel').classList.remove('open'); samplePanelOpen=false; _advanceBusy=false; return;}
+          if(t>=activeSite.transects) {document.getElementById('sample-panel').classList.remove('open'); samplePanelOpen=false; _advanceBusy=false; return;}
           s=0;
         }
         await renderCollect();
@@ -3087,7 +2992,7 @@
 
     // ── Cover grid ────────────────────────────────────────
     function renderCoverGrid() {
-      const maxHits=activeEvent? (activeEvent.coverPts||2):(activeSite?.coverPts||2);
+      const maxHits=activeSite? activeSite.coverPts:2;
       const hitCount={};
       COVER_CATS.forEach(c => hitCount[c.id]=0);
       samplePanelState.coverHits.forEach(h => {
@@ -3152,10 +3057,8 @@
       const samples=await dbGetByIndex('samples','siteId',activeSiteId);
       const events=await dbGetByIndex('events','siteId',activeSiteId);
       const allFilled=samples.filter(s => s.hasData);
-      const siteTotalPer=activeSite.transects*activeSite.samples; // fallback for old sites
-      // Per-event slot counts; prefer event-stored values, fall back to site-stored for legacy data
-      const getEvTotal=ev => (ev.transects||activeSite.transects||4)*(ev.samples||activeSite.samples||50);
-      const total=getEvTotal(sortedEvents[0]||{}); // kept for single-event compatibility
+      const siteTotalPer=activeSite.transects*activeSite.samples; // slots per event
+      const total=siteTotalPer; // kept for per-event % calculations below
 
       const EV_COLORS=['#5baad4','#d4a843','#7ecb6f','#e07c3a','#c47dd4','#d46b5b'];
 
@@ -3190,7 +3093,7 @@
       allFilled.forEach(s => (s.coverHits||[]).forEach(h => {coverTotals[h.id]=(coverTotals[h.id]||0)+1; totalHits++;}));
       const nativeCount=Object.values(speciesMeta).filter(m => m.native==='Y').length;
       const invasiveCount=Object.values(speciesMeta).filter(m => m.native==='N').length;
-      const overallTotal=sortedEvents.reduce((sum,ev) => sum+getEvTotal(ev),0)||1;
+      const overallTotal=siteTotalPer*sortedEvents.length||siteTotalPer;
       const completion=overallTotal? Math.round(allFilled.length/overallTotal*100):0;
 
       // ─ Card 1: Overview ─
@@ -3214,7 +3117,7 @@
       let eventTimelineHTML='';
       if(sortedEvents.length>0) {
         const rows=evStats.map(({ev,evFilled,spFreq,nativeSp,invasiveSp,covTotals,hits,topCover,color}) => {
-          const evPct=getEvTotal(ev)? Math.round(evFilled.length/getEvTotal(ev)*100):0;
+          const evPct=total? Math.round(evFilled.length/total*100):0;
           const dateStr=ev.eventDate||new Date(ev.createdAt).toLocaleDateString();
           const topCovPct=hits? Math.round((covTotals[topCover.id]||0)/hits*100):0;
           return `<tr>
@@ -3437,8 +3340,7 @@
       // ─ Card 7: Transect breakdown ─
       let transectHTML='';
       if(allFilled.length>0) {
-        const maxT=allFilled.reduce((m,s) => Math.max(m,s.transectIdx||0),0);
-        const tRows=Array.from({length: maxT+1},(_,t) => {
+        const tRows=Array.from({length: activeSite.transects},(_,t) => {
           const tSamples=allFilled.filter(s => s.transectIdx===t);
           const tSpFreq={},tSpMeta={};
           tSamples.forEach(s => (s.species||[]).forEach(sp => {tSpFreq[sp.symbol]=(tSpFreq[sp.symbol]||0)+1; tSpMeta[sp.symbol]=sp;}));
