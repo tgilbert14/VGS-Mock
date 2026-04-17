@@ -1842,6 +1842,12 @@
           <div id="sync-site-list"></div>
           <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Pending</button>
         </div>
+        <div class="card" style="border-color:var(--danger);">
+          <div class="card-title" style="color:var(--danger);">⚠️ Developer Tools</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Permanently wipes all sites, events,
+            samples, and folders from the local database. Requires dev password. Cannot be undone.</div>
+          <button class="btn btn-danger btn-sm" id="wipe-db-btn">🗑 Wipe Database…</button>
+        </div>
       </div>
 
       <!-- ═══ MAP PAGE ═══ -->
@@ -1921,6 +1927,25 @@
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="incomplete-cancel-btn">Go Back</button>
         <button class="btn btn-warn btn-full" id="incomplete-confirm-btn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wipe database modal -->
+  <div class="modal-backdrop" id="wipe-db-modal">
+    <div class="modal">
+      <div class="modal-title" style="color:var(--danger);">🗑 Wipe Database</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">This will permanently delete <strong>all sites,
+          events, samples, and folders</strong> from the local database. This cannot be undone.</p>
+      <div class="field" style="margin-bottom:14px;">
+        <label style="font-size:.75rem;">Enter dev password to confirm</label>
+        <input type="password" id="wipe-db-pw" placeholder="Password" autocomplete="off">
+        <div id="wipe-db-err" style="font-size:.7rem;color:var(--danger);margin-top:4px;display:none;">Incorrect
+          password.</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="wipe-db-cancel-btn">Cancel</button>
+        <button class="btn btn-danger btn-full" id="wipe-db-confirm-btn">Wipe Everything</button>
       </div>
     </div>
   </div>
@@ -2701,14 +2726,21 @@
       // Site header
       const hdr=document.getElementById('collect-site-header');
       const totalDone=allSamples.filter(s => s.hasData).length;
-      const gpsStr=activeSite.lat&&activeSite.lng? `📍 ${activeSite.lat}, ${activeSite.lng}`:'';
+      const hasGps=!!(activeSite.lat&&activeSite.lng);
+      const _lat=hasGps? parseFloat(activeSite.lat):null;
+      const _lng=hasGps? parseFloat(activeSite.lng):null;
+      const _navUri=hasGps? `geo:${_lat},${_lng}?q=${_lat},${_lng}(${encodeURIComponent(activeSite.name)})`:'';
+      const _gMaps=hasGps? `https://www.google.com/maps/search/?api=1&query=${_lat},${_lng}`:'';
+      const gpsStr=hasGps? `📍 ${activeSite.lat}, ${activeSite.lng}`:'';
       hdr.innerHTML=`
           <div class="card-title">${esc(activeSite.name)}
         <span class="badge">${totalDone} collected</span>
         </div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;align-items:center;">
             ${activeSite.desc? `<span style="font-style:italic;">${esc(activeSite.desc)}</span>`:''}
             ${gpsStr? `<span>${gpsStr}</span>`:''}
+            ${hasGps? `<a href="${_navUri}" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;" title="Navigate to site in maps app">🧭 Navigate</a>`:''}
+            ${hasGps? `<a href="${_gMaps}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;">🌍 Maps</a>`:''}
             <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
           </div>`;
 
@@ -3609,6 +3641,37 @@
       localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
       localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
       toast('Settings saved','ok');
+    });
+
+    // ── Wipe database ──
+    document.getElementById('wipe-db-btn').addEventListener('click',() => {
+      document.getElementById('wipe-db-pw').value='';
+      document.getElementById('wipe-db-err').style.display='none';
+      document.getElementById('wipe-db-modal').classList.add('open');
+    });
+    document.getElementById('wipe-db-cancel-btn').addEventListener('click',() => {
+      document.getElementById('wipe-db-modal').classList.remove('open');
+    });
+    document.getElementById('wipe-db-confirm-btn').addEventListener('click',async () => {
+      const pw=document.getElementById('wipe-db-pw').value;
+      if(pw!=='1699') {
+        document.getElementById('wipe-db-err').style.display='';
+        document.getElementById('wipe-db-pw').value='';
+        document.getElementById('wipe-db-pw').focus();
+        return;
+      }
+      document.getElementById('wipe-db-modal').classList.remove('open');
+      // Clear all data stores
+      for(const store of ['sites','events','samples','folders']) {
+        const all=await dbGetAll(store);
+        for(const rec of all) await dbDelete(store,rec.id);
+      }
+      // Reset in-memory state
+      activeSiteId=null; activeSite=null; activeEventId=null; activeEvent=null;
+      renderSiteList();
+      renderCollect();
+      renderSync();
+      toast('Database wiped','ok');
     });
 
     document.getElementById('sync-btn').addEventListener('click',async () => {
