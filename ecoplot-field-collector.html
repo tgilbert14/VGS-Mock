@@ -984,6 +984,59 @@
       opacity: .8;
     }
 
+    .sp-trend-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .sp-filter-sel {
+      font-size: .68rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--s2);
+      color: var(--fg);
+      cursor: pointer;
+    }
+
+    .sort-th {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .sort-th:hover {
+      color: var(--accent);
+    }
+
+    .nat-badge {
+      display: inline-block;
+      font-size: .55rem;
+      padding: 0 4px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-style: normal;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    .nat-badge.nat {
+      background: rgba(126, 203, 111, .2);
+      color: var(--accent);
+    }
+
+    .nat-badge.inv {
+      background: rgba(217, 85, 85, .2);
+      color: var(--danger);
+    }
+
+    .nat-badge.unk {
+      background: var(--s3);
+      color: var(--dim);
+    }
+
     .seen-chip.invasive-sp {
       border-color: var(--danger);
       color: var(--danger);
@@ -1869,6 +1922,7 @@
     let speciesDB=[];
     let showSiteSpecies=true;
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
+    let spTrendState={sortCol: 'overall',sortDir: 'desc',groupBy: ''};  // persists across tab switches
 
     // Build a deduplicated species list [{symbol,common,sci,native}] from a set of samples
     // Preserves first-seen order (no alpha sort)
@@ -1997,7 +2051,7 @@
     async function loadSpeciesDB() {
       const all=await dbGetAll('species');
       if(all.length) {
-        speciesDB=all.map(r => [r.symbol,r.common,r.sci,r.native]);
+        speciesDB=all.map(r => [r.symbol,r.common,r.sci,r.native,r.duration||'',r.growthHabit||'']);
       } else {
         speciesDB=[];
       }
@@ -2034,22 +2088,38 @@
       reader.onload=async e => {
         try {
           const lines=e.target.result.split(/\r?\n/);
+          // Detect delimiter: tab vs comma
+          const firstLine=lines[0];
+          const delim=(firstLine.split('\t').length>firstLine.split(',').length)? '\t':',';
+          const parseLine=delim==='\t'
+            ? line => line.split('\t').map(f => f.replace(/^"|"$/g,'').trim())
+            :parseCSVLine;
+          // Detect column indices from header row (USDA PLANTS standard fallbacks: dur=8, habit=9, native=10)
+          const hdr=parseLine(lines[0]).map(h => h.trim().toLowerCase());
+          const symCol=hdr.findIndex(h => h==='symbol')||0;
+          const sciCol=hdr.findIndex(h => h.includes('scientific'))||1;
+          const comCol=hdr.findIndex(h => h.includes('common'))||2;
+          const durCol=hdr.findIndex(h => h==='duration'||h==='duration ');
+          const habCol=hdr.findIndex(h => h==='growth habit'||h.includes('growth habit')||h.includes('growth_habit'));
+          const natCol=hdr.findIndex(h => (h.includes('native')&&h.includes('status'))||h==='native status');
           const entries=[];
           for(let i=1;i<lines.length;i++) {
             const line=lines[i].trim();
             if(!line) continue;
-            const f=parseCSVLine(line);
+            const f=parseLine(line);
             if(f.length<3) continue;
-            const symbol=f[0].trim();
-            const sci=f[1].trim();
-            const common=f[2].trim();
+            const symbol=(f[symCol>=0? symCol:0]||'').trim();
+            const sci=(f[sciCol>=0? sciCol:1]||'').trim();
+            const common=(f[comCol>=0? comCol:2]||'').trim();
             if(!symbol||!common) continue;
-            const native=parseNativeStatus(f[10]||'');
-            entries.push({symbol,common,sci,native});
+            const native=parseNativeStatus((f[natCol>=0? natCol:10]||''));
+            const duration=(f[durCol>=0? durCol:8]||'').trim();
+            const growthHabit=(f[habCol>=0? habCol:9]||'').trim();
+            entries.push({symbol,common,sci,native,duration,growthHabit});
           }
           btn.textContent='Saving…';
           await dbBulkPut('species',entries);
-          speciesDB=entries.map(r => [r.symbol,r.common,r.sci,r.native]);
+          speciesDB=entries.map(r => [r.symbol,r.common,r.sci,r.native,r.duration||'',r.growthHabit||'']);
           updateSpeciesDBUI(entries.length);
           toast('Loaded '+entries.length.toLocaleString()+' species','ok');
         } catch(err) {
@@ -2930,7 +3000,8 @@
       const samples=await dbGetByIndex('samples','siteId',activeSiteId);
       const events=await dbGetByIndex('events','siteId',activeSiteId);
       const allFilled=samples.filter(s => s.hasData);
-      const total=activeSite.transects*activeSite.samples;
+      const siteTotalPer=activeSite.transects*activeSite.samples; // slots per event
+      const total=siteTotalPer; // kept for per-event % calculations below
 
       const EV_COLORS=['#5baad4','#d4a843','#7ecb6f','#e07c3a','#c47dd4','#d46b5b'];
 
@@ -2965,14 +3036,15 @@
       allFilled.forEach(s => (s.coverHits||[]).forEach(h => {coverTotals[h.id]=(coverTotals[h.id]||0)+1; totalHits++;}));
       const nativeCount=Object.values(speciesMeta).filter(m => m.native==='Y').length;
       const invasiveCount=Object.values(speciesMeta).filter(m => m.native==='N').length;
-      const completion=total? Math.round(allFilled.length/total*100):0;
+      const overallTotal=siteTotalPer*sortedEvents.length||siteTotalPer;
+      const completion=overallTotal? Math.round(allFilled.length/overallTotal*100):0;
 
       // ─ Card 1: Overview ─
       const overviewHTML=`
             <div class="card">
         <div class="card-title">${esc(activeSite.name)} — Overview</div>
         <div class="stat-grid">
-          <div class="stat-box"><div class="stat-val">${allFilled.length}<span style="font-size:.65rem;color:var(--muted)">/${total}</span></div><div class="stat-lbl">Samples</div></div>
+          <div class="stat-box"><div class="stat-val">${allFilled.length}<span style="font-size:.65rem;color:var(--muted)">/${overallTotal}</span></div><div class="stat-lbl">Samples</div></div>
           <div class="stat-box"><div class="stat-val">${Object.keys(speciesFreq).length}</div><div class="stat-lbl">Species</div></div>
           <div class="stat-box"><div class="stat-val">${completion}%</div><div class="stat-lbl">Complete</div></div>
         </div>
@@ -3023,35 +3095,150 @@
         </tr>`;
       }).join('')||'<tr><td colspan="3" style="color:var(--muted);font-size:.75rem;padding:12px 8px;">No species recorded yet</td></tr>';
 
-      // ─ Card 4: Species × Event (2+ events) ─
-      let speciesTrendHTML='';
-      if(sortedEvents.length>=2&&sortedSpecies.length>0) {
-        const topSp=sortedSpecies.slice(0,15);
-        const evHdrs=evStats.map(({ev,color}) =>
-          `<th class="ev-col"><span class="ev-dot" style="background:${color};"></span>${esc(ev.eventDate||new Date(ev.createdAt).toLocaleDateString())}</th>`
-        ).join('');
-        const spRows=topSp.map(([sym]) => {
-          const meta=speciesMeta[sym];
-          const invasive=meta.native==='N';
-          const cells=evStats.map(({evFilled,spFreq,color}) => {
-            const p=evFilled.length? Math.round((spFreq[sym]||0)/evFilled.length*100):0;
-            const bc=invasive? 'var(--danger)':color;
-            return `<td class="ev-col"><span style="font-weight:700;color:${bc};">${p}%</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${bc};"></div></div></td>`;
-          }).join('');
-          const fp=evStats[0].evFilled.length? Math.round((evStats[0].spFreq[sym]||0)/evStats[0].evFilled.length*100):0;
-          const lp=evStats[evStats.length-1].evFilled.length? Math.round((evStats[evStats.length-1].spFreq[sym]||0)/evStats[evStats.length-1].evFilled.length*100):0;
-          const d=lp-fp;
-          const dHTML=d!==0? `<span style="font-size:.65rem;color:${d>0? (invasive? 'var(--danger)':'var(--accent)'):'var(--muted)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
-          return `<tr><td><div style="font-size:.72rem;">${esc(meta.common)}</div><div style="font-size:.58rem;color:var(--muted);font-style:italic;">${esc(meta.sci)}</div></td>${cells} <td class="ev-col">${dHTML}</td></tr>`;
+      // ─ Card 4: Species × Event (interactive, sortable, filterable) ─
+      const spDbLookup={};
+      speciesDB.forEach(p => {spDbLookup[p[0]]={dur: (p[4]||'').split(',')[0].trim(),habit: (p[5]||'').split(',')[0].trim()};});
+
+      function refreshSpTrend() {
+        const el=document.getElementById('sp-trend-card');
+        if(!el) return;
+        if(sortedEvents.length<2||!Object.keys(speciesMeta).length) {
+          el.innerHTML='<div class="card-title">Species Freq by Event</div><p style="font-size:.75rem;color:var(--muted);padding:8px 0;">Requires 2+ events with data.</p>';
+          return;
+        }
+
+        // Build full species list with db metadata
+        const allSyms=new Set();
+        evStats.forEach(({spFreq}) => Object.keys(spFreq).forEach(s => allSyms.add(s)));
+        const spList=[...allSyms].map(sym => {
+          const meta=speciesMeta[sym]||{symbol: sym,common: sym,sci: '',native: '?'};
+          const db=spDbLookup[sym]||{dur: '',habit: ''};
+          const evFreqs=evStats.map(({evFilled,spFreq}) => {
+            const n=spFreq[sym]||0;
+            const p=evFilled.length? Math.round(n/evFilled.length*100):0;
+            return {n,p};
+          });
+          return {sym,meta,dur: db.dur,habit: db.habit,evFreqs,overall: evFreqs.reduce((s,x) => s+x.n,0)};
+        });
+
+        const opt=(val,label,cur) => `<option value="${esc(val)}"${cur===val? ' selected':''}>${esc(label)}</option>`;
+        const groupBy=spTrendState.groupBy||'';
+        const evHdrs=evStats.map(({ev,color},i) => {
+          const si=spTrendState.sortCol===String(i)
+            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '↓':'↑'}</span>`
+            :`<span style="opacity:.3;">↕</span>`;
+          return `<th class="ev-col sort-th" data-sort-col="${i}">
+            <span class="ev-dot" style="background:${color};"></span>${esc(ev.eventDate||new Date(ev.createdAt).toLocaleDateString())} ${si}
+          </th>`;
         }).join('');
-        speciesTrendHTML=`
-          <div class="card">
-          <div class="card-title">Species Freq by Event <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of sampled plots)</span></div>
-          <div style="overflow-x:auto;"><table class="trend-table">
-            <thead><tr><th>Species</th>${evHdrs}<th class="ev-col">Trend</th></tr></thead>
-            <tbody>${spRows}</tbody>
-          </table></div>
+
+        const controlsHTML=`<div class="sp-trend-filters">
+          <select class="sp-filter-sel" id="sp-groupby-sel">
+            ${opt('','Individual species',groupBy)}
+            ${opt('habit','Group by Growth Habit',groupBy)}
+            ${opt('dur','Group by Duration',groupBy)}
+            ${opt('nat','Group by Native Status',groupBy)}
+          </select>
         </div>`;
+
+        let bodyHTML='';
+
+        if(groupBy) {
+          // ── Grouped mode: sum freq% by group ──
+          const getGroupKey=sp => {
+            if(groupBy==='habit') return sp.habit||'Unknown';
+            if(groupBy==='dur') return sp.dur||'Unknown';
+            if(groupBy==='nat') return sp.meta.native==='Y'? 'Native':sp.meta.native==='N'? 'Non-Native':'Unknown';
+            return 'All';
+          };
+          const groups={};
+          spList.forEach(sp => {
+            const k=getGroupKey(sp);
+            if(!groups[k]) groups[k]={key: k,evSumP: evStats.map(() => 0),evSumN: evStats.map(() => 0)};
+            sp.evFreqs.forEach(({n,p},i) => {groups[k].evSumP[i]+=p; groups[k].evSumN[i]+=n;});
+          });
+          const groupArr=Object.values(groups).sort((a,b) =>
+            b.evSumN.reduce((s,x) => s+x,0)-a.evSumN.reduce((s,x) => s+x,0)
+          );
+          // cap summed % at 100 display (sum of individual freqs can exceed 100)
+          const rows=groupArr.map(g => {
+            const cells=g.evSumP.map((p,i) => {
+              const col=evStats[i].color;
+              const disp=Math.min(p,999); // show raw sum, no cap
+              const barW=Math.min(disp,100);
+              return `<td class="ev-col"><span style="font-weight:700;color:${col};">${disp}%</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:${barW}%;background:${col};"></div></div><div style="font-size:.6rem;color:var(--muted);margin-top:1px;">${g.evSumN[i]} plots</div></td>`;
+            }).join('');
+            const fp=g.evSumP[0]||0;
+            const lp=g.evSumP[g.evSumP.length-1]||0;
+            const d=lp-fp;
+            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
+            return `<tr><td style="font-weight:700;font-size:.8rem;">${esc(g.key)}</td>${cells}<td class="ev-col">${dHTML}</td></tr>`;
+          }).join('');
+          bodyHTML=`<div style="overflow-x:auto;"><table class="trend-table">
+            <thead><tr><th>Group</th>${evHdrs}<th class="ev-col">Trend</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>`;
+
+        } else {
+          // ── Individual species mode (original) ──
+          const dir=spTrendState.sortDir==='desc'? -1:1;
+          let filtered=[...spList].sort((a,b) => {
+            if(spTrendState.sortCol==='overall') return dir*(b.overall-a.overall);
+            const i=parseInt(spTrendState.sortCol);
+            if(!isNaN(i)) return dir*((b.evFreqs[i]?.n||0)-(a.evFreqs[i]?.n||0));
+            return 0;
+          }).slice(0,50);
+          const siOver=spTrendState.sortCol==='overall'
+            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '↓':'↑'}</span>`
+            :`<span style="opacity:.3;">↕</span>`;
+          const rows=filtered.map(({sym,meta,dur,habit,evFreqs}) => {
+            const invasive=meta.native==='N';
+            const nBadge=meta.native==='Y'? '<span class="nat-badge nat">N</span>':
+              meta.native==='N'? '<span class="nat-badge inv">I</span>':
+                '<span class="nat-badge unk">?</span>';
+            const cells=evFreqs.map(({n,p},i) => {
+              const bc=invasive? 'var(--danger)':evStats[i].color;
+              return `<td class="ev-col"><span style="font-weight:700;color:${bc};">${p}%</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${bc};"></div></div><div style="font-size:.6rem;color:var(--muted);margin-top:1px;">${n} plots</div></td>`;
+            }).join('');
+            const fp=evFreqs[0]?.p||0;
+            const lp=evFreqs[evFreqs.length-1]?.p||0;
+            const d=lp-fp;
+            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? (invasive? 'var(--danger)':'var(--accent)'):'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
+            return `<tr>
+              <td>
+                <div style="font-size:.68rem;font-weight:700;font-family:var(--font-mono);color:var(--accent2);">[${esc(sym)}]</div>
+                <div style="font-size:.72rem;">${esc(meta.common)} ${nBadge}</div>
+                <div style="font-size:.56rem;color:var(--muted);font-style:italic;">${esc(meta.sci)}</div>
+                ${dur||habit? `<div style="font-size:.56rem;color:var(--dim);margin-top:2px;">${[dur,habit].filter(Boolean).join(' · ')}</div>`:''}
+              </td>${cells}<td class="ev-col">${dHTML}</td>
+            </tr>`;
+          }).join('');
+          bodyHTML=`<div style="overflow-x:auto;"><table class="trend-table">
+            <thead><tr><th class="sort-th" data-sort-col="overall">Species ${siOver}</th>${evHdrs}<th class="ev-col">Trend</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>`;
+        }
+
+        const subLbl=groupBy? '(summed freq % by group)':'(% of sampled plots · top 50)';
+        el.innerHTML=`
+          <div class="card-title">Species Freq by Event <span style="font-size:.6rem;color:var(--muted);font-weight:400;">${subLbl}</span></div>
+          ${controlsHTML}${bodyHTML}`;
+
+        // Wire group-by dropdown
+        el.querySelector('#sp-groupby-sel').addEventListener('change',e => {
+          spTrendState.groupBy=e.target.value;
+          spTrendState.sortCol='overall';
+          refreshSpTrend();
+        });
+        // Wire sort headers (individual mode only)
+        el.querySelectorAll('.sort-th[data-sort-col]').forEach(th => {
+          th.addEventListener('click',() => {
+            const col=th.dataset.sortCol;
+            if(spTrendState.sortCol===col) spTrendState.sortDir=spTrendState.sortDir==='desc'? 'asc':'desc';
+            else {spTrendState.sortCol=col; spTrendState.sortDir='desc';}
+            refreshSpTrend();
+          });
+        });
       }
 
       // ─ Card 5: Overall cover ─
@@ -3073,8 +3260,9 @@
         ).join('');
         const cRows=COVER_CATS.map(c => {
           const cells=evStats.map(({covTotals,hits,color}) => {
-            const p=hits? Math.round((covTotals[c.id]||0)/hits*100):0;
-            return `<td class="ev-col"><span style="font-weight:700;color:${color};">${p}%</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${color};"></div></div></td>`;
+            const n=covTotals[c.id]||0;
+            const p=hits? Math.round(n/hits*100):0;
+            return `<td class="ev-col"><span style="font-weight:700;color:${color};">${p}%</span><div class="mini-bar-wrap"><div class="mini-bar" style="width:${p}%;background:${color};"></div></div><div style="font-size:.6rem;color:var(--muted);margin-top:1px;">${n} hits</div></td>`;
           }).join('');
           const fp=evStats[0].hits? Math.round((evStats[0].covTotals[c.id]||0)/evStats[0].hits*100):0;
           const lp=evStats[evStats.length-1].hits? Math.round((evStats[evStats.length-1].covTotals[c.id]||0)/evStats[evStats.length-1].hits*100):0;
@@ -3123,12 +3311,13 @@
         <div class="card-title">Species Frequency <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of plots, all events)</span></div>
         <table class="cover-table"><thead><tr><th>Species</th><th style="text-align:right;">Freq %</th><th style="text-align:center;">Status</th></tr></thead>
         <tbody>${speciesRows}</tbody></table>
-      </div>`+speciesTrendHTML+`
+      </div>`+`<div id="sp-trend-card" class="card"></div>`+`
           <div class="card">
         <div class="card-title">Ground Cover <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of hits, all events)</span></div>
         <table class="cover-table"><thead><tr><th>Category</th><th style="text-align:right;">% of Hits</th><th style="text-align:right;">Count</th></tr></thead>
         <tbody>${coverRows}</tbody></table>
       </div>`+coverTrendHTML+transectHTML;
+      refreshSpTrend();
     }
 
     // ══════════════════════════════════════════════════════
