@@ -1809,6 +1809,12 @@
                   title="Cancel">✕</button>
               </div>
               <div class="field">
+                <label>Protocol</label>
+                <select id="new-event-protocol">
+                  <option value="">— Custom / No Protocol —</option>
+                </select>
+              </div>
+              <div class="field">
                 <label>Event Name</label>
                 <input type="text" id="new-event-name" placeholder="e.g. Spring 2026 Survey">
               </div>
@@ -1853,6 +1859,28 @@
                   <input type="number" id="new-event-fh" value="40" min="1">
                 </div>
               </div>
+              <div class="field">
+                <label>Methods</label>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;">
+                  <label
+                    style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                    <input type="checkbox" id="new-event-method-cover" checked
+                      style="width:auto;accent-color:var(--accent);">
+                    Ground Cover Hits
+                  </label>
+                  <label
+                    style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                    <input type="checkbox" id="new-event-method-freq" checked
+                      style="width:auto;accent-color:var(--accent);">
+                    Frequency Quadrat
+                  </label>
+                  <label
+                    style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                    <input type="checkbox" id="new-event-method-dwr" style="width:auto;accent-color:var(--accent);">
+                    Dry Weight Rank (DWR)
+                  </label>
+                </div>
+              </div>
               <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
             </div>
           </div>
@@ -1876,6 +1904,78 @@
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
           <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
+        </div>
+        <div class="card">
+          <div class="card-title">Survey Protocols</div>
+          <div id="protocols-list" style="margin-bottom:10px;"></div>
+          <button class="btn btn-outline btn-sm" id="add-protocol-btn">＋ Add Custom Protocol</button>
+          <div id="add-protocol-form" style="display:none;margin-top:12px;">
+            <div class="field" style="margin-bottom:8px;">
+              <label>Protocol Name</label>
+              <input type="text" id="np-name" placeholder="e.g. My Field Protocol">
+            </div>
+            <div class="row2" style="margin-bottom:8px;">
+              <div class="field">
+                <label>Transects</label>
+                <input type="number" id="np-transects" value="4" min="1" max="20">
+              </div>
+              <div class="field">
+                <label>Samples / Transect</label>
+                <input type="number" id="np-samples" value="50" min="1" max="200">
+              </div>
+            </div>
+            <div class="row3" style="margin-bottom:8px;">
+              <div class="field">
+                <label>Length</label>
+                <input type="number" id="np-length" value="100" min="1">
+              </div>
+              <div class="field">
+                <label>Unit</label>
+                <select id="np-unit">
+                  <option value="m">m</option>
+                  <option value="ft">ft</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Cover Pts</label>
+                <input type="number" id="np-coverpts" value="2" min="1" max="10">
+              </div>
+            </div>
+            <div class="row2" style="margin-bottom:8px;">
+              <div class="field">
+                <label>Frame W (cm)</label>
+                <input type="number" id="np-fw" value="40" min="1">
+              </div>
+              <div class="field">
+                <label>Frame H (cm)</label>
+                <input type="number" id="np-fh" value="40" min="1">
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>Methods</label>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;">
+                <label
+                  style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                  <input type="checkbox" id="np-method-cover" checked style="width:auto;accent-color:var(--accent);">
+                  Ground Cover Hits
+                </label>
+                <label
+                  style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                  <input type="checkbox" id="np-method-freq" checked style="width:auto;accent-color:var(--accent);">
+                  Frequency Quadrat
+                </label>
+                <label
+                  style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                  <input type="checkbox" id="np-method-dwr" style="width:auto;accent-color:var(--accent);">
+                  Dry Weight Rank (DWR)
+                </label>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm" id="cancel-add-protocol-btn">Cancel</button>
+              <button class="btn btn-primary btn-sm" id="save-protocol-btn" style="flex:1;">Save Protocol</button>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-title">Collection Settings</div>
@@ -1942,8 +2042,19 @@
     <div id="panel-sample-map"></div>
     <div id="sample-panel-body">
 
+      <!-- Ground cover -->
+      <div class="card" id="panel-cover-card">
+        <div class="card-title">
+          Ground Cover Hits
+          <span id="cover-pts-badge" class="badge">2 pts / sample</span>
+        </div>
+        <div id="cover-hit-progress"></div>
+        <div class="cover-grid" id="cover-grid"></div>
+        <div id="hit-log" class="hit-log"></div>
+      </div>
+
       <!-- Frequency Quadrat -->
-      <div class="card">
+      <div class="card" id="panel-freq-card">
         <div class="card-title">Frequency Quadrat
           <span style="display:flex;gap:6px;align-items:center;">
             <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
@@ -1960,15 +2071,26 @@
         <div id="species-chips" class="species-chips"></div>
       </div>
 
-      <!-- Ground cover -->
-      <div class="card">
-        <div class="card-title">
-          Ground Cover Hits
-          <span id="cover-pts-badge" class="badge">2 pts / sample</span>
+      <!-- Dry Weight Rank (DWR) -->
+      <div class="card" id="panel-dwr-card">
+        <div class="card-title">Dry Weight Rank (DWR)
+          <span style="display:flex;gap:6px;align-items:center;">
+            <button class="seen-toggle-btn" id="dwr-abc-btn" title="Sort alphabetically">ABC</button>
+            <span id="dwr-count-badge" class="badge">0/3 species</span>
+          </span>
         </div>
-        <div id="cover-hit-progress"></div>
-        <div class="cover-grid" id="cover-grid"></div>
-        <div id="hit-log" class="hit-log"></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Select the top 3 species by estimated dry
+          weight in this frame.</div>
+        <div id="dwr-search-wrap" style="margin-bottom:10px;">
+          <input type="text" id="dwr-input" placeholder="Search species (max 3)…" autocomplete="off" autocorrect="off"
+            spellcheck="false">
+          <button id="dwr-clear" style="display:none;">✕</button>
+        </div>
+        <div id="dwr-dropdown"
+          style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-bottom:10px;">
+        </div>
+        <div id="dwr-seen-section"></div>
+        <div id="dwr-chips" style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;"></div>
       </div>
 
     </div>
@@ -2057,7 +2179,7 @@
     //  INDEXEDDB
     // ══════════════════════════════════════════════════════
     const DB_NAME='ecoplot2';
-    const DB_VER=4;
+    const DB_VER=5;
 
     function openDB() {
       return new Promise((res,rej) => {
@@ -2086,6 +2208,8 @@
             const fo=db.createObjectStore('folders',{keyPath: 'id'});
             fo.createIndex('parentId','parentId',{unique: false});
           }
+          if(!db.objectStoreNames.contains('protocols'))
+            db.createObjectStore('protocols',{keyPath: 'id'});
         };
         r.onsuccess=e => res(e.target.result);
         r.onerror=e => rej(e.target.error);
@@ -2259,6 +2383,7 @@
           });
           renderSpeciesChips();
           renderSeenSpecies();
+          renderDWRSeenSpecies();
         });
       });
 
@@ -2802,15 +2927,6 @@
     // ══════════════════════════════════════════════════════
     //  COLLECT PAGE
     // ══════════════════════════════════════════════════════
-    function openNewEventForm() {
-      document.getElementById('new-event-form').style.display='';
-      document.getElementById('new-event-toggle-btn').style.display='none';
-      document.getElementById('new-event-name').focus();
-    }
-    function closeNewEventForm() {
-      document.getElementById('new-event-form').style.display='none';
-      document.getElementById('new-event-toggle-btn').style.display='';
-    }
     document.getElementById('new-event-toggle-btn').addEventListener('click',openNewEventForm);
     document.getElementById('new-event-cancel-btn').addEventListener('click',closeNewEventForm);
     async function renderCollect() {
@@ -2821,6 +2937,9 @@
 
       const allSamples=await dbGetByIndex('samples','siteId',activeSiteId);
       const allEvents=await dbGetByIndex('events','siteId',activeSiteId);
+      const allProtocols=await loadAllProtocols();
+      const protocolMap={};
+      allProtocols.forEach(p => protocolMap[p.id]=p);
       const sampleMap={};
       allSamples.forEach(s => sampleMap[s.id]=s);
       allEvents.sort((a,b) => {
@@ -2863,11 +2982,13 @@
           const pct=evTotal? Math.round(evDone/evTotal*100):0;
           const isActive=activeEventId===ev.id;
           const cfgStr=`${ev.transects||4}T × ${ev.samples||50}S · ${ev.length||100}${ev.unit||'m'} · ${ev.coverPts||2} cover pts · frame ${ev.frameW||40}×${ev.frameH||40}cm`;
+          const proto=ev.protocolId? protocolMap[ev.protocolId]:null;
+          const protoTag=proto? `<span class="badge" style="margin-left:4px;font-size:.6rem;">${esc(proto.name)}</span>`:'';
           return `
           <div class="event-item${isActive? ' active-event':''}" data-eid="${ev.id}">
             <div class="site-icon" style="font-size:1.1rem;">📅</div>
             <div class="site-meta">
-              <div class="site-name">${esc(ev.name)}</div>
+              <div class="site-name">${esc(ev.name)}${protoTag}</div>
               <div class="site-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
               <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
             </div>
@@ -2992,6 +3113,7 @@
       }
 
       document.getElementById('create-event-btn').onclick=createEvent;
+      wireProtocolFormListeners();
     }
 
     function buildTransectsHTML(eventId,sampleMap) {
@@ -3038,12 +3160,85 @@
       });
     }
 
+    // ── Protocol helpers ──
+    async function loadAllProtocols() {
+      return dbGetAll('protocols');
+    }
+
+    async function renderProtocolSelect(selectEl) {
+      const protocols=await loadAllProtocols();
+      // Keep the first "Custom" option, replace the rest
+      while(selectEl.options.length>1) selectEl.remove(1);
+      protocols.sort((a,b) => {
+        if(a.builtIn&&!b.builtIn) return -1;
+        if(!a.builtIn&&b.builtIn) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      protocols.forEach(p => {
+        const opt=document.createElement('option');
+        opt.value=p.id;
+        opt.textContent=p.name;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    async function applyProtocolToForm(protocolId) {
+      if(!protocolId) return;
+      const p=await dbGet('protocols',protocolId);
+      if(!p) return;
+      document.getElementById('new-event-name').value=p.name;
+      document.getElementById('new-event-transects').value=p.transects;
+      document.getElementById('new-event-samples').value=p.samples;
+      document.getElementById('new-event-length').value=p.length;
+      document.getElementById('new-event-unit').value=p.unit;
+      document.getElementById('new-event-coverpts').value=p.coverPts;
+      document.getElementById('new-event-fw').value=p.frameW;
+      document.getElementById('new-event-fh').value=p.frameH;
+      document.getElementById('new-event-method-cover').checked=p.methods.includes('cover');
+      document.getElementById('new-event-method-freq').checked=p.methods.includes('freq');
+      document.getElementById('new-event-method-dwr').checked=p.methods.includes('dwr');
+    }
+
+    function wireProtocolFormListeners() {
+      const sel=document.getElementById('new-event-protocol');
+      sel.onchange=async () => {
+        await applyProtocolToForm(sel.value);
+      };
+      // When any config field changes manually, reset selector to Custom
+      const configFields=['new-event-transects','new-event-samples','new-event-length',
+        'new-event-unit','new-event-coverpts','new-event-fw','new-event-fh',
+        'new-event-method-cover','new-event-method-freq','new-event-method-dwr'];
+      configFields.forEach(id => {
+        document.getElementById(id).onchange=() => {
+          if(sel.value) sel.value='';
+        };
+      });
+    }
+
+    function openNewEventForm() {
+      const form=document.getElementById('new-event-form');
+      if(form.style.display==='block') return;
+      form.style.display='block';
+      document.getElementById('new-event-toggle-btn').style.display='none';
+      renderProtocolSelect(document.getElementById('new-event-protocol'));
+    }
+
+    function closeNewEventForm() {
+      document.getElementById('new-event-form').style.display='none';
+      document.getElementById('new-event-toggle-btn').style.display='';
+    }
+
     async function createEvent() {
       const name=document.getElementById('new-event-name').value.trim()||
         `Survey ${new Date().toLocaleDateString()} `;
       const dateVal=document.getElementById('new-event-date').value||
         new Date().toISOString().slice(0,10);
       document.getElementById('new-event-date').value='';
+      const protocolId=document.getElementById('new-event-protocol').value||null;
+      const methods=[];
+      if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
+      if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
+      if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
       const ev={
         id: 'evt_'+Date.now(),siteId: activeSiteId,name,eventDate: dateVal,notes: '',
         transects: +document.getElementById('new-event-transects').value||4,
@@ -3053,17 +3248,21 @@
         coverPts: +document.getElementById('new-event-coverpts').value||2,
         frameW: +document.getElementById('new-event-fw').value||40,
         frameH: +document.getElementById('new-event-fh').value||40,
+        protocolId,methods: methods.length? methods:['cover','freq'],
         createdAt: Date.now(),syncStatus: 'pending'
       };
       await dbPut('events',ev);
       activeEventId=ev.id;
       activeEvent=ev;
       document.getElementById('new-event-name').value='';
+      // Reset protocol select to custom for next time
+      document.getElementById('new-event-protocol').value='';
       closeNewEventForm();
       updateCrumb();
       toast('Event created','ok');
       renderCollect();
     }
+
 
     function sampleId(siteId,eventId,t,s) {return `${siteId}_${eventId}_T${t}_S${s} `;}
 
@@ -3088,11 +3287,21 @@
       if(!activeEvent&&activeEventId) activeEvent=await dbGet('events',activeEventId);
       const ev=activeEvent||{transects: 4,samples: 50,length: 100,unit: 'm',frameW: 40,frameH: 40,coverPts: 2,name: ''};
 
+      // Show/hide method cards based on event protocol methods
+      const methods=ev.methods||['cover','freq'];
+      const coverCard=document.getElementById('panel-cover-card');
+      const freqCard=document.getElementById('panel-freq-card');
+      const dwrCard=document.getElementById('panel-dwr-card');
+      if(coverCard) coverCard.style.display=methods.includes('cover')? '':'none';
+      if(freqCard) freqCard.style.display=methods.includes('freq')? '':'none';
+      if(dwrCard) dwrCard.style.display=methods.includes('dwr')? '':'none';
+
       const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
       const rec=await dbGet('samples',sid);
 
       samplePanelState.species=rec?.species||[];
       samplePanelState.coverHits=rec?.coverHits||[];
+      samplePanelState.dwr=rec?.dwr||[];
 
       // Header
       const offset=Math.round((sIdx/((ev.samples||50)-1||1))*(ev.length||100));
@@ -3134,8 +3343,10 @@
       renderPanelSampleMap(tIdx,sIdx);
       renderSpeciesChips();
       renderSeenSpecies();
+      renderDWRSeenSpecies();
       renderCoverGrid();
       renderHitLog();
+      renderDWRChips();
     }
 
     async function renderPanelSampleMap(tIdx,sIdx) {
@@ -3172,13 +3383,14 @@
       const {transectIdx: t,sampleIdx: s}=samplePanelState;
       const species=JSON.parse(JSON.stringify(samplePanelState.species));
       const coverHits=JSON.parse(JSON.stringify(samplePanelState.coverHits));
-      const hasData=species.length>0||coverHits.length>0;
+      const dwr=JSON.parse(JSON.stringify(samplePanelState.dwr));
+      const hasData=species.length>0||coverHits.length>0||dwr.length>0;
       if(!force&&!hasData) return;
       const sid=sampleId(activeSiteId,activeEventId,t,s);
       await dbPut('samples',{
         id: sid,siteId: activeSiteId,eventId: activeEventId,
         transectIdx: t,sampleIdx: s,
-        species,coverHits,
+        species,coverHits,dwr,
         hasData,savedAt: Date.now(),syncStatus: 'pending'
       });
     }
@@ -3192,10 +3404,13 @@
     document.getElementById('sample-clear-btn').addEventListener('click',() => {
       samplePanelState.species=[];
       samplePanelState.coverHits=[];
+      samplePanelState.dwr=[];
       renderSpeciesChips();
       renderSeenSpecies();
+      renderDWRSeenSpecies();
       renderCoverGrid();
       renderHitLog();
+      renderDWRChips();
     });
 
     document.getElementById('sample-prev-btn').addEventListener('click',() => advanceSample(-1));
@@ -3300,6 +3515,165 @@
       document.getElementById('species-clear').style.display='none';
       speciesDrop.classList.remove('open');
     });
+
+    // ── DWR search (max 3 species) ────────────────────────────────────
+    const dwrInput=document.getElementById('dwr-input');
+    const dwrDrop=document.getElementById('dwr-dropdown');
+
+    dwrInput.addEventListener('input',() => {
+      if(!speciesDB.length) return;
+      const q=dwrInput.value.trim().toLowerCase();
+      document.getElementById('dwr-clear').style.display=q? '':'none';
+      if(q.length<2) {dwrDrop.style.display='none'; dwrDrop.innerHTML=''; return;}
+      const results=speciesDB.filter(p =>
+        p[0].toLowerCase().includes(q)||
+        p[1].toLowerCase().includes(q)||
+        p[2].toLowerCase().includes(q)
+      ).slice(0,30);
+      if(!results.length) {dwrDrop.style.display='none'; return;}
+      dwrDrop.innerHTML=results.map(p => {
+        const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
+        const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
+        return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;">
+          <div>
+            <div class="species-common" style="font-weight:600;">${esc(p[1])}</div>
+            <div class="species-sci" style="font-size:.75rem;color:var(--muted);">${esc(p[2])} <span style="font-style:normal;color:var(--dim);">[${p[0]}]</span></div>
+          </div>
+          <span class="species-native ${nCls}" style="font-size:.75rem;">${nLbl}</span>
+        </div>`;
+      }).join('');
+      dwrDrop.style.display='block';
+
+      dwrDrop.querySelectorAll('.species-opt').forEach(opt => {
+        opt.addEventListener('click',() => {
+          const sym=opt.dataset.sym;
+          if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
+          samplePanelState.dwr.push({
+            symbol: opt.dataset.sym,common: opt.dataset.common,
+            sci: opt.dataset.sci,native: opt.dataset.native
+          });
+          renderDWRChips();
+          renderDWRSeenSpecies();
+          dwrInput.value='';
+          document.getElementById('dwr-clear').style.display='none';
+          dwrDrop.style.display='none';
+          dwrDrop.innerHTML='';
+        });
+      });
+    });
+
+    document.getElementById('dwr-clear').addEventListener('click',() => {
+      dwrInput.value='';
+      document.getElementById('dwr-clear').style.display='none';
+      dwrDrop.style.display='none';
+    });
+
+    document.getElementById('dwr-abc-btn').addEventListener('click',() => {
+      const dwrAlphaSort=document.getElementById('dwr-abc-btn').classList.contains('active');
+      if(!dwrAlphaSort) {
+        samplePanelState.dwr.sort((a,b) => a.common.localeCompare(b.common));
+      }
+      document.getElementById('dwr-abc-btn').classList.toggle('active');
+      renderDWRChips();
+    });
+
+    function renderDWRChips() {
+      const el=document.getElementById('dwr-chips');
+      const countBadge=document.getElementById('dwr-count-badge');
+      if(countBadge) countBadge.textContent=`${samplePanelState.dwr.length}/3 species`;
+
+      el.innerHTML=samplePanelState.dwr.map((sp,idx) => {
+        const invasive=sp.native==='N';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
+          <span style="font-weight:600;min-width:20px;">${idx+1}.</span>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${esc(sp.common)}${invasive? ' <span title="Non-native" style="font-size:.75rem;">⚠️</span>':''}</div>
+            <div style="font-size:.7rem;color:var(--muted);">[${sp.symbol}]</div>
+          </div>
+          <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">✕</button>
+        </div>`;
+      }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.8rem;color:var(--muted);">No species selected yet</span>':'');
+
+      el.querySelectorAll('.dwr-remove').forEach(btn => {
+        btn.addEventListener('click',() => {
+          const idx=+btn.dataset.idx;
+          samplePanelState.dwr.splice(idx,1);
+          renderDWRChips();
+          renderDWRSeenSpecies();
+        });
+      });
+    }
+
+    async function renderDWRSeenSpecies() {
+      const sec=document.getElementById('dwr-seen-section');
+      if(!sec||!activeEventId) {if(sec) sec.innerHTML=''; return;}
+
+      const dwrSyms=new Set(samplePanelState.dwr.map(x => x.symbol));
+
+      // Event species
+      const evSamples=(await dbGetByIndex('samples','eventId',activeEventId))
+        .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx);
+      const evSeenRaw=collectSeenSpecies(evSamples);
+      const evSeen=speciesAlphaSort
+        ? [...evSeenRaw].sort((a,b) => a.common.localeCompare(b.common))
+        :evSeenRaw;
+
+      // Optional: site species
+      let siteSeen=[];
+      let siteFreq={};
+      if(showSiteSpecies) {
+        const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
+        siteSamples.forEach(s => {
+          const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
+          symsInSample.forEach(sym => {siteFreq[sym]=(siteFreq[sym]||0)+1;});
+        });
+        const siteAll=speciesAlphaSort
+          ? collectSeenSpecies(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
+          :collectSeenSpeciesByFreq(siteSamples);
+        const evSyms=new Set(evSeen.map(x => x.symbol));
+        siteSeen=siteAll.filter(x => !evSyms.has(x.symbol));
+      }
+
+      function dwrChipHTML(sp,freq) {
+        const selected=dwrSyms.has(sp.symbol);
+        const inv=sp.native==='N';
+        const cls=['seen-chip',inv? 'invasive-sp':'',selected? 'selected':''].filter(Boolean).join(' ');
+        const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
+        return `<button class="${cls}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
+          ${inv? '⚠️ ':''} ${esc(sp.common)} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>${freqBadge}
+        </button>`;
+      }
+
+      let html='';
+
+      if(evSeen.length) {
+        html+=`<div class="seen-section-hdr"><span>This Event</span></div>`;
+        html+=`<div class="seen-chips" id="seen-dwr-ev-chips">${evSeen.map(sp => dwrChipHTML(sp,null)).join('')}</div>`;
+      }
+      if(showSiteSpecies&&siteSeen.length) {
+        const siteSubLbl=speciesAlphaSort? 'a→z':'most seen first';
+        html+=`<div class="seen-section-hdr"><span>Seen at site (${siteSubLbl})</span></div>`;
+        html+=`<div class="seen-chips" id="seen-dwr-site-chips">${siteSeen.map(sp => dwrChipHTML(sp,siteFreq[sp.symbol])).join('')}</div>`;
+      }
+
+      sec.innerHTML=html;
+
+      // Wire quick-add clicks
+      sec.querySelectorAll('.seen-chip').forEach(btn => {
+        btn.addEventListener('click',() => {
+          if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
+          const sym=btn.dataset.sym;
+          samplePanelState.dwr.push({
+            symbol: btn.dataset.sym,common: btn.dataset.common,
+            sci: btn.dataset.sci,native: btn.dataset.native
+          });
+          renderDWRChips();
+          renderDWRSeenSpecies();
+          renderSpeciesChips();
+          renderSeenSpecies();
+        });
+      });
+    }
 
     document.getElementById('species-abc-btn').addEventListener('click',() => {
       speciesAlphaSort=!speciesAlphaSort;
@@ -3767,7 +4141,78 @@
       // load Collection Settings
       const iwVal=localStorage.getItem('ep_incomplete_warn');
       document.getElementById('cfg-incomplete-warn').checked=(iwVal===null||iwVal==='1');
+      // load Protocols list
+      renderProtocols();
     }
+
+    async function renderProtocols() {
+      const protocols=await loadAllProtocols();
+      protocols.sort((a,b) => {
+        if(a.builtIn&&!b.builtIn) return -1;
+        if(!a.builtIn&&b.builtIn) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      const listEl=document.getElementById('protocols-list');
+      if(!listEl) return;
+      if(!protocols.length) {listEl.innerHTML='<div style="font-size:.75rem;color:var(--muted);">No protocols.</div>'; return;}
+      listEl.innerHTML=protocols.map(p => {
+        const cfgStr=`${p.transects}T × ${p.samples}S · ${p.length}${p.unit} · ${p.frameW}×${p.frameH}cm`;
+        const methodStr=(p.methods||['cover','freq']).map(m => m==='cover'? 'Ground Cover':m==='freq'? 'Frequency Quadrat':'Dry Weight Rank').join(', ');
+        return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.82rem;font-weight:600;">${esc(p.name)}${p.builtIn? '<span class="badge" style="margin-left:4px;font-size:.6rem;">built-in</span>':''}</div>
+            <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${cfgStr}</div>
+            <div style="font-size:.65rem;color:var(--muted);">${methodStr}</div>
+          </div>
+          ${!p.builtIn? `<button class="btn btn-danger btn-sm proto-delete-btn" data-proto-id="${p.id}" title="Delete protocol" style="flex-shrink:0;">🗑</button>`:''}
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.proto-delete-btn').forEach(btn => {
+        btn.onclick=async () => {
+          const id=btn.dataset.protoId;
+          if(!confirm('Delete this custom protocol? It will no longer appear in new events.')) return;
+          await dbDelete('protocols',id);
+          renderProtocols();
+          toast('Protocol deleted','ok');
+        };
+      });
+    }
+
+    // Wire protocol card buttons
+    document.getElementById('add-protocol-btn').addEventListener('click',() => {
+      document.getElementById('add-protocol-form').style.display='block';
+      document.getElementById('add-protocol-btn').style.display='none';
+    });
+    document.getElementById('cancel-add-protocol-btn').addEventListener('click',() => {
+      document.getElementById('add-protocol-form').style.display='none';
+      document.getElementById('add-protocol-btn').style.display='';
+    });
+    document.getElementById('save-protocol-btn').addEventListener('click',async () => {
+      const name=document.getElementById('np-name').value.trim();
+      if(!name) {toast('Enter a protocol name','warn'); return;}
+      const methods=[];
+      if(document.getElementById('np-method-cover').checked) methods.push('cover');
+      if(document.getElementById('np-method-freq').checked) methods.push('freq');
+      if(document.getElementById('np-method-dwr').checked) methods.push('dwr');
+      if(!methods.length) {toast('Select at least one method','warn'); return;}
+      const p={
+        id: 'proto_custom_'+Date.now(),name,builtIn: false,
+        transects: +document.getElementById('np-transects').value||4,
+        samples: +document.getElementById('np-samples').value||50,
+        length: +document.getElementById('np-length').value||100,
+        unit: document.getElementById('np-unit').value||'m',
+        coverPts: +document.getElementById('np-coverpts').value||2,
+        frameW: +document.getElementById('np-fw').value||40,
+        frameH: +document.getElementById('np-fh').value||40,
+        methods
+      };
+      await dbPut('protocols',p);
+      document.getElementById('np-name').value='';
+      document.getElementById('add-protocol-form').style.display='none';
+      document.getElementById('add-protocol-btn').style.display='';
+      renderProtocols();
+      toast('Protocol saved','ok');
+    });
 
     function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||'',incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1'};}
 
@@ -4022,6 +4467,34 @@
         // Migrate old name
         await dbPut('folders',{...existing,name: 'Practice (Not Syncable)'});
       }
+      // Seed built-in protocols (idempotent)
+      const defaultProtocols=[
+        {
+          id: 'proto_rtr_standard',name: 'RTR Standard',builtIn: true,
+          transects: 4,samples: 50,length: 100,unit: 'm',
+          coverPts: 2,frameW: 40,frameH: 40,methods: ['cover','freq','dwr']
+        },
+        {
+          id: 'proto_freq_only',name: 'Frequency Only',builtIn: true,
+          transects: 4,samples: 50,length: 100,unit: 'm',
+          coverPts: 2,frameW: 40,frameH: 40,methods: ['freq']
+        },
+        {
+          id: 'proto_cover_only',name: 'Cover Only',builtIn: true,
+          transects: 4,samples: 50,length: 100,unit: 'm',
+          coverPts: 2,frameW: 40,frameH: 40,methods: ['cover']
+        },
+        {
+          id: 'proto_dwr_only',name: 'DWR Only',builtIn: true,
+          transects: 4,samples: 50,length: 100,unit: 'm',
+          coverPts: 2,frameW: 40,frameH: 40,methods: ['dwr']
+        },
+      ];
+      for(const p of defaultProtocols) {
+        const ep=await dbGet('protocols',p.id);
+        if(!ep) await dbPut('protocols',p);
+      }
+
       loadSpeciesDB();
       renderSiteList();
       document.getElementById('collect-no-site').style.display='';
