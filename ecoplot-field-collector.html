@@ -433,6 +433,161 @@
       transform: none;
     }
 
+    /* ── Folder browser ── */
+    #folder-nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    #folder-breadcrumb {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 3px;
+      font-size: .68rem;
+      min-width: 0;
+    }
+
+    .crumb-btn {
+      background: none;
+      border: none;
+      color: var(--accent2);
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      cursor: pointer;
+      padding: 3px 4px;
+      border-radius: 5px;
+    }
+
+    .crumb-btn:active {
+      background: var(--s3);
+    }
+
+    .crumb-sep {
+      color: var(--dim);
+      padding: 0 1px;
+    }
+
+    .crumb-current {
+      color: var(--text);
+      font-weight: 600;
+      font-size: .68rem;
+      padding: 3px 4px;
+    }
+
+    .folder-item {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+
+    .folder-item:active,
+    .folder-item:hover {
+      border-color: var(--accent2);
+      background: var(--s2);
+    }
+
+    .folder-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .folder-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .folder-name {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: .92rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .folder-sub {
+      font-size: .65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .folder-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .f-action {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: .75rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .12s;
+    }
+
+    .f-action:hover {
+      border-color: var(--accent2);
+      color: var(--text);
+    }
+
+    .f-action.del:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    #new-folder-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #new-folder-row input {
+      margin: 0;
+    }
+
+    #new-folder-row .btn {
+      flex-shrink: 0;
+      padding: 10px 14px;
+    }
+
+    .folder-location-hint {
+      font-size: .62rem;
+      color: var(--muted);
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: var(--s2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .folder-location-hint strong {
+      color: var(--accent2);
+    }
+
     /* ── Site list ── */
     .site-item {
       background: var(--s1);
@@ -742,6 +897,18 @@
       min-height: 32px;
     }
 
+    .species-chips-label {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+
     /* ── Seen-species quick-pick ── */
     .seen-section-hdr {
       display: flex;
@@ -801,6 +968,20 @@
       opacity: .35;
       cursor: default;
       pointer-events: none;
+    }
+
+    .seen-freq-badge {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 0 4px;
+      font-size: .55rem;
+      line-height: 1.4;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      vertical-align: middle;
+      opacity: .8;
     }
 
     .seen-chip.invasive-sp {
@@ -1246,10 +1427,11 @@
     }
 
     .spt-ctx {
-      font-size: .58rem;
-      color: var(--dim);
-      margin-top: 2px;
-      letter-spacing: .03em;
+      font-size: .68rem;
+      color: var(--gold);
+      font-weight: 600;
+      margin-top: 3px;
+      letter-spacing: .01em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1419,15 +1601,20 @@
               <input type="number" id="new-site-fh" value="40" min="1">
             </div>
           </div>
+          <div id="create-site-location" class="folder-location-hint">📁 Creating in: <strong>Root</strong></div>
           <button class="btn btn-primary btn-full" id="create-site-btn">＋ Create Site</button>
         </div>
 
-        <div class="card-title" style="padding:0 4px;margin-bottom:10px;">Saved Sites</div>
-        <div id="site-list">
-          <div class="empty"><span class="e-icon">🌾</span>
-            <p>No sites yet.<br>Create one above.</p>
-          </div>
+        <div id="folder-nav-bar">
+          <div id="folder-breadcrumb"></div>
+          <button class="btn btn-ghost btn-sm" id="new-folder-btn">📁 ＋ Folder</button>
         </div>
+        <div id="new-folder-row" style="display:none;">
+          <input type="text" id="new-folder-input" placeholder="Folder name…">
+          <button class="btn btn-outline btn-sm" id="new-folder-confirm">Add</button>
+          <button class="btn btn-ghost btn-sm" id="new-folder-cancel">✕</button>
+        </div>
+        <div id="site-list"></div>
 
       </div>
 
@@ -1511,10 +1698,13 @@
     <div id="panel-sample-map"></div>
     <div id="sample-panel-body">
 
-      <!-- Quadrat species -->
+      <!-- Frequency Quadrat -->
       <div class="card">
-        <div class="card-title">Quadrat Species
-          <span id="quadrat-size-badge" class="badge">40×40 cm</span>
+        <div class="card-title">Frequency Quadrat
+          <span style="display:flex;gap:6px;align-items:center;">
+            <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
+            <span id="quadrat-size-badge" class="badge">40×40 cm</span>
+          </span>
         </div>
         <div id="species-search-wrap">
           <input type="text" id="species-input" placeholder="Search USDA plant name or symbol…" autocomplete="off"
@@ -1576,7 +1766,7 @@
     //  INDEXEDDB
     // ══════════════════════════════════════════════════════
     const DB_NAME='ecoplot2';
-    const DB_VER=3;
+    const DB_VER=4;
 
     function openDB() {
       return new Promise((res,rej) => {
@@ -1600,6 +1790,10 @@
           if(!db.objectStoreNames.contains('events')) {
             const ev=db.createObjectStore('events',{keyPath: 'id'});
             ev.createIndex('siteId','siteId',{unique: false});
+          }
+          if(!db.objectStoreNames.contains('folders')) {
+            const fo=db.createObjectStore('folders',{keyPath: 'id'});
+            fo.createIndex('parentId','parentId',{unique: false});
           }
         };
         r.onsuccess=e => res(e.target.result);
@@ -1674,12 +1868,31 @@
     // Empty until user imports a CSV via the Sync tab
     let speciesDB=[];
     let showSiteSpecies=true;
+    let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
 
     // Build a deduplicated species list [{symbol,common,sci,native}] from a set of samples
+    // Preserves first-seen order (no alpha sort)
     function collectSeenSpecies(sampleList) {
       const map={};
-      sampleList.forEach(s => (s.species||[]).forEach(sp => {if(!map[sp.symbol]) map[sp.symbol]=sp;}));
-      return Object.values(map).sort((a,b) => a.common.localeCompare(b.common));
+      const order=[];
+      sampleList.forEach(s => (s.species||[]).forEach(sp => {
+        if(!map[sp.symbol]) {map[sp.symbol]=sp; order.push(sp.symbol);}
+      }));
+      return order.map(sym => map[sym]);
+    }
+
+    // Returns species sorted by frequency (# samples they appear in), desc
+    function collectSeenSpeciesByFreq(sampleList) {
+      const map={};
+      const freq={};
+      sampleList.forEach(s => {
+        const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
+        symsInSample.forEach(sym => {
+          freq[sym]=(freq[sym]||0)+1;
+        });
+        (s.species||[]).forEach(sp => {if(!map[sp.symbol]) map[sp.symbol]=sp;});
+      });
+      return Object.values(map).sort((a,b) => (freq[b.symbol]||0)-(freq[a.symbol]||0)||a.common.localeCompare(b.common));
     }
 
     async function renderSeenSpecies() {
@@ -1688,25 +1901,38 @@
 
       const currentSyms=new Set(samplePanelState.species.map(x => x.symbol));
 
-      // Always: event species
-      const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
-      const evSeen=collectSeenSpecies(evSamples);
+      // Always: event species — sorted by collection order so first-seen order is T1S1 → T1S2 → …
+      const evSamples=(await dbGetByIndex('samples','eventId',activeEventId))
+        .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx);
+      const evSeenRaw=collectSeenSpecies(evSamples);
+      const evSeen=speciesAlphaSort
+        ? [...evSeenRaw].sort((a,b) => a.common.localeCompare(b.common))
+        :evSeenRaw;
 
-      // Optional: site species (minus event species)
+      // Optional: site species (minus event species), sorted by frequency
       let siteSeen=[];
+      let siteFreq={};
       if(showSiteSpecies) {
         const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
-        const siteAll=collectSeenSpecies(siteSamples);
+        // Build freq map for badge display
+        siteSamples.forEach(s => {
+          const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
+          symsInSample.forEach(sym => {siteFreq[sym]=(siteFreq[sym]||0)+1;});
+        });
+        const siteAll=speciesAlphaSort
+          ? collectSeenSpecies(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
+          :collectSeenSpeciesByFreq(siteSamples);
         const evSyms=new Set(evSeen.map(x => x.symbol));
         siteSeen=siteAll.filter(x => !evSyms.has(x.symbol));
       }
 
-      function chipHTML(sp,greyIfAdded) {
+      function chipHTML(sp,greyIfAdded,freq) {
         const already=currentSyms.has(sp.symbol);
         const inv=sp.native==='N';
         const cls=['seen-chip',inv? 'invasive-sp':'',already&&greyIfAdded? 'already':''].filter(Boolean).join(' ');
+        const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
         return `<button class="${cls}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${already? 'disabled title="Already added"':''}>
-          ${inv? '⚠️ ':''} ${esc(sp.common)} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>
+          ${inv? '⚠️ ':''} ${esc(sp.common)} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>${freqBadge}
         </button>`;
       }
 
@@ -1714,13 +1940,14 @@
 
       if(evSeen.length) {
         html+=`<div class="seen-section-hdr"><span>This Event</span></div>`;
-        html+=`<div class="seen-chips" id="seen-ev-chips">${evSeen.map(sp => chipHTML(sp,true)).join('')}</div>`;
+        html+=`<div class="seen-chips" id="seen-ev-chips">${evSeen.map(sp => chipHTML(sp,true,null)).join('')}</div>`;
       }
       if(showSiteSpecies&&siteSeen.length) {
-        html+=`<div class="seen-section-hdr"><span>Seen at Site</span>
+        const siteSubLbl=speciesAlphaSort? 'a→z':'most seen first';
+        html+=`<div class="seen-section-hdr"><span>Seen at site (${siteSubLbl})</span>
           <button class="seen-toggle-btn active" id="site-sp-toggle">■ Hide site species</button>
         </div>`;
-        html+=`<div class="seen-chips" id="seen-site-chips">${siteSeen.map(sp => chipHTML(sp,true)).join('')}</div>`;
+        html+=`<div class="seen-chips" id="seen-site-chips">${siteSeen.map(sp => chipHTML(sp,true,siteFreq[sp.symbol])).join('')}</div>`;
       } else if(!showSiteSpecies) {
         html+=`<div class="seen-section-hdr" style="margin-top:6px;"><span></span>
           <button class="seen-toggle-btn" id="site-sp-toggle">▶ Show site species</button>
@@ -1896,6 +2123,7 @@
       const site={
         id: 'site_'+Date.now(),
         name,
+        folderId: currentFolderId,
         desc: document.getElementById('new-site-desc').value.trim(),
         transects: +document.getElementById('new-site-transects').value,
         samples: +document.getElementById('new-site-samples').value,
@@ -1921,50 +2149,133 @@
     });
 
     let showArchived=false;
+    let currentFolderId=null; // null = root
+
+    // Build the full path array [{id,name},...] from root to folderId
+    async function buildFolderPath(folderId,folders) {
+      const path=[];
+      let cur=folderId;
+      while(cur) {
+        const f=folders.find(x => x.id===cur);
+        if(!f) break;
+        path.unshift(f);
+        cur=f.parentId;
+      }
+      return path;
+    }
+
+    // Count all sites (recursively) inside a folder subtree
+    function countSitesInFolder(folderId,allFolders,allSites) {
+      const directSites=allSites.filter(s => (s.folderId||null)===folderId).length;
+      const childFolders=allFolders.filter(f => f.parentId===folderId);
+      return directSites+childFolders.reduce((sum,f) => sum+countSitesInFolder(f.id,allFolders,allSites),0);
+    }
 
     async function renderSiteList() {
+      const folders=await dbGetAll('folders');
       const allSites=await dbGetAll('sites');
-      const all=await dbGetAll('samples');
+      const allSamples=await dbGetAll('samples');
       const el=document.getElementById('site-list');
-      const active=allSites.filter(s => !s.archived);
-      const archived=allSites.filter(s => s.archived);
+
+      // ── Breadcrumb ──
+      const path=await buildFolderPath(currentFolderId,folders);
+      const bcEl=document.getElementById('folder-breadcrumb');
+      let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
+      path.forEach((f,i) => {
+        bcHTML+=`<span class="crumb-sep">›</span>`;
+        if(i===path.length-1) {
+          bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
+        } else {
+          bcHTML+=`<button class="crumb-btn" data-crumb="${f.id}">${esc(f.name)}</button>`;
+        }
+      });
+      bcEl.innerHTML=bcHTML;
+      bcEl.querySelectorAll('[data-crumb]').forEach(btn => {
+        btn.addEventListener('click',() => {
+          currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
+          updateCreateLocationHint(folders);
+          renderSiteList();
+        });
+      });
+
+      // ── Location hint on create form ──
+      updateCreateLocationHint(folders,path);
+
+      // ── Sub-folders at current level ──
+      const subFolders=folders.filter(f => f.parentId===currentFolderId).sort((a,b) => {
+        // localOnly (Practice) always at bottom
+        if(a.localOnly&&!b.localOnly) return 1;
+        if(!a.localOnly&&b.localOnly) return -1;
+        return a.name.localeCompare(b.name);
+      });
+      let html='';
+
+      subFolders.forEach(f => {
+        const subCount=folders.filter(sf => sf.parentId===f.id).length;
+        const siteCount=countSitesInFolder(f.id,folders,allSites);
+        const isLocal=f.localOnly===true;
+        const icon=isLocal? '🧪':'📁';
+        const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
+        const actions=isLocal
+          ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
+          :`<div class="folder-actions">
+              <button class="f-action" data-rename-folder="${f.id}" title="Rename">✏️</button>
+              <button class="f-action del" data-del-folder="${f.id}" title="Delete">✕</button>
+             </div>`;
+        html+=`<div class="folder-item" data-folder-id="${f.id}">
+          <div class="folder-icon">${icon}</div>
+          <div class="folder-meta">
+            <div class="folder-name">${esc(f.name)}${localBadge}</div>
+            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' · ':''}${siteCount} site${siteCount!==1? 's':''}</div>
+          </div>
+          ${actions}
+        <span class="site-arrow" style="margin-left:4px;">›</span>
+        </div>`;
+      });
+
+      // ── Sites at current level ──
+      const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
+      const active=levelSites.filter(s => !s.archived);
+      const archived=levelSites.filter(s => s.archived);
       const visible=showArchived? archived:active;
 
-      let html='';
-      if(!visible.length&&!allSites.length) {
-        html='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
-      } else if(!visible.length) {
-        html='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites.':'No active sites.')+'</p></div>';
-      } else {
-        html=visible.sort((a,b) => b.createdAt-a.createdAt).map(s => {
-          const total=s.transects*s.samples;
-          const done=all.filter(x => x.siteId===s.id&&x.hasData).length;
-          const pct=total? Math.round(done/total*100):0;
-          const isSel=activeSiteId===s.id;
-          if(s.archived) {
-            return `<div class="site-item" data-id="${s.id}" style="opacity:.55;">
-      <div class="site-icon">📦</div>
-      <div class="site-meta">
-        <div class="site-name">${esc(s.name)}</div>
-        <div class="site-sub">${done}/${total} collected · archived</div>
-      </div>
-      <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
-    </div>`;
-          }
-          return `<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
-      <div class="site-icon">🌿</div>
-      <div class="site-meta">
-        <div class="site-name">${esc(s.name)}</div>
-        <div class="site-sub">${s.transects} transects · ${s.samples} samples · ${done}/${total} collected (${pct}%)</div>
-        <div class="prog-bar-wrap" style="margin-top:6px;margin-bottom:0;height:3px;">
-          <div class="prog-bar" style="width:${pct}%"></div>
-        </div>
-      </div>
-      <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
-      <span class="site-arrow">›</span>
-    </div>`;
-        }).join('');
+      if(!visible.length&&!subFolders.length) {
+        if(!allSites.length&&!folders.length) {
+          html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
+        } else {
+          html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
+        }
       }
+
+      visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
+        const total=s.transects*s.samples;
+        const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
+        const pct=total? Math.round(done/total*100):0;
+        const isSel=activeSiteId===s.id;
+        if(s.archived) {
+          html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
+            <div class="site-icon">📦</div>
+            <div class="site-meta">
+              <div class="site-name">${esc(s.name)}</div>
+              <div class="site-sub">${done}/${total} collected · archived</div>
+            </div>
+            <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
+          </div>`;
+        } else {
+          html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
+            <div class="site-icon">🌿</div>
+            <div class="site-meta">
+              <div class="site-name">${esc(s.name)}</div>
+              <div class="site-sub">${s.transects} transects · ${s.samples} samples · ${done}/${total} collected (${pct}%)</div>
+              <div class="prog-bar-wrap" style="margin-top:6px;margin-bottom:0;height:3px;">
+                <div class="prog-bar" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
+            <span class="site-arrow">›</span>
+          </div>`;
+        }
+      });
 
       // Archive toggle footer
       if(archived.length||showArchived) {
@@ -1977,6 +2288,20 @@
 
       el.innerHTML=html;
 
+      // ── Wire folder clicks ──
+      el.querySelectorAll('[data-folder-id]').forEach(item => {
+        item.addEventListener('click',e => {
+          const renBtn=e.target.closest('[data-rename-folder]');
+          const delBtn=e.target.closest('[data-del-folder]');
+          if(renBtn) {e.stopPropagation(); promptRenameFolder(renBtn.dataset.renameFolder,folders); return;}
+          if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
+          currentFolderId=item.dataset.folderId;
+          updateCreateLocationHint(folders);
+          renderSiteList();
+        });
+      });
+
+      // ── Wire site clicks ──
       el.querySelectorAll('.site-item').forEach(item => {
         item.addEventListener('click',e => {
           const delBtn=e.target.closest('[data-del]');
@@ -1991,20 +2316,93 @@
       if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList();});
     }
 
+    async function updateCreateLocationHint(folders,path) {
+      if(!path) path=await buildFolderPath(currentFolderId,folders||await dbGetAll('folders'));
+      const label=path.length? path.map(f => esc(f.name)).join(' › '):'Root';
+      const hint=document.getElementById('create-site-location');
+      if(hint) hint.innerHTML=`📁 Creating in: <strong>${label}</strong>`;
+    }
+
+    // ── New folder wiring ──
+    document.getElementById('new-folder-btn').addEventListener('click',() => {
+      document.getElementById('new-folder-row').style.display='flex';
+      document.getElementById('new-folder-input').focus();
+    });
+    document.getElementById('new-folder-cancel').addEventListener('click',() => {
+      document.getElementById('new-folder-row').style.display='none';
+      document.getElementById('new-folder-input').value='';
+    });
+    async function confirmNewFolder() {
+      const name=document.getElementById('new-folder-input').value.trim();
+      if(!name) return;
+      await dbPut('folders',{id: 'folder_'+Date.now(),name,parentId: currentFolderId,createdAt: Date.now()});
+      document.getElementById('new-folder-row').style.display='none';
+      document.getElementById('new-folder-input').value='';
+      renderSiteList();
+    }
+    document.getElementById('new-folder-confirm').addEventListener('click',confirmNewFolder);
+    document.getElementById('new-folder-input').addEventListener('keydown',e => {
+      if(e.key==='Enter') confirmNewFolder();
+      if(e.key==='Escape') document.getElementById('new-folder-cancel').click();
+    });
+
+    async function promptRenameFolder(folderId,folders) {
+      const folder=folders.find(f => f.id===folderId);
+      if(!folder) return;
+      // inline rename: replace folder name with an input temporarily
+      const nameEl=document.querySelector(`[data-folder-id="${folderId}"] .folder-name`);
+      if(!nameEl) return;
+      const old=folder.name;
+      nameEl.innerHTML=`<input type="text" id="rename-folder-input" value="${esc(old)}" style="background:var(--s3);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;color:var(--text);font-family:var(--font-ui);font-weight:700;font-size:.88rem;width:100%;">`;
+      const inp=document.getElementById('rename-folder-input');
+      inp.focus(); inp.select();
+      const save=async () => {
+        const newName=inp.value.trim();
+        if(newName&&newName!==old) {
+          folder.name=newName;
+          await dbPut('folders',folder);
+          toast('Folder renamed','ok');
+        }
+        renderSiteList();
+      };
+      inp.addEventListener('blur',save);
+      inp.addEventListener('keydown',e => {if(e.key==='Enter') inp.blur(); if(e.key==='Escape') {inp.value=old; inp.blur();} });
+    }
+
+    async function promptDeleteFolder(folderId,folders,allSites) {
+      const subFolders=folders.filter(f => f.parentId===folderId);
+      const sitesInside=allSites.filter(s => (s.folderId||null)===folderId);
+      if(subFolders.length||sitesInside.length) {
+        toast('Move or delete contents first','err'); return;
+      }
+      await dbDelete('folders',folderId);
+      toast('Folder deleted');
+      renderSiteList();
+    }
+
     function promptDelete(siteId) {
       document.getElementById('del-modal').classList.add('open');
       document.getElementById('del-confirm-btn').onclick=async () => {
-        // delete all samples for site
-        const samples=await dbGetByIndex('samples','siteId',siteId);
-        for(const s of samples) await dbDelete('samples',s.id);
-        await dbDelete('sites',siteId);
+        const site=await dbGet('sites',siteId);
+        if(site) {site.archived=true; site.syncStatus='pending'; await dbPut('sites',site);}
         if(activeSiteId===siteId) {activeSiteId=null; activeSite=null; updateCrumb(); renderCollect();}
         document.getElementById('del-modal').classList.remove('open');
-        toast('Site deleted');
+        toast('Site archived','ok');
         renderSiteList();
       };
     }
     document.getElementById('del-cancel-btn').onclick=() => document.getElementById('del-modal').classList.remove('open');
+
+    async function restoreSite(siteId) {
+      const site=await dbGet('sites',siteId);
+      if(!site) return;
+      site.archived=false;
+      site.syncStatus='pending';
+      await dbPut('sites',site);
+      toast('Site restored','ok');
+      showArchived=false;
+      renderSiteList();
+    }
 
     async function selectSite(id) {
       activeSiteId=id;
@@ -2023,7 +2421,7 @@
     function updateCrumb() {
       const el=document.getElementById('site-crumb');
       if(activeSite&&activeEvent)
-        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> · ${esc(activeEvent.name)}`;
+        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> · ${esc(activeEvent.name)} `;
       else if(activeSite)
         el.innerHTML=`<strong>${esc(activeSite.name)}</strong>`;
       else
@@ -2050,15 +2448,15 @@
       const siteTotalPer=activeSite.transects*activeSite.samples;
       const totalDone=allSamples.filter(s => s.hasData).length;
       hdr.innerHTML=`
-        <div class="card-title">${esc(activeSite.name)}
-          <span class="badge">${totalDone} collected</span>
+          <div class="card-title">${esc(activeSite.name)}
+        <span class="badge">${totalDone} collected</span>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;">
-          <span>📏 ${activeSite.transects}T × ${activeSite.samples}S</span>
-          <span>🔲 ${activeSite.frameW}×${activeSite.frameH}cm</span>
-          <span>⬤ ${activeSite.coverPts}pts</span>
-          <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
-        </div>`;
+          <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;">
+            <span>📏 ${activeSite.transects}T × ${activeSite.samples}S</span>
+            <span>🔲 ${activeSite.frameW}×${activeSite.frameH}cm</span>
+            <span>⬤ ${activeSite.coverPts}pts</span>
+            <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
+          </div>`;
 
       // Event list
       const evList=document.getElementById('event-list');
@@ -2093,9 +2491,11 @@
                 <label>Notes</label>
                 <textarea id="enotes-${ev.id}" rows="2" placeholder="Weather, observer, conditions…" style="width:100%;resize:none;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-mono);font-size:.85rem;outline:none;">${esc(ev.notes||'')}</textarea>
               </div>
-              <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}" style="margin-top:6px;">Save</button>
+              <div style="display:flex;gap:8px;margin-top:6px;">
+                <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}">Save</button>
+                <button class="btn btn-primary btn-sm event-open-btn" data-eid="${ev.id}" style="flex:1;">▶ Open Transects</button>
+              </div>
             </div>
-            <div id="tlist-${ev.id}">${buildTransectsHTML(ev.id,sampleMap)}</div>
           </div>`;
         }).join('');
 
@@ -2104,7 +2504,6 @@
           hd.addEventListener('click',() => {
             const eid=hd.dataset.eid;
             const was=activeEventId===eid;
-            // collapse current
             if(activeEventId) {
               const prev=document.getElementById('eblock-'+activeEventId);
               const prevChev=document.getElementById('echev-'+activeEventId);
@@ -2119,14 +2518,27 @@
             document.getElementById('eblock-'+eid).style.display='block';
             document.getElementById('echev-'+eid).classList.add('open');
             updateCrumb();
-            wireTransects(eid,sampleMap);
           });
         });
 
-        // Wire transects for already-open event
-        if(activeEventId&&document.getElementById('eblock-'+activeEventId)) {
-          wireTransects(activeEventId,sampleMap);
-        }
+        // "Open Transects" button — jump to first incomplete sample (or T0·S0)
+        evList.querySelectorAll('.event-open-btn').forEach(btn => {
+          btn.addEventListener('click',e => {
+            e.stopPropagation();
+            const eid=btn.dataset.eid;
+            activeEventId=eid;
+            activeEvent=allEvents.find(ev => ev.id===eid)||null;
+            updateCrumb();
+            // find first incomplete sample
+            let startT=0,startS=0;
+            outer: for(let t=0;t<activeSite.transects;t++) {
+              for(let s=0;s<activeSite.samples;s++) {
+                if(!sampleMap[sampleId(activeSiteId,eid,t,s)]?.hasData) {startT=t; startS=s; break outer;}
+              }
+            }
+            openSamplePanel(startT,startS);
+          });
+        });
 
         // Details save buttons
         evList.querySelectorAll('.event-details-save').forEach(btn => {
@@ -2161,7 +2573,7 @@
           <div class="transect-prog">${tDone}/${activeSite.samples}</div>
           <div class="transect-chevron" id="tchev-${eventId}-${t}">›</div>
         </div>
-        <div id="tsamples-${eventId}-${t}" style="display:none;"><div class="sample-grid">`;
+          <div id="tsamples-${eventId}-${t}" style="display:none;"><div class="sample-grid">`;
         for(let s=0;s<activeSite.samples;s++) {
           const rec=sampleMap[sampleId(activeSiteId,eventId,t,s)];
           html+=`<div class="sample-dot${rec?.hasData? ' complete':''}" data-t="${t}" data-s="${s}" data-eid="${eventId}">${s+1}<div class="dot-pip"></div></div>`;
@@ -2177,8 +2589,8 @@
       tListEl.querySelectorAll('.transect-header').forEach(hd => {
         hd.addEventListener('click',() => {
           const t=hd.dataset.t,eid=hd.dataset.eid;
-          const body=document.getElementById(`tsamples-${eid}-${t}`);
-          const chev=document.getElementById(`tchev-${eid}-${t}`);
+          const body=document.getElementById(`tsamples-${eid} -${t} `);
+          const chev=document.getElementById(`tchev-${eid} -${t} `);
           const open=body.style.display==='block';
           body.style.display=open? 'none':'block';
           chev.classList.toggle('open',!open);
@@ -2195,7 +2607,7 @@
 
     async function createEvent() {
       const name=document.getElementById('new-event-name').value.trim()||
-        `Survey ${new Date().toLocaleDateString()}`;
+        `Survey ${new Date().toLocaleDateString()} `;
       const dateVal=document.getElementById('new-event-date').value||
         new Date().toISOString().slice(0,10);
       document.getElementById('new-event-date').value='';
@@ -2209,7 +2621,7 @@
       renderCollect();
     }
 
-    function sampleId(siteId,eventId,t,s) {return `${siteId}_${eventId}_T${t}_S${s}`;}
+    function sampleId(siteId,eventId,t,s) {return `${siteId}_${eventId}_T${t}_S${s} `;}
 
     // ══════════════════════════════════════════════════════
     //  SAMPLE PANEL
@@ -2226,6 +2638,7 @@
       // ── FIX: always sync state so Save/advance uses the right position ──
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
+      speciesAlphaSort=false; // reset ABC toggle per sample
 
       const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
       const rec=await dbGet('samples',sid);
@@ -2235,16 +2648,16 @@
 
       // Header
       const offset=Math.round((sIdx/(activeSite.samples-1||1))*activeSite.length);
-      document.getElementById('spt-main').textContent=`T${tIdx+1}  ·  S${sIdx+1}`;
+      document.getElementById('spt-main').textContent=`T${tIdx+1}  ·  S${sIdx+1} `;
       document.getElementById('spt-sub').textContent=
         `Sample ${sIdx+1} of ${activeSite.samples}  ·  ${offset} ${activeSite.unit} along transect`;
       const evName=activeEvent?.name||(activeEventId? (await dbGet('events',activeEventId))?.name:null);
       document.getElementById('spt-ctx').textContent=
-        evName? `${esc(activeSite.name)}  ·  ${esc(evName)}`:esc(activeSite.name);
+        evName? `${esc(activeSite.name)}  ·  ${esc(evName)} `:esc(activeSite.name);
       document.getElementById('quadrat-size-badge').textContent=
         `${activeSite.frameW}×${activeSite.frameH} cm`;
       document.getElementById('cover-pts-badge').textContent=
-        `${activeSite.coverPts} pts / sample`;
+        `${activeSite.coverPts} pts/sample`;
 
       // nav buttons
       document.getElementById('sample-prev-btn').disabled=(tIdx===0&&sIdx===0);
@@ -2256,8 +2669,8 @@
       const activeDot=document.querySelector(`.sample-dot[data-eid="${activeEventId}"][data-t="${tIdx}"][data-s="${sIdx}"]`);
       if(activeDot) {
         activeDot.classList.add('current');
-        const tBody=document.getElementById(`tsamples-${activeEventId}-${tIdx}`);
-        const tChev=document.getElementById(`tchev-${activeEventId}-${tIdx}`);
+        const tBody=document.getElementById(`tsamples-${activeEventId} -${tIdx} `);
+        const tChev=document.getElementById(`tchev-${activeEventId} -${tIdx} `);
         if(tBody&&tBody.style.display!=='block') {
           tBody.style.display='block';
           tChev&&tChev.classList.add('open');
@@ -2415,14 +2828,29 @@
       speciesDrop.classList.remove('open');
     });
 
+    document.getElementById('species-abc-btn').addEventListener('click',() => {
+      speciesAlphaSort=!speciesAlphaSort;
+      if(speciesAlphaSort) {
+        // Also sort current chips in-place so insertion order becomes ABC
+        samplePanelState.species.sort((a,b) => a.common.localeCompare(b.common));
+      }
+      renderSpeciesChips(); // also calls renderSeenSpecies internally
+    });
+
     function renderSpeciesChips() {
       const el=document.getElementById('species-chips');
-      el.innerHTML=samplePanelState.species.map(sp => {
+      const abcBtn=document.getElementById('species-abc-btn');
+      if(abcBtn) abcBtn.classList.toggle('active',speciesAlphaSort);
+
+      // When ABC on, display sorted copy; chips array itself is already sorted in-place
+      const display=samplePanelState.species;
+
+      el.innerHTML=display.map(sp => {
         const invasive=sp.native==='N';
         return `<div class="species-chip${invasive? ' invasive':''}">
-      ${esc(sp.common)} <span style="opacity:.6;font-size:.6rem">[${sp.symbol}]</span>
+          ${esc(sp.common)} <span style="opacity:.6;font-size:.6rem">[${sp.symbol}]</span>
       ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
-      <button class="chip-remove" data-sym="${sp.symbol}">✕</button>
+        <button class="chip-remove" data-sym="${sp.symbol}">✕</button>
     </div>`;
       }).join('')||'<span style="font-size:.7rem;color:var(--muted);">No species added yet</span>';
       el.querySelectorAll('.chip-remove').forEach(btn => {
@@ -2451,15 +2879,15 @@
       <span>Hits recorded: ${totalHits} / ${maxHits}</span>
       <span style="color:${totalHits>=maxHits? 'var(--accent)':'var(--muted)'}">${pct}%</span>
     </div>
-    <div class="prog-bar-wrap" style="margin-bottom:10px;">
-      <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
-    </div>`;
+          <div class="prog-bar-wrap" style="margin-bottom:10px;">
+            <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
+          </div>`;
 
       document.getElementById('cover-grid').innerHTML=COVER_CATS.map(c => `
-    <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}">
-      <span class="cover-icon">${c.icon}</span>
+            <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}">
+              <span class="cover-icon">${c.icon}</span>
       ${esc(c.label)}
-      <span class="cover-count">${hitCount[c.id]||''}</span>
+        <span class="cover-count">${hitCount[c.id]||''}</span>
     </div>`).join('');
 
       document.querySelectorAll('.cover-btn').forEach(btn => {
@@ -2478,7 +2906,7 @@
     function renderHitLog() {
       const el=document.getElementById('hit-log');
       el.innerHTML=samplePanelState.coverHits.map((h,i) => `
-    <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
+          <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
       el.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click',() => {
           samplePanelState.coverHits.splice(+btn.dataset.hi,1);
@@ -2541,7 +2969,7 @@
 
       // ─ Card 1: Overview ─
       const overviewHTML=`
-      <div class="card">
+            <div class="card">
         <div class="card-title">${esc(activeSite.name)} — Overview</div>
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-val">${allFilled.length}<span style="font-size:.65rem;color:var(--muted)">/${total}</span></div><div class="stat-lbl">Samples</div></div>
@@ -2572,7 +3000,7 @@
           </tr>`;
         }).join('');
         eventTimelineHTML=`
-        <div class="card">
+          <div class="card">
           <div class="card-title">Event Timeline</div>
           <div style="overflow-x:auto;">
             <table class="trend-table"><thead><tr>
@@ -2614,10 +3042,10 @@
           const lp=evStats[evStats.length-1].evFilled.length? Math.round((evStats[evStats.length-1].spFreq[sym]||0)/evStats[evStats.length-1].evFilled.length*100):0;
           const d=lp-fp;
           const dHTML=d!==0? `<span style="font-size:.65rem;color:${d>0? (invasive? 'var(--danger)':'var(--accent)'):'var(--muted)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
-          return `<tr><td><div style="font-size:.72rem;">${esc(meta.common)}</div><div style="font-size:.58rem;color:var(--muted);font-style:italic;">${esc(meta.sci)}</div></td>${cells}<td class="ev-col">${dHTML}</td></tr>`;
+          return `<tr><td><div style="font-size:.72rem;">${esc(meta.common)}</div><div style="font-size:.58rem;color:var(--muted);font-style:italic;">${esc(meta.sci)}</div></td>${cells} <td class="ev-col">${dHTML}</td></tr>`;
         }).join('');
         speciesTrendHTML=`
-        <div class="card">
+          <div class="card">
           <div class="card-title">Species Freq by Event <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of sampled plots)</span></div>
           <div style="overflow-x:auto;"><table class="trend-table">
             <thead><tr><th>Species</th>${evHdrs}<th class="ev-col">Trend</th></tr></thead>
@@ -2652,10 +3080,10 @@
           const lp=evStats[evStats.length-1].hits? Math.round((evStats[evStats.length-1].covTotals[c.id]||0)/evStats[evStats.length-1].hits*100):0;
           const d=lp-fp;
           const dHTML=d!==0? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
-          return `<tr><td>${c.icon} ${c.label}</td>${cells}<td class="ev-col">${dHTML}</td></tr>`;
+          return `<tr><td>${c.icon} ${c.label}</td>${cells} <td class="ev-col">${dHTML}</td></tr>`;
         }).join('');
         coverTrendHTML=`
-        <div class="card">
+          <div class="card">
           <div class="card-title">Cover % by Event</div>
           <div style="overflow-x:auto;"><table class="trend-table">
             <thead><tr><th>Category</th>${evHdrs}<th class="ev-col">Trend</th></tr></thead>
@@ -2682,7 +3110,7 @@
           </tr>`;
         }).join('');
         transectHTML=`
-        <div class="card">
+          <div class="card">
           <div class="card-title">Transect Breakdown <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(all events)</span></div>
           <table class="trend-table"><thead><tr>
             <th>Transect</th><th style="text-align:center;">Samples</th><th style="text-align:center;">Richness</th><th>Top Species</th>
@@ -2691,12 +3119,12 @@
       }
 
       content.innerHTML=overviewHTML+eventTimelineHTML+`
-      <div class="card">
+          <div class="card">
         <div class="card-title">Species Frequency <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of plots, all events)</span></div>
         <table class="cover-table"><thead><tr><th>Species</th><th style="text-align:right;">Freq %</th><th style="text-align:center;">Status</th></tr></thead>
         <tbody>${speciesRows}</tbody></table>
       </div>`+speciesTrendHTML+`
-      <div class="card">
+          <div class="card">
         <div class="card-title">Ground Cover <span style="font-size:.6rem;color:var(--muted);font-weight:400;">(% of hits, all events)</span></div>
         <table class="cover-table"><thead><tr><th>Category</th><th style="text-align:right;">% of Hits</th><th style="text-align:right;">Count</th></tr></thead>
         <tbody>${coverRows}</tbody></table>
@@ -2714,23 +3142,27 @@
       const sites=await dbGetAll('sites');
       const samples=await dbGetAll('samples');
       const activeSites=sites.filter(s => !s.archived);
+      const folders=await dbGetAll('folders');
       const archivedIds=new Set(sites.filter(s => s.archived).map(s => s.id));
-      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!archivedIds.has(x.siteId)).length;
+      const localOnlyIds=getLocalOnlySiteIds(folders,sites);
+      const excludedIds=new Set([...archivedIds,...localOnlyIds]);
+      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!excludedIds.has(x.siteId)).length;
       document.getElementById('pending-badge').textContent=`${pending} pending`;
 
       const rows=activeSites.map(site => {
+        const isLocal=localOnlyIds.has(site.id);
         const sTotal=site.transects*site.samples;
         const sDone=samples.filter(x => x.siteId===site.id&&x.hasData).length;
         const sPend=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='pending').length;
         const sSynced=samples.filter(x => x.siteId===site.id&&x.syncStatus==='synced').length;
         return `<div class="sync-status-row">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}</div>
-        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected · ${sPend} pending · ${sSynced} synced</div>
+        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${isLocal? ' <span style="font-size:.6rem;color:var(--gold);">🧪 local only</span>':''}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' · not synced':` · ${sPend} pending · ${sSynced} synced`}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
-        ${sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
-        ${sSynced>0? `<div class="status-dot sd-synced" title="Synced"></div>`:''}
+        ${!isLocal&&sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
+        ${!isLocal&&sSynced>0? `<div class="status-dot sd-synced" title="Synced"></div>`:''}
       </div>
     </div>`;
       }).join('')||'<div class="empty"><span class="e-icon">📡</span><p>No sites created yet.</p></div>';
@@ -2741,6 +3173,17 @@
 
     function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||''};}
 
+    // Returns a Set of siteIds that live inside localOnly folders (never synced)
+    function getLocalOnlySiteIds(folders,sites) {
+      const localFolderIds=new Set();
+      const queue=folders.filter(f => f.localOnly).map(f => f.id);
+      while(queue.length) {
+        const fid=queue.shift();
+        localFolderIds.add(fid);
+        folders.filter(f => f.parentId===fid).forEach(f => queue.push(f.id));
+      }
+      return new Set(sites.filter(s => localFolderIds.has(s.folderId)).map(s => s.id));
+    }
     document.getElementById('save-cfg-btn').addEventListener('click',() => {
       localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
       localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
@@ -2752,8 +3195,11 @@
       if(!url) {toast('Set Azure URL first','err'); return;}
       const samples=await dbGetAll('samples');
       const sites=await dbGetAll('sites');
+      const folders=await dbGetAll('folders');
       const archivedSiteIds=new Set(sites.filter(s => s.archived).map(s => s.id));
-      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!archivedSiteIds.has(x.siteId));
+      const localOnlySiteIds=getLocalOnlySiteIds(folders,sites);
+      const excludedSiteIds=new Set([...archivedSiteIds,...localOnlySiteIds]);
+      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!excludedSiteIds.has(x.siteId));
       if(!pending.length) {toast('Nothing to sync'); return;}
 
       const btn=document.getElementById('sync-btn');
@@ -2789,8 +3235,8 @@
 
       btn.textContent='↑ Sync All Pending';
       renderSync();
-      if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''}`,'ok');
-      else toast(`${ok} synced, ${fail} failed`,'err');
+      if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''} `,'ok');
+      else toast(`${ok} synced,${fail} failed`,'err');
     });
 
     // ══════════════════════════════════════════════════════
@@ -2811,9 +3257,23 @@
     // ══════════════════════════════════════════════════════
     //  INIT
     // ══════════════════════════════════════════════════════
-    loadSpeciesDB();
-    renderSiteList();
-    document.getElementById('collect-no-site').style.display='';
+    async function init() {
+      // Ensure the local-only practice folder always exists
+      const existing=await dbGet('folders','folder_local_practice');
+      if(!existing) {
+        await dbPut('folders',{
+          id: 'folder_local_practice',
+          name: 'Practice (Local Only)',
+          parentId: null,
+          localOnly: true,
+          createdAt: 0
+        });
+      }
+      loadSpeciesDB();
+      renderSiteList();
+      document.getElementById('collect-no-site').style.display='';
+    }
+    init();
 
     // ── Service Worker registration ──
     if('serviceWorker' in navigator) {
