@@ -1578,6 +1578,29 @@
       text-overflow: ellipsis;
     }
 
+    .transect-jump-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .transect-jump-label {
+      font-size: .62rem;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .transect-jump-sel {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: .7rem;
+      min-width: 72px;
+    }
+
     /* ── Panel sample mini-map ── */
     #panel-sample-map {
       background: var(--s1);
@@ -1688,7 +1711,7 @@
         <span class="tab-icon">🗺</span>Map
       </div>
       <div class="nav-tab" data-page="sync">
-        <span class="tab-icon">☁️</span>Sync
+        <span class="tab-icon">🧰</span>Setup
       </div>
     </div>
 
@@ -1727,6 +1750,12 @@
             <div class="field">
               <label>Description</label>
               <input type="text" id="new-site-desc" placeholder="e.g. North slope, riparian buffer">
+            </div>
+            <div class="field">
+              <label>Default Protocol</label>
+              <select id="new-site-protocol">
+                <option value="">— None —</option>
+              </select>
             </div>
             <div class="row2">
               <div class="field">
@@ -1908,6 +1937,8 @@
         <div class="card">
           <div class="card-title">Survey Protocols</div>
           <div id="protocols-list" style="margin-bottom:10px;"></div>
+          <button class="btn btn-outline btn-sm" id="import-protocol-btn">📂 Import protocol (.vgsp/.xml)</button>
+          <input type="file" id="protocol-file-input" accept=".vgsp,.xml,.txt" style="display:none;">
           <button class="btn btn-outline btn-sm" id="add-protocol-btn">＋ Add Custom Protocol</button>
           <div id="add-protocol-form" style="display:none;margin-top:12px;">
             <div class="field" style="margin-bottom:8px;">
@@ -2034,9 +2065,17 @@
         <div class="spt-sub" id="spt-sub"></div>
         <div class="spt-ctx" id="spt-ctx"></div>
       </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" id="sample-prev-btn">◀ Prev</button>
-        <button class="btn btn-ghost btn-sm" id="sample-next-btn">Next ▶</button>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" id="sample-prev-btn">◀ Prev</button>
+          <button class="btn btn-ghost btn-sm" id="sample-next-btn">Next ▶</button>
+        </div>
+        <div class="transect-jump-wrap" id="transect-jump-wrap" style="display:none;">
+          <span class="transect-jump-label">Transect</span>
+          <button class="btn btn-ghost btn-sm" id="transect-prev-btn" title="Previous transect">◀</button>
+          <select id="transect-jump-select" class="transect-jump-sel" aria-label="Jump to transect"></select>
+          <button class="btn btn-ghost btn-sm" id="transect-next-btn" title="Next transect">▶</button>
+        </div>
       </div>
     </div>
     <div id="panel-sample-map"></div>
@@ -2065,6 +2104,11 @@
           <input type="text" id="species-input" placeholder="Search USDA plant name or symbol…" autocomplete="off"
             autocorrect="off" spellcheck="false">
           <button id="species-clear" style="display:none;">✕</button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin:6px 0 8px 0;">
+          <button class="seen-toggle-btn" id="species-none-btn"
+            title="Record that no species were present in this frame" style="border-color:#d19b1f;color:#d19b1f;">None
+            in frame</button>
         </div>
         <div id="species-dropdown"></div>
         <div id="species-seen-section"></div>
@@ -2160,11 +2204,33 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="protocol-preview-modal">
+    <div class="modal">
+      <div class="modal-title">Import Protocol?</div>
+      <div id="protocol-preview-body" style="font-size:.75rem;color:var(--muted);margin-bottom:16px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="protocol-preview-cancel-btn">Cancel</button>
+        <button class="btn btn-primary btn-full" id="protocol-preview-confirm-btn">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="protocol-preview-modal">
+    <div class="modal">
+      <div class="modal-title">Import Protocol?</div>
+      <div id="protocol-preview-body" style="font-size:.75rem;color:var(--muted);margin-bottom:16px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="protocol-preview-cancel-btn">Cancel</button>
+        <button class="btn btn-primary btn-full" id="protocol-preview-confirm-btn">Import</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
   <script>
     // ══════════════════════════════════════════════════════
-    //  USDA PLANT DATABASE — removed, import via CSV on Sync tab
+    //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const USDA_PLANTS=[];
     const COVER_CATS=[
@@ -2174,6 +2240,40 @@
       {id: "woody_litter",label: "Woody Litter",icon: "🪵"},
       {id: "live_basal",label: "Live Basal Veg",icon: "🌿"},
     ];
+
+    function coverIconForLabel(label) {
+      const s=String(label||'').toLowerCase();
+      if(s.includes('bare')) return '🟤';
+      if(s.includes('rock')) return '⬛';
+      if(s.includes('woody')||s.includes('wood')) return '🪵';
+      if(s.includes('litter')) return '🍂';
+      if(s.includes('veg')||s.includes('vegetation')||s.includes('basal')) return '🌿';
+      if(s.includes('gravel')) return '🪨';
+      return '•';
+    }
+
+    function getCoverCatsForEvent(ev) {
+      if(Array.isArray(ev?.coverCats)&&ev.coverCats.length) return ev.coverCats;
+      return COVER_CATS;
+    }
+
+    function protocolPreviewHTML(p) {
+      const methods=(p.methods||[]).map(m => m==='cover'? 'Ground Cover':m==='freq'? 'Frequency Quadrat':'Dry Weight Rank').join(', ')||'None';
+      const coverCatText=Array.isArray(p.coverCats)&&p.coverCats.length
+        ? `${p.coverCats.length} imported categories`
+        :'default cover categories';
+      return `
+        <div style="font-size:.9rem;color:var(--text);font-weight:600;margin-bottom:6px;">${esc(p.name)}</div>
+        ${p.description? `<div style="margin-bottom:8px;">${esc(p.description)}</div>`:''}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div><strong>${p.transects}</strong> transects</div>
+          <div><strong>${p.samples}</strong> samples / transect</div>
+          <div><strong>${p.length}${p.unit}</strong> transect length</div>
+          <div><strong>${p.frameW}×${p.frameH} cm</strong> frame</div>
+        </div>
+        <div style="margin-bottom:4px;">Methods: ${esc(methods)}</div>
+        <div>Cover categories: ${esc(coverCatText)}</div>`;
+    }
 
     // ══════════════════════════════════════════════════════
     //  INDEXEDDB
@@ -2280,11 +2380,16 @@
     // ══════════════════════════════════════════════════════
     //  SPECIES DATABASE
     // ══════════════════════════════════════════════════════
-    // Empty until user imports a CSV via the Sync tab
+    // Empty until user imports a CSV via the Setup tab
     let speciesDB=[];
     let showSiteSpecies=true;
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let spTrendState={sortCol: 'overall',sortDir: 'desc',groupBy: ''};  // persists across tab switches
+    const USDA_SPECIES_METHODS=[
+      {key: 'species',badge: 'freq'},
+      {key: 'dwr',badge: 'dwr'},
+    ];
+    const USDA_SPECIES_METHOD_KEYS=USDA_SPECIES_METHODS.map(m => m.key);
 
     // Build a deduplicated species list [{symbol,common,sci,native}] from a set of samples
     // Preserves first-seen order (no alpha sort)
@@ -2295,6 +2400,73 @@
         if(!map[sp.symbol]) {map[sp.symbol]=sp; order.push(sp.symbol);}
       }));
       return order.map(sym => map[sym]);
+    }
+
+    // Collect species from BOTH frequency (species) and DWR (dwr) arrays across all event samples
+    // Returns deduplicated list in order of first appearance
+    function collectEventSpeciesUnified(sampleList) {
+      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
+    }
+
+    function collectSeenSpeciesByMethods(sampleList,methodKeys) {
+      const map={};
+      const order=[];
+      sampleList.forEach(s => {
+        methodKeys.forEach(key => {
+          (s[key]||[]).forEach(sp => {
+            if(!map[sp.symbol]) {map[sp.symbol]=sp; order.push(sp.symbol);}
+          });
+        });
+      });
+      return order.map(sym => map[sym]);
+    }
+
+    function collectSeenSpeciesByFreqMethods(sampleList,methodKeys) {
+      const map={};
+      const freq={};
+      sampleList.forEach(s => {
+        const symsInSample=new Set();
+        methodKeys.forEach(key => {
+          (s[key]||[]).forEach(sp => {
+            symsInSample.add(sp.symbol);
+            if(!map[sp.symbol]) map[sp.symbol]=sp;
+          });
+        });
+        symsInSample.forEach(sym => {
+          freq[sym]=(freq[sym]||0)+1;
+        });
+      });
+      return Object.values(map).sort((a,b) => (freq[b.symbol]||0)-(freq[a.symbol]||0)||a.common.localeCompare(b.common));
+    }
+
+    function buildSpeciesFreqMapByMethods(sampleList,methodKeys) {
+      const freq={};
+      sampleList.forEach(s => {
+        const symsInSample=new Set();
+        methodKeys.forEach(key => {
+          (s[key]||[]).forEach(sp => symsInSample.add(sp.symbol));
+        });
+        symsInSample.forEach(sym => {
+          freq[sym]=(freq[sym]||0)+1;
+        });
+      });
+      return freq;
+    }
+
+    function speciesMethodBadgesForSymbol(sampleList,symbol,methods=USDA_SPECIES_METHODS) {
+      return methods
+        .filter(m => sampleList.some(s => (s[m.key]||[]).some(x => x.symbol===symbol)))
+        .map(m => m.badge);
+    }
+
+    // Site/event seen list for USDA methods, preserving first-seen order
+    function collectSeenSpeciesUnified(sampleList) {
+      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
+    }
+
+    // Site/event seen list for USDA methods sorted by per-sample frequency, desc
+    function collectSeenSpeciesByFreqUnified(sampleList) {
+      return collectSeenSpeciesByFreqMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
     }
 
     // Returns species sorted by frequency (# samples they appear in), desc
@@ -2315,31 +2487,23 @@
       const sec=document.getElementById('species-seen-section');
       if(!sec||!activeEventId) {if(sec) sec.innerHTML=''; return;}
 
-      const currentSyms=new Set(samplePanelState.species.map(x => x.symbol));
-
-      // Always: event species — sorted by collection order so first-seen order is T1S1 → T1S2 → …
+      // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=(await dbGetByIndex('samples','eventId',activeEventId))
         .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx);
-      const evSeenRaw=collectSeenSpecies(evSamples);
-      const evSeen=speciesAlphaSort
-        ? [...evSeenRaw].sort((a,b) => a.common.localeCompare(b.common))
-        :evSeenRaw;
+      const unifiedCurrent=collectEventSpeciesUnified(evSamples);
 
-      // Optional: site species (minus event species), sorted by frequency
+      const currentSyms=new Set(samplePanelState.species.map(x => x.symbol));
+
+      // Optional: site species (USDA methods), sorted by frequency
       let siteSeen=[];
       let siteFreq={};
       if(showSiteSpecies) {
         const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
-        // Build freq map for badge display
-        siteSamples.forEach(s => {
-          const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
-          symsInSample.forEach(sym => {siteFreq[sym]=(siteFreq[sym]||0)+1;});
-        });
+        siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
         const siteAll=speciesAlphaSort
-          ? collectSeenSpecies(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
-          :collectSeenSpeciesByFreq(siteSamples);
-        const evSyms=new Set(evSeen.map(x => x.symbol));
-        siteSeen=siteAll.filter(x => !evSyms.has(x.symbol));
+          ? collectSeenSpeciesUnified(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
+          :collectSeenSpeciesByFreqUnified(siteSamples);
+        siteSeen=siteAll;
       }
 
       function chipHTML(sp,greyIfAdded,freq) {
@@ -2352,11 +2516,20 @@
         </button>`;
       }
 
+      function currentPicksHTML(sp) {
+        const inv=sp.native==='N';
+        const badges=speciesMethodBadgesForSymbol(evSamples,sp.symbol);
+        const badgeStr=badges.length? ` <span style="font-size:.55rem;color:var(--muted);">(${badges.join('+')})</span>`:'';
+        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
+          ${inv? '⚠️ ':''} ${esc(sp.common)}${badgeStr} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>
+        </button>`;
+      }
+
       let html='';
 
-      if(evSeen.length) {
-        html+=`<div class="seen-section-hdr"><span>This Event</span></div>`;
-        html+=`<div class="seen-chips" id="seen-ev-chips">${evSeen.map(sp => chipHTML(sp,true,null)).join('')}</div>`;
+      if(unifiedCurrent.length) {
+        html+=`<div class="seen-section-hdr"><span>Current Picks (event-wide)</span></div>`;
+        html+=`<div class="seen-chips" id="seen-current-chips">${unifiedCurrent.map(sp => currentPicksHTML(sp)).join('')}</div>`;
       }
       if(showSiteSpecies&&siteSeen.length) {
         const siteSubLbl=speciesAlphaSort? 'a→z':'most seen first';
@@ -2372,11 +2545,28 @@
 
       sec.innerHTML=html;
 
-      // Wire quick-add clicks
-      sec.querySelectorAll('.seen-chip:not([disabled])').forEach(btn => {
+      // Wire quick-add clicks for current picks (allow duplicates via search within same array)
+      sec.querySelectorAll('#seen-current-chips .seen-chip').forEach(btn => {
+        btn.addEventListener('click',() => {
+          const sym=btn.dataset.sym;
+          if(samplePanelState.species.find(x => x.symbol===sym)) return; // Already in freq
+          samplePanelState.freqNone=false;
+          samplePanelState.species.push({
+            symbol: btn.dataset.sym,common: btn.dataset.common,
+            sci: btn.dataset.sci,native: btn.dataset.native
+          });
+          renderSpeciesChips();
+          renderSeenSpecies();
+          renderDWRSeenSpecies();
+        });
+      });
+
+      // Wire quick-add clicks for other sections
+      sec.querySelectorAll('#seen-site-chips .seen-chip:not([disabled])').forEach(btn => {
         btn.addEventListener('click',() => {
           const sym=btn.dataset.sym;
           if(samplePanelState.species.find(x => x.symbol===sym)) return;
+          samplePanelState.freqNone=false;
           samplePanelState.species.push({
             symbol: btn.dataset.sym,common: btn.dataset.common,
             sci: btn.dataset.sci,native: btn.dataset.native
@@ -2431,7 +2621,7 @@
         document.getElementById('import-species-btn').textContent='📂 Re-import CSV';
       } else {
         badge.textContent='No list loaded';
-        info.textContent='No species list loaded. Import your speciesList.csv to enable plant search.';
+        info.textContent='No species list loaded. Import your speciesList.csv on the Setup tab to enable plant search.';
       }
       updateSpeciesInputState();
     }
@@ -2441,7 +2631,7 @@
       speciesInput.disabled=!hasDB;
       speciesInput.placeholder=hasDB
         ? 'Search by symbol, common name or scientific name…'
-        :'Import a species list on the Sync tab first…';
+        :'Import a species list on the Setup tab first…';
     }
 
     async function importSpeciesCSV(file) {
@@ -2505,6 +2695,7 @@
       transectIdx: 0,
       sampleIdx: 0,
       species: [],   // [{symbol,common,sci,native}]
+      freqNone: false,
       coverHits: []  // [{id,label}]
     };
     let samplePanelOpen=false;
@@ -2554,6 +2745,7 @@
     function openNewSiteForm() {
       document.getElementById('new-site-form').style.display='';
       document.getElementById('new-site-toggle-btn').style.display='none';
+      renderSiteProtocolSelect(document.getElementById('new-site-protocol'));
       document.getElementById('new-site-name').focus();
     }
     function closeNewSiteForm() {
@@ -2597,6 +2789,7 @@
         id: 'site_'+Date.now(),
         name,
         folderId: currentFolderId,
+        protocolId: document.getElementById('new-site-protocol').value||null,
         desc: document.getElementById('new-site-desc').value.trim(),
         lat: document.getElementById('new-site-lat').value.trim()||null,
         lng: document.getElementById('new-site-lng').value.trim()||null,
@@ -2613,6 +2806,7 @@
         // reset form
         ['new-site-name','new-site-desc','new-site-lat','new-site-lng','new-site-elev','new-site-slope'].forEach(id => document.getElementById(id).value='');
         document.getElementById('new-site-aspect').value='';
+        document.getElementById('new-site-protocol').value='';
         document.getElementById('new-site-type').value='None';
         document.getElementById('new-site-status').value='Active';
         closeNewSiteForm();
@@ -3006,6 +3200,13 @@
                 <label>Date</label>
                 <input type="date" id="edate-${ev.id}" value="${ev.eventDate||''}">
               </div>
+              <div class="field" style="margin-bottom:8px;">
+                <label>Protocol</label>
+                <select id="eproto-${ev.id}">
+                  <option value="">— Keep current / custom —</option>
+                  ${sortProtocolsForDisplay(allProtocols).map(p => `<option value="${p.id}"${ev.protocolId===p.id? ' selected':''}>${esc(p.name)}</option>`).join('')}
+                </select>
+              </div>
               <div class="row2" style="margin-bottom:8px;">
                 <div class="field">
                   <label>Transects</label>
@@ -3023,6 +3224,7 @@
               <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:6px 8px;background:var(--s2);border-radius:6px;">${cfgStr}</div>
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-ghost btn-sm" data-close-eid="${ev.id}">Cancel</button>
+                <button class="btn btn-ghost btn-sm event-apply-protocol-btn" data-eid="${ev.id}">Apply Protocol</button>
                 <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}" style="flex:1;">Save</button>
                 <button class="btn btn-danger btn-sm event-delete-btn" data-del-eid="${ev.id}" title="Delete event">🗑</button>
               </div>
@@ -3090,6 +3292,22 @@
           });
         });
 
+        // Apply protocol button
+        evList.querySelectorAll('.event-apply-protocol-btn').forEach(btn => {
+          btn.addEventListener('click',async e => {
+            e.stopPropagation();
+            const eid=btn.dataset.eid;
+            const protocolId=document.getElementById('eproto-'+eid).value;
+            if(!protocolId) {toast('Select a protocol first','warn'); return;}
+            const ev=allEvents.find(x => x.id===eid);
+            if(!ev) return;
+            await applyProtocolToEvent(ev,protocolId);
+            await dbPut('events',ev);
+            toast('Protocol applied','ok');
+            renderCollect();
+          });
+        });
+
         // Save button
         evList.querySelectorAll('.event-details-save').forEach(btn => {
           btn.addEventListener('click',async e => {
@@ -3105,6 +3323,7 @@
             const newS=parseInt(document.getElementById('esamples-'+eid).value)||ev.samples||50;
             ev.transects=newT;
             ev.samples=newS;
+            ev.protocolId=document.getElementById('eproto-'+eid).value||null;
             await dbPut('events',ev);
             toast('Saved','ok');
             renderCollect();
@@ -3165,15 +3384,216 @@
       return dbGetAll('protocols');
     }
 
+    function sortProtocolsForDisplay(protocols) {
+      return [...protocols].sort((a,b) => {
+        if(!!a.builtIn!==!!b.builtIn) return a.builtIn? 1:-1;
+        const aImported=!!a.importedAt;
+        const bImported=!!b.importedAt;
+        if(aImported!==bImported) return aImported? -1:1;
+        if(aImported&&bImported&&a.importedAt!==b.importedAt) return b.importedAt-a.importedAt;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+    }
+
+    async function refreshNewEventProtocolSelect() {
+      const selectEl=document.getElementById('new-event-protocol');
+      if(!selectEl) return;
+      const selected=selectEl.value;
+      await renderProtocolSelect(selectEl);
+      if(selected&&[...selectEl.options].some(opt => opt.value===selected)) {
+        selectEl.value=selected;
+      }
+    }
+
+    async function renderSiteProtocolSelect(selectEl) {
+      if(!selectEl) return;
+      const protocols=sortProtocolsForDisplay(await loadAllProtocols());
+      while(selectEl.options.length>1) selectEl.remove(1);
+      protocols.forEach(p => {
+        const opt=document.createElement('option');
+        opt.value=p.id;
+        opt.textContent=p.name;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    async function refreshSiteProtocolSelect() {
+      const selectEl=document.getElementById('new-site-protocol');
+      if(!selectEl) return;
+      const selected=selectEl.value;
+      await renderSiteProtocolSelect(selectEl);
+      if(selected&&[...selectEl.options].some(opt => opt.value===selected)) selectEl.value=selected;
+    }
+
+    function closeProtocolPreview() {
+      document.getElementById('protocol-preview-modal').classList.remove('open');
+      document.getElementById('protocol-preview-confirm-btn').onclick=null;
+    }
+
+    function openProtocolPreview(protocol,onConfirm) {
+      document.getElementById('protocol-preview-body').innerHTML=protocolPreviewHTML(protocol);
+      document.getElementById('protocol-preview-modal').classList.add('open');
+      document.getElementById('protocol-preview-confirm-btn').onclick=async () => {
+        closeProtocolPreview();
+        await onConfirm();
+      };
+    }
+
+    function decodeHtmlEntities(s) {
+      const t=document.createElement('textarea');
+      t.innerHTML=String(s||'');
+      return t.value;
+    }
+
+    function fullyDecodeEntities(s,maxPasses=4) {
+      let out=String(s||'');
+      for(let i=0;i<maxPasses;i++) {
+        const next=decodeHtmlEntities(out);
+        if(next===out) break;
+        out=next;
+      }
+      return out;
+    }
+
+    function parseXmlSafe(xmlText) {
+      const parser=new DOMParser();
+      const doc=parser.parseFromString(xmlText,'text/xml');
+      if(doc.querySelector('parsererror')) return null;
+      return doc;
+    }
+
+    function firstTagText(root,tagName) {
+      const el=root.getElementsByTagName(tagName)[0];
+      return el? (el.textContent||'').trim():'';
+    }
+
+    function directChildText(node,tagName) {
+      for(const child of node.children||[]) {
+        if(child.tagName===tagName) return (child.textContent||'').trim();
+      }
+      return '';
+    }
+
+    function parseAttributeXmlToMap(xmlText) {
+      const decoded=fullyDecodeEntities(xmlText||'');
+      const doc=parseXmlSafe(decoded);
+      if(!doc) return {};
+      const out={};
+      const nodes=doc.getElementsByTagName('*');
+      for(const node of nodes) {
+        const id=directChildText(node,'ID');
+        if(!id) continue;
+        const val=directChildText(node,'Value');
+        const qual=directChildText(node,'Qualifier');
+        out[id]={value: val,qualifier: qual};
+      }
+      return out;
+    }
+
+    function parseVgspCoverCatsFromDefs(defs,targetDefPk) {
+      const categoryDefs=defs.filter(d => firstTagText(d,'DefinitionType').toLowerCase()==='categorylist');
+      if(!categoryDefs.length) return [];
+
+      const selected=categoryDefs.find(d => firstTagText(d,'DefinitionPK')===targetDefPk)||categoryDefs[0];
+      let xmlRaw=firstTagText(selected,'DefinitionXML');
+      xmlRaw=fullyDecodeEntities(xmlRaw).trim();
+      const listDoc=parseXmlSafe(xmlRaw)||parseXmlSafe(fullyDecodeEntities(xmlRaw));
+      if(!listDoc) return [];
+
+      const seen=new Set();
+      const out=[];
+      [...listDoc.getElementsByTagName('Species')].forEach(sp => {
+        const rawId=(firstTagText(sp,'PK_Species')||'').trim();
+        const id=rawId.toLowerCase();
+        const label=(firstTagText(sp,'CommonName')||firstTagText(sp,'SpeciesName')||rawId).trim();
+        if(!id||!label||seen.has(id)) return;
+        seen.add(id);
+        out.push({id,label,icon: coverIconForLabel(label)});
+      });
+
+      return out;
+    }
+
+    function parseVgspProtocol(fileText) {
+      const outer=parseXmlSafe(fileText);
+      if(!outer) throw new Error('Invalid XML');
+
+      const defs=[...outer.getElementsByTagName('Definitions')];
+      const protoDef=defs.find(d => firstTagText(d,'DefinitionType').toUpperCase()==='PROTOCOL');
+      if(!protoDef) throw new Error('No PROTOCOL definition found');
+
+      const name=firstTagText(protoDef,'DefinitionName')||'Imported Protocol';
+      const description=firstTagText(protoDef,'DefinitionDescription')||'';
+      let innerRaw=firstTagText(protoDef,'DefinitionXML');
+      innerRaw=fullyDecodeEntities(innerRaw).trim();
+      if(innerRaw.startsWith('<![CDATA[')&&innerRaw.endsWith(']]>')) {
+        innerRaw=innerRaw.slice(9,-3).trim();
+      }
+      const inner=parseXmlSafe(innerRaw)||parseXmlSafe(fullyDecodeEntities(innerRaw));
+      if(!inner) throw new Error('Could not parse inner protocol XML');
+
+      const formAttrsRaw=firstTagText(inner,'FormAttributesXML');
+      const formMap=parseAttributeXmlToMap(formAttrsRaw);
+
+      const transects=Math.max(1,parseInt((formMap.NumberOfTransects?.value)||'4',10)||4);
+      const samples=Math.max(1,parseInt((formMap.SamplesPerTransect?.value)||'50',10)||50);
+      const length=Math.max(1,parseInt((formMap.TransectLength?.value)||'100',10)||100);
+      const qual=(formMap.TransectLength?.qualifier||'').toLowerCase();
+      const unit=qual.includes('ft')||qual.includes('feet')? 'ft':'m';
+
+      const events=[...inner.getElementsByTagName('Events')];
+      const methods=[];
+      let coverPts=2;
+      let frameW=40;
+      let frameH=40;
+      let gcCategoryListPk='';
+
+      events.forEach(ev => {
+        const evName=(firstTagText(ev,'EventName')||firstTagText(ev,'ListItem')||'').toLowerCase();
+        const evAttrMap=parseAttributeXmlToMap(firstTagText(ev,'EventAttributesXML'));
+        if(evName.includes('ground cover')||evName.includes('point ground cover')) {
+          if(!methods.includes('cover')) methods.push('cover');
+          coverPts=Math.max(1,parseInt((evAttrMap.PointsPerSample?.value)||String(coverPts),10)||coverPts);
+          gcCategoryListPk=(evAttrMap.GCCategoryList?.value||'').trim()||gcCategoryListPk;
+        }
+        if(evName.includes('frequency')) {
+          if(!methods.includes('freq')) methods.push('freq');
+          frameW=Math.max(1,parseInt((evAttrMap.Quadrat1Width?.value)||String(frameW),10)||frameW);
+          frameH=Math.max(1,parseInt((evAttrMap.Quadrat1Height?.value)||String(frameH),10)||frameH);
+        }
+        if(evName.includes('dwr')) {
+          if(!methods.includes('dwr')) methods.push('dwr');
+          frameW=Math.max(1,parseInt((evAttrMap.Quadrat1Width?.value)||String(frameW),10)||frameW);
+          frameH=Math.max(1,parseInt((evAttrMap.Quadrat1Height?.value)||String(frameH),10)||frameH);
+        }
+      });
+
+      if(!methods.length) methods.push('cover','freq');
+      const coverCats=parseVgspCoverCatsFromDefs(defs,gcCategoryListPk);
+
+      return {
+        id: 'proto_vgsp_'+Date.now(),
+        name,
+        description,
+        builtIn: false,
+        source: 'vgsp',
+        transects,
+        samples,
+        length,
+        unit,
+        coverPts,
+        frameW,
+        frameH,
+        methods,
+        coverCats,
+        importedAt: Date.now()
+      };
+    }
+
     async function renderProtocolSelect(selectEl) {
-      const protocols=await loadAllProtocols();
+      const protocols=sortProtocolsForDisplay(await loadAllProtocols());
       // Keep the first "Custom" option, replace the rest
       while(selectEl.options.length>1) selectEl.remove(1);
-      protocols.sort((a,b) => {
-        if(a.builtIn&&!b.builtIn) return -1;
-        if(!a.builtIn&&b.builtIn) return 1;
-        return a.name.localeCompare(b.name);
-      });
       protocols.forEach(p => {
         const opt=document.createElement('option');
         opt.value=p.id;
@@ -3199,6 +3619,24 @@
       document.getElementById('new-event-method-dwr').checked=p.methods.includes('dwr');
     }
 
+    async function applyProtocolToEvent(ev,protocolId,{overwriteName=false}={}) {
+      if(!protocolId) return ev;
+      const protocol=await dbGet('protocols',protocolId);
+      if(!protocol) return ev;
+      ev.protocolId=protocolId;
+      ev.transects=protocol.transects;
+      ev.samples=protocol.samples;
+      ev.length=protocol.length;
+      ev.unit=protocol.unit;
+      ev.coverPts=protocol.coverPts;
+      ev.frameW=protocol.frameW;
+      ev.frameH=protocol.frameH;
+      ev.methods=(protocol.methods||[]).length? [...protocol.methods]:['cover','freq'];
+      ev.coverCats=Array.isArray(protocol.coverCats)? protocol.coverCats:undefined;
+      if(overwriteName||!ev.name) ev.name=protocol.name;
+      return ev;
+    }
+
     function wireProtocolFormListeners() {
       const sel=document.getElementById('new-event-protocol');
       sel.onchange=async () => {
@@ -3220,7 +3658,14 @@
       if(form.style.display==='block') return;
       form.style.display='block';
       document.getElementById('new-event-toggle-btn').style.display='none';
-      renderProtocolSelect(document.getElementById('new-event-protocol'));
+      renderProtocolSelect(document.getElementById('new-event-protocol')).then(async () => {
+        const siteProtocolId=activeSite?.protocolId||'';
+        const selectEl=document.getElementById('new-event-protocol');
+        if(siteProtocolId&&[...selectEl.options].some(opt => opt.value===siteProtocolId)) {
+          selectEl.value=siteProtocolId;
+          await applyProtocolToForm(siteProtocolId);
+        }
+      });
     }
 
     function closeNewEventForm() {
@@ -3235,6 +3680,7 @@
         new Date().toISOString().slice(0,10);
       document.getElementById('new-event-date').value='';
       const protocolId=document.getElementById('new-event-protocol').value||null;
+      const protocol=protocolId? await dbGet('protocols',protocolId):null;
       const methods=[];
       if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
       if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
@@ -3249,6 +3695,7 @@
         frameW: +document.getElementById('new-event-fw').value||40,
         frameH: +document.getElementById('new-event-fh').value||40,
         protocolId,methods: methods.length? methods:['cover','freq'],
+        coverCats: Array.isArray(protocol?.coverCats)? protocol.coverCats:undefined,
         createdAt: Date.now(),syncStatus: 'pending'
       };
       await dbPut('events',ev);
@@ -3300,6 +3747,7 @@
       const rec=await dbGet('samples',sid);
 
       samplePanelState.species=rec?.species||[];
+      samplePanelState.freqNone=!!rec?.freqNone;
       samplePanelState.coverHits=rec?.coverHits||[];
       samplePanelState.dwr=rec?.dwr||[];
 
@@ -3319,6 +3767,7 @@
       document.getElementById('sample-prev-btn').disabled=(tIdx===0&&sIdx===0);
       const lastT=(ev.transects||4)-1,lastS=(ev.samples||50)-1;
       document.getElementById('sample-next-btn').disabled=(tIdx===lastT&&sIdx===lastS);
+      renderTransectJump(tIdx,sIdx,ev);
 
       // ── Highlight current dot + auto-expand its transect ──
       document.querySelectorAll('.sample-dot').forEach(d => d.classList.remove('current'));
@@ -3347,6 +3796,43 @@
       renderCoverGrid();
       renderHitLog();
       renderDWRChips();
+    }
+
+    let _transectJumpBusy=false;
+    function renderTransectJump(tIdx,sIdx,ev) {
+      const wrap=document.getElementById('transect-jump-wrap');
+      const sel=document.getElementById('transect-jump-select');
+      const prevBtn=document.getElementById('transect-prev-btn');
+      const nextBtn=document.getElementById('transect-next-btn');
+      if(!wrap||!sel||!prevBtn||!nextBtn) return;
+
+      const tCount=ev?.transects||4;
+      if(tCount<=1) {
+        wrap.style.display='none';
+        return;
+      }
+
+      wrap.style.display='flex';
+      sel.innerHTML=Array.from({length: tCount},(_,i) => `<option value="${i}">T${i+1}</option>`).join('');
+      sel.value=String(tIdx);
+      prevBtn.disabled=tIdx<=0;
+      nextBtn.disabled=tIdx>=tCount-1;
+
+      const jumpToTransect=async targetT => {
+        if(targetT===samplePanelState.transectIdx) return;
+        if(targetT<0||targetT>=tCount) return;
+        if(_transectJumpBusy) return;
+        _transectJumpBusy=true;
+        try {
+          await saveCurrent();
+          await renderCollect();
+          await loadSampleIntoPanel(targetT,0);
+        } finally {_transectJumpBusy=false;}
+      };
+
+      sel.onchange=() => jumpToTransect(+sel.value);
+      prevBtn.onclick=() => jumpToTransect(tIdx-1);
+      nextBtn.onclick=() => jumpToTransect(tIdx+1);
     }
 
     async function renderPanelSampleMap(tIdx,sIdx) {
@@ -3382,15 +3868,16 @@
       if(!activeSiteId||!activeEventId) return;
       const {transectIdx: t,sampleIdx: s}=samplePanelState;
       const species=JSON.parse(JSON.stringify(samplePanelState.species));
+      const freqNone=!!samplePanelState.freqNone;
       const coverHits=JSON.parse(JSON.stringify(samplePanelState.coverHits));
       const dwr=JSON.parse(JSON.stringify(samplePanelState.dwr));
-      const hasData=species.length>0||coverHits.length>0||dwr.length>0;
+      const hasData=species.length>0||freqNone||coverHits.length>0||dwr.length>0;
       if(!force&&!hasData) return;
       const sid=sampleId(activeSiteId,activeEventId,t,s);
       await dbPut('samples',{
         id: sid,siteId: activeSiteId,eventId: activeEventId,
         transectIdx: t,sampleIdx: s,
-        species,coverHits,dwr,
+        species,freqNone,coverHits,dwr,
         hasData,savedAt: Date.now(),syncStatus: 'pending'
       });
     }
@@ -3403,6 +3890,7 @@
 
     document.getElementById('sample-clear-btn').addEventListener('click',() => {
       samplePanelState.species=[];
+      samplePanelState.freqNone=false;
       samplePanelState.coverHits=[];
       samplePanelState.dwr=[];
       renderSpeciesChips();
@@ -3425,7 +3913,7 @@
         if(dir>0&&(localStorage.getItem('ep_incomplete_warn')==='1'||localStorage.getItem('ep_incomplete_warn')===null)) {
           const maxHits=activeEvent? (activeEvent.coverPts||0):(activeSite?.coverPts||0);
           const totalHits=samplePanelState.coverHits.length;
-          const noSpecies=samplePanelState.species.length===0;
+          const noSpecies=samplePanelState.species.length===0&&!samplePanelState.freqNone;
           const coverShort=maxHits>0&&totalHits<maxHits;
           if(noSpecies||coverShort) {
             const reasons=[];
@@ -3496,6 +3984,7 @@
         opt.addEventListener('click',() => {
           const sym=opt.dataset.sym;
           if(samplePanelState.species.find(x => x.symbol===sym)) {toast('Already added'); return;}
+          samplePanelState.freqNone=false;
           samplePanelState.species.push({
             symbol: opt.dataset.sym,common: opt.dataset.common,
             sci: opt.dataset.sci,native: opt.dataset.native
@@ -3514,6 +4003,19 @@
       speciesInput.value='';
       document.getElementById('species-clear').style.display='none';
       speciesDrop.classList.remove('open');
+    });
+
+    document.getElementById('species-none-btn').addEventListener('click',() => {
+      samplePanelState.freqNone=!samplePanelState.freqNone;
+      if(samplePanelState.freqNone) {
+        samplePanelState.species=[];
+        speciesInput.value='';
+        document.getElementById('species-clear').style.display='none';
+        speciesDrop.classList.remove('open');
+        speciesDrop.innerHTML='';
+      }
+      renderSpeciesChips();
+      renderSeenSpecies();
     });
 
     // ── DWR search (max 3 species) ────────────────────────────────────
@@ -3608,30 +4110,23 @@
       const sec=document.getElementById('dwr-seen-section');
       if(!sec||!activeEventId) {if(sec) sec.innerHTML=''; return;}
 
-      const dwrSyms=new Set(samplePanelState.dwr.map(x => x.symbol));
-
-      // Event species
+      // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=(await dbGetByIndex('samples','eventId',activeEventId))
         .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx);
-      const evSeenRaw=collectSeenSpecies(evSamples);
-      const evSeen=speciesAlphaSort
-        ? [...evSeenRaw].sort((a,b) => a.common.localeCompare(b.common))
-        :evSeenRaw;
+      const unifiedCurrent=collectEventSpeciesUnified(evSamples);
+
+      const dwrSyms=new Set(samplePanelState.dwr.map(x => x.symbol));
 
       // Optional: site species
       let siteSeen=[];
       let siteFreq={};
       if(showSiteSpecies) {
         const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
-        siteSamples.forEach(s => {
-          const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
-          symsInSample.forEach(sym => {siteFreq[sym]=(siteFreq[sym]||0)+1;});
-        });
+        siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
         const siteAll=speciesAlphaSort
-          ? collectSeenSpecies(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
-          :collectSeenSpeciesByFreq(siteSamples);
-        const evSyms=new Set(evSeen.map(x => x.symbol));
-        siteSeen=siteAll.filter(x => !evSyms.has(x.symbol));
+          ? collectSeenSpeciesUnified(siteSamples).sort((a,b) => a.common.localeCompare(b.common))
+          :collectSeenSpeciesByFreqUnified(siteSamples);
+        siteSeen=siteAll;
       }
 
       function dwrChipHTML(sp,freq) {
@@ -3644,11 +4139,20 @@
         </button>`;
       }
 
+      function currentPickHTML(sp) {
+        const inv=sp.native==='N';
+        const badges=speciesMethodBadgesForSymbol(evSamples,sp.symbol);
+        const badgeStr=badges.length? ` <span style="font-size:.55rem;color:var(--muted);">(${badges.join(', ')})</span>`:'';
+        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
+          ${inv? '⚠️ ':''} ${esc(sp.common)}${badgeStr} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>
+        </button>`;
+      }
+
       let html='';
 
-      if(evSeen.length) {
-        html+=`<div class="seen-section-hdr"><span>This Event</span></div>`;
-        html+=`<div class="seen-chips" id="seen-dwr-ev-chips">${evSeen.map(sp => dwrChipHTML(sp,null)).join('')}</div>`;
+      if(unifiedCurrent.length) {
+        html+=`<div class="seen-section-hdr"><span>Current Picks (event-wide)</span></div>`;
+        html+=`<div class="seen-chips" id="seen-dwr-current-chips">${unifiedCurrent.map(sp => currentPickHTML(sp)).join('')}</div>`;
       }
       if(showSiteSpecies&&siteSeen.length) {
         const siteSubLbl=speciesAlphaSort? 'a→z':'most seen first';
@@ -3658,20 +4162,21 @@
 
       sec.innerHTML=html;
 
+      function addDwrFromButton(btn) {
+        if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
+        samplePanelState.dwr.push({
+          symbol: btn.dataset.sym,common: btn.dataset.common,
+          sci: btn.dataset.sci,native: btn.dataset.native
+        });
+        renderDWRChips();
+        renderDWRSeenSpecies();
+        renderSpeciesChips();
+        renderSeenSpecies();
+      }
+
       // Wire quick-add clicks
       sec.querySelectorAll('.seen-chip').forEach(btn => {
-        btn.addEventListener('click',() => {
-          if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
-          const sym=btn.dataset.sym;
-          samplePanelState.dwr.push({
-            symbol: btn.dataset.sym,common: btn.dataset.common,
-            sci: btn.dataset.sci,native: btn.dataset.native
-          });
-          renderDWRChips();
-          renderDWRSeenSpecies();
-          renderSpeciesChips();
-          renderSeenSpecies();
-        });
+        btn.addEventListener('click',() => addDwrFromButton(btn));
       });
     }
 
@@ -3687,10 +4192,33 @@
     function renderSpeciesChips() {
       const el=document.getElementById('species-chips');
       const abcBtn=document.getElementById('species-abc-btn');
+      const noneBtn=document.getElementById('species-none-btn');
       if(abcBtn) abcBtn.classList.toggle('active',speciesAlphaSort);
+      if(noneBtn) {
+        noneBtn.classList.toggle('active',samplePanelState.freqNone);
+        noneBtn.style.borderColor=samplePanelState.freqNone? '#d19b1f':'#d19b1f';
+        noneBtn.style.color=samplePanelState.freqNone? '#1b1b1b':'#d19b1f';
+        noneBtn.style.background=samplePanelState.freqNone? '#e9b949':'transparent';
+      }
 
       // When ABC on, display sorted copy; chips array itself is already sorted in-place
       const display=samplePanelState.species;
+
+      if(samplePanelState.freqNone) {
+        el.innerHTML=`<div class="species-chip" style="background:#f7d98a;border:1px solid #d19b1f;color:#4f3900;">
+          ⚠ No species in frame <span style="opacity:.75;font-size:.62rem">(recorded)</span>
+          <button class="chip-remove" data-none="1">✕</button>
+        </div>`;
+        el.querySelectorAll('.chip-remove').forEach(btn => {
+          btn.addEventListener('click',() => {
+            samplePanelState.freqNone=false;
+            renderSpeciesChips();
+            renderSeenSpecies();
+          });
+        });
+        renderSeenSpecies();
+        return;
+      }
 
       el.innerHTML=display.map(sp => {
         const invasive=sp.native==='N';
@@ -3713,8 +4241,9 @@
     // ── Cover grid ────────────────────────────────────────
     function renderCoverGrid() {
       const maxHits=activeEvent? (activeEvent.coverPts||2):(activeSite?.coverPts||2);
+      const coverCats=getCoverCatsForEvent(activeEvent);
       const hitCount={};
-      COVER_CATS.forEach(c => hitCount[c.id]=0);
+      coverCats.forEach(c => hitCount[c.id]=0);
       samplePanelState.coverHits.forEach(h => {
         if(hitCount[h.id]!==undefined) hitCount[h.id]++;
       });
@@ -3730,7 +4259,7 @@
             <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
           </div>`;
 
-      document.getElementById('cover-grid').innerHTML=COVER_CATS.map(c => `
+      document.getElementById('cover-grid').innerHTML=coverCats.map(c => `
             <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}">
               <span class="cover-icon">${c.icon}</span>
       ${esc(c.label)}
@@ -3742,7 +4271,7 @@
           if(samplePanelState.coverHits.length>=maxHits) {
             toast(`Max ${maxHits} hits per sample`,'err'); return;
           }
-          const cat=COVER_CATS.find(c => c.id===btn.dataset.cid);
+          const cat=coverCats.find(c => c.id===btn.dataset.cid);
           samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
           renderCoverGrid();
           renderHitLog();
@@ -3791,18 +4320,29 @@
         return da-db;
       });
 
+      // Build a cover category catalog across defaults, event protocols, and observed sample hits
+      const coverCatMap={};
+      COVER_CATS.forEach(c => {coverCatMap[c.id]=c;});
+      sortedEvents.forEach(ev => getCoverCatsForEvent(ev).forEach(c => {
+        if(c?.id&&!coverCatMap[c.id]) coverCatMap[c.id]={id: c.id,label: c.label||c.id,icon: c.icon||coverIconForLabel(c.label)};
+      }));
+      allFilled.forEach(s => (s.coverHits||[]).forEach(h => {
+        if(h?.id&&!coverCatMap[h.id]) coverCatMap[h.id]={id: h.id,label: h.label||h.id,icon: coverIconForLabel(h.label||h.id)};
+      }));
+      const coverCatalog=Object.values(coverCatMap);
+
       // Per-event aggregation
       const evStats=sortedEvents.map((ev,i) => {
         const evFilled=allFilled.filter(s => s.eventId===ev.id);
         const spFreq={},spMeta={};
         evFilled.forEach(s => (s.species||[]).forEach(sp => {spFreq[sp.symbol]=(spFreq[sp.symbol]||0)+1; spMeta[sp.symbol]=sp;}));
         const covTotals={};
-        COVER_CATS.forEach(c => covTotals[c.id]=0);
+        coverCatalog.forEach(c => covTotals[c.id]=0);
         let hits=0;
         evFilled.forEach(s => (s.coverHits||[]).forEach(h => {covTotals[h.id]=(covTotals[h.id]||0)+1; hits++;}));
         const nativeSp=Object.keys(spMeta).filter(sym => spMeta[sym]?.native==='Y').length;
         const invasiveSp=Object.keys(spMeta).filter(sym => spMeta[sym]?.native==='N').length;
-        const topCover=COVER_CATS.reduce((best,c) => (covTotals[c.id]||0)>(covTotals[best.id]||0)? c:best,COVER_CATS[0]);
+        const topCover=coverCatalog.reduce((best,c) => (covTotals[c.id]||0)>(covTotals[best.id]||0)? c:best,coverCatalog[0]||{id: '',label: '—',icon: '•'});
         return {ev,evFilled,spFreq,spMeta,covTotals,hits,nativeSp,invasiveSp,topCover,color: EV_COLORS[i%EV_COLORS.length]};
       });
 
@@ -3810,7 +4350,7 @@
       const speciesFreq={},speciesMeta={};
       allFilled.forEach(s => (s.species||[]).forEach(sp => {speciesFreq[sp.symbol]=(speciesFreq[sp.symbol]||0)+1; speciesMeta[sp.symbol]=sp;}));
       const coverTotals={};
-      COVER_CATS.forEach(c => coverTotals[c.id]=0);
+      coverCatalog.forEach(c => coverTotals[c.id]=0);
       let totalHits=0;
       allFilled.forEach(s => (s.coverHits||[]).forEach(h => {coverTotals[h.id]=(coverTotals[h.id]||0)+1; totalHits++;}));
       const nativeCount=Object.values(speciesMeta).filter(m => m.native==='Y').length;
@@ -4021,7 +4561,7 @@
       }
 
       // ─ Card 5: Overall cover ─
-      const coverRows=COVER_CATS.map(c => {
+      const coverRows=coverCatalog.map(c => {
         const n=coverTotals[c.id]||0;
         const pct=totalHits? Math.round(n/totalHits*100):0;
         return `<tr>
@@ -4037,7 +4577,7 @@
         const evHdrs=evStats.map(({ev,color}) =>
           `<th class="ev-col"><span class="ev-dot" style="background:${color};"></span>${esc(ev.eventDate||new Date(ev.createdAt).toLocaleDateString())}</th>`
         ).join('');
-        const cRows=COVER_CATS.map(c => {
+        const cRows=coverCatalog.map(c => {
           const cells=evStats.map(({covTotals,hits,color}) => {
             const n=covTotals[c.id]||0;
             const p=hits? Math.round(n/hits*100):0;
@@ -4146,23 +4686,25 @@
     }
 
     async function renderProtocols() {
-      const protocols=await loadAllProtocols();
-      protocols.sort((a,b) => {
-        if(a.builtIn&&!b.builtIn) return -1;
-        if(!a.builtIn&&b.builtIn) return 1;
-        return a.name.localeCompare(b.name);
-      });
+      const protocols=sortProtocolsForDisplay(await loadAllProtocols());
       const listEl=document.getElementById('protocols-list');
       if(!listEl) return;
       if(!protocols.length) {listEl.innerHTML='<div style="font-size:.75rem;color:var(--muted);">No protocols.</div>'; return;}
       listEl.innerHTML=protocols.map(p => {
         const cfgStr=`${p.transects}T × ${p.samples}S · ${p.length}${p.unit} · ${p.frameW}×${p.frameH}cm`;
         const methodStr=(p.methods||['cover','freq']).map(m => m==='cover'? 'Ground Cover':m==='freq'? 'Frequency Quadrat':'Dry Weight Rank').join(', ');
+        const desc=p.description? `<div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${esc(p.description)}</div>`:'';
+        const sourceBadge=p.builtIn
+          ? '<span class="badge" style="margin-left:4px;font-size:.6rem;">built-in</span>'
+          :p.importedAt
+            ? '<span class="badge" style="margin-left:4px;font-size:.6rem;">imported</span>'
+            :'<span class="badge" style="margin-left:4px;font-size:.6rem;">custom</span>';
         return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:.82rem;font-weight:600;">${esc(p.name)}${p.builtIn? '<span class="badge" style="margin-left:4px;font-size:.6rem;">built-in</span>':''}</div>
+            <div style="font-size:.82rem;font-weight:600;">${esc(p.name)}${sourceBadge}</div>
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${cfgStr}</div>
             <div style="font-size:.65rem;color:var(--muted);">${methodStr}</div>
+            ${desc}
           </div>
           ${!p.builtIn? `<button class="btn btn-danger btn-sm proto-delete-btn" data-proto-id="${p.id}" title="Delete protocol" style="flex-shrink:0;">🗑</button>`:''}
         </div>`;
@@ -4173,6 +4715,8 @@
           if(!confirm('Delete this custom protocol? It will no longer appear in new events.')) return;
           await dbDelete('protocols',id);
           renderProtocols();
+          refreshNewEventProtocolSelect();
+          refreshSiteProtocolSelect();
           toast('Protocol deleted','ok');
         };
       });
@@ -4211,8 +4755,37 @@
       document.getElementById('add-protocol-form').style.display='none';
       document.getElementById('add-protocol-btn').style.display='';
       renderProtocols();
+      refreshNewEventProtocolSelect();
+      refreshSiteProtocolSelect();
       toast('Protocol saved','ok');
     });
+
+    document.getElementById('import-protocol-btn').addEventListener('click',() => {
+      document.getElementById('protocol-file-input').click();
+    });
+
+    document.getElementById('protocol-file-input').addEventListener('change',async e => {
+      const file=e.target.files[0];
+      e.target.value='';
+      if(!file) return;
+
+      try {
+        const text=await file.text();
+        const parsed=parseVgspProtocol(text);
+        openProtocolPreview(parsed,async () => {
+          await dbPut('protocols',parsed);
+          renderProtocols();
+          refreshNewEventProtocolSelect();
+          refreshSiteProtocolSelect();
+          toast(`Imported protocol: ${parsed.name}`,'ok');
+        });
+      } catch(err) {
+        console.error('protocol import error:',err);
+        toast('Could not import protocol file','err');
+      }
+    });
+
+    document.getElementById('protocol-preview-cancel-btn').addEventListener('click',closeProtocolPreview);
 
     function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||'',incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1'};}
 
