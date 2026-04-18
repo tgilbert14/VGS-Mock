@@ -4592,7 +4592,6 @@
       const siteTotalPer=activeSite.transects*activeSite.samples; // fallback for old sites
       // Per-event slot counts; prefer event-stored values, fall back to site-stored for legacy data
       const getEvTotal=ev => (ev.transects||activeSite.transects||4)*(ev.samples||activeSite.samples||50);
-      const total=getEvTotal(sortedEvents[0]||{}); // kept for single-event compatibility
 
       const EV_COLORS=['#5baad4','#d4a843','#7ecb6f','#e07c3a','#c47dd4','#d46b5b'];
 
