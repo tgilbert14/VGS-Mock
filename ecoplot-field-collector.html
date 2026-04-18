@@ -4086,14 +4086,16 @@
 
       const openFromChip=() => openBulkReplaceModal(speciesFromDataset(chipEl));
 
+      const isControlTarget=e => e.target.closest(removeSelector)||e.target.closest('.chip-edit')||e.target.closest('.dwr-edit');
+
       chipEl.addEventListener('contextmenu',e => {
-        if(e.target.closest(removeSelector)) return;
+        if(isControlTarget(e)) return;
         e.preventDefault();
         openFromChip();
       });
 
       chipEl.addEventListener('pointerdown',e => {
-        if(e.target.closest(removeSelector)) return;
+        if(isControlTarget(e)) return;
         holdTimer=setTimeout(() => {
           holdTimer=null;
           openFromChip();
@@ -4375,6 +4377,7 @@
             <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">⚠️</span>':''}</div>
             <div style="font-size:.7rem;color:var(--muted);">[${sp.symbol}]</div>
           </div>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">↺</button>
           <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">✕</button>
         </div>`;
       }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.8rem;color:var(--muted);">No species selected yet</span>':'');
@@ -4385,6 +4388,14 @@
           samplePanelState.dwr.splice(idx,1);
           renderDWRChips();
           renderDWRSeenSpecies();
+        });
+      });
+      el.querySelectorAll('.dwr-edit').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const row=btn.closest('.dwr-chip-row[data-sym]');
+          if(!row) return;
+          openBulkReplaceModal(speciesFromDataset(row));
         });
       });
       el.querySelectorAll('.dwr-chip-row[data-sym]').forEach(chip => wireBulkReplaceTrigger(chip,'.dwr-remove'));
@@ -4507,6 +4518,7 @@
         return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
           ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">[${sp.symbol}]</span>
       ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
+        <button class="chip-edit" data-sym="${sp.symbol}" title="Replace this species across event" style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.82rem;padding:0 2px;">↺</button>
         <button class="chip-remove" data-sym="${sp.symbol}">✕</button>
     </div>`;
       }).join('')||'<span style="font-size:.7rem;color:var(--muted);">No species added yet</span>';
@@ -4515,6 +4527,14 @@
           samplePanelState.species=samplePanelState.species.filter(x => x.symbol!==btn.dataset.sym);
           renderSpeciesChips();
           renderSeenSpecies();
+        });
+      });
+      el.querySelectorAll('.chip-edit').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const chip=btn.closest('.species-chip[data-sym]');
+          if(!chip) return;
+          openBulkReplaceModal(speciesFromDataset(chip));
         });
       });
       el.querySelectorAll('.species-chip[data-sym]').forEach(chip => wireBulkReplaceTrigger(chip,'.chip-remove'));
