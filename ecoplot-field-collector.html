@@ -1840,7 +1840,7 @@
               <div class="field">
                 <label>Protocol</label>
                 <select id="new-event-protocol">
-                  <option value="">— Custom / No Protocol —</option>
+                  <option value="">— No Protocol (manual settings) —</option>
                 </select>
               </div>
               <div class="field">
@@ -3253,8 +3253,10 @@
               <div class="field" style="margin-bottom:8px;">
                 <label>Protocol</label>
                 <select id="eproto-${ev.id}">
-                  <option value="">— Keep current / custom —</option>
-                  ${sortProtocolsForDisplay(allProtocols).map(p => `<option value="${p.id}"${ev.protocolId===p.id? ' selected':''}>${esc(p.name)}</option>`).join('')}
+                  ${allProtocols.length
+              ? `<option value="">— Keep current settings —</option>
+                  ${sortProtocolsForDisplay(allProtocols).map(p => `<option value="${p.id}"${ev.protocolId===p.id? ' selected':''}>${esc(p.name)}</option>`).join('')}`
+              :'<option value="">— Import or Create Protocol —</option>'}
                 </select>
               </div>
               <div class="row2" style="margin-bottom:8px;">
@@ -3274,7 +3276,7 @@
               <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:6px 8px;background:var(--s2);border-radius:6px;">${cfgStr}</div>
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-ghost btn-sm" data-close-eid="${ev.id}">Cancel</button>
-                <button class="btn btn-ghost btn-sm event-apply-protocol-btn" data-eid="${ev.id}">Apply Protocol</button>
+                <button class="btn btn-ghost btn-sm event-apply-protocol-btn" data-eid="${ev.id}" ${allProtocols.length? '':'disabled title="Import or create a protocol first"'}>Apply Protocol</button>
                 <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}" style="flex:1;">Save</button>
                 <button class="btn btn-danger btn-sm event-delete-btn" data-del-eid="${ev.id}" title="Delete event">🗑</button>
               </div>
@@ -3346,6 +3348,7 @@
         evList.querySelectorAll('.event-apply-protocol-btn').forEach(btn => {
           btn.addEventListener('click',async e => {
             e.stopPropagation();
+            if(btn.disabled) {toast('Import or create a protocol first','warn'); return;}
             const eid=btn.dataset.eid;
             const protocolId=document.getElementById('eproto-'+eid).value;
             if(!protocolId) {toast('Select a protocol first','warn'); return;}
@@ -3642,8 +3645,11 @@
 
     async function renderProtocolSelect(selectEl) {
       const protocols=sortProtocolsForDisplay(await loadAllProtocols());
-      // Keep the first "Custom" option, replace the rest
+      // Keep the first placeholder option, replace the rest
       while(selectEl.options.length>1) selectEl.remove(1);
+      selectEl.options[0].textContent=protocols.length
+        ? '— No Protocol (manual settings) —'
+        :'— Import or Create Protocol (optional) —';
       protocols.forEach(p => {
         const opt=document.createElement('option');
         opt.value=p.id;
