@@ -1891,19 +1891,19 @@
               <div class="field">
                 <label>Methods</label>
                 <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;">
-                  <label
+                  <label id="new-event-method-cover-wrap"
                     style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
                     <input type="checkbox" id="new-event-method-cover" checked
                       style="width:auto;accent-color:var(--accent);">
                     Ground Cover Hits
                   </label>
-                  <label
+                  <label id="new-event-method-freq-wrap"
                     style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
                     <input type="checkbox" id="new-event-method-freq" checked
                       style="width:auto;accent-color:var(--accent);">
                     Frequency Quadrat
                   </label>
-                  <label
+                  <label id="new-event-method-dwr-wrap"
                     style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
                     <input type="checkbox" id="new-event-method-dwr" style="width:auto;accent-color:var(--accent);">
                     Dry Weight Rank (DWR)
@@ -2173,6 +2173,11 @@
       <div class="modal-title" style="color:var(--danger);">🗑 Wipe Database</div>
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">This will permanently delete <strong>all sites,
           events, samples, and folders</strong> from the local database. This cannot be undone.</p>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text);margin-bottom:12px;">
+        <input type="checkbox" id="wipe-db-protocols" style="width:auto;accent-color:var(--danger);">
+        Also remove imported and custom protocols
+      </label>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px;">Built-in protocols are kept.</div>
       <div class="field" style="margin-bottom:14px;">
         <label style="font-size:.75rem;">Enter dev password to confirm</label>
         <input type="password" id="wipe-db-pw" placeholder="Password" autocomplete="off">
@@ -3644,11 +3649,11 @@
     }
 
     async function renderProtocolSelect(selectEl) {
-      const protocols=sortProtocolsForDisplay(await loadAllProtocols());
+      const protocols=sortProtocolsForDisplay((await loadAllProtocols()).filter(p => !p.builtIn));
       // Keep the first placeholder option, replace the rest
       while(selectEl.options.length>1) selectEl.remove(1);
       selectEl.options[0].textContent=protocols.length
-        ? '— No Protocol (manual settings) —'
+        ? '— Select a Protocol —'
         :'— Import or Create Protocol (optional) —';
       protocols.forEach(p => {
         const opt=document.createElement('option');
@@ -3659,9 +3664,12 @@
     }
 
     async function applyProtocolToForm(protocolId) {
-      if(!protocolId) return;
+      if(!protocolId) {
+        syncNewEventMethodOptions();
+        return;
+      }
       const p=await dbGet('protocols',protocolId);
-      if(!p) return;
+      if(!p) {syncNewEventMethodOptions(); return;}
       document.getElementById('new-event-name').value=p.name;
       document.getElementById('new-event-transects').value=p.transects;
       document.getElementById('new-event-samples').value=p.samples;
@@ -3670,9 +3678,29 @@
       document.getElementById('new-event-coverpts').value=p.coverPts;
       document.getElementById('new-event-fw').value=p.frameW;
       document.getElementById('new-event-fh').value=p.frameH;
-      document.getElementById('new-event-method-cover').checked=p.methods.includes('cover');
-      document.getElementById('new-event-method-freq').checked=p.methods.includes('freq');
-      document.getElementById('new-event-method-dwr').checked=p.methods.includes('dwr');
+      syncNewEventMethodOptions(p.methods||[]);
+    }
+
+    function syncNewEventMethodOptions(methods=null) {
+      const coverWrap=document.getElementById('new-event-method-cover-wrap');
+      const freqWrap=document.getElementById('new-event-method-freq-wrap');
+      const dwrWrap=document.getElementById('new-event-method-dwr-wrap');
+      const coverBox=document.getElementById('new-event-method-cover');
+      const freqBox=document.getElementById('new-event-method-freq');
+      const dwrBox=document.getElementById('new-event-method-dwr');
+
+      const hasProtocolMethods=Array.isArray(methods)&&methods.length>0;
+      const showCover=hasProtocolMethods&&methods.includes('cover');
+      const showFreq=hasProtocolMethods&&methods.includes('freq');
+      const showDwr=hasProtocolMethods&&methods.includes('dwr');
+
+      coverWrap.style.display=showCover? 'flex':'none';
+      freqWrap.style.display=showFreq? 'flex':'none';
+      dwrWrap.style.display=showDwr? 'flex':'none';
+
+      coverBox.checked=showCover;
+      freqBox.checked=showFreq;
+      dwrBox.checked=showDwr;
     }
 
     async function applyProtocolToEvent(ev,protocolId,{overwriteName=false}={}) {
@@ -3698,13 +3726,16 @@
       sel.onchange=async () => {
         await applyProtocolToForm(sel.value);
       };
-      // When any config field changes manually, reset selector to Custom
+      // When any config field changes manually, reset selector to no protocol mode.
       const configFields=['new-event-transects','new-event-samples','new-event-length',
         'new-event-unit','new-event-coverpts','new-event-fw','new-event-fh',
         'new-event-method-cover','new-event-method-freq','new-event-method-dwr'];
       configFields.forEach(id => {
         document.getElementById(id).onchange=() => {
-          if(sel.value) sel.value='';
+          if(sel.value) {
+            sel.value='';
+            syncNewEventMethodOptions();
+          }
         };
       });
     }
@@ -3714,6 +3745,7 @@
       if(form.style.display==='block') return;
       form.style.display='block';
       document.getElementById('new-event-toggle-btn').style.display='none';
+      syncNewEventMethodOptions();
       renderProtocolSelect(document.getElementById('new-event-protocol')).then(async () => {
         const siteProtocolId=activeSite?.protocolId||'';
         const selectEl=document.getElementById('new-event-protocol');
@@ -3741,6 +3773,10 @@
       if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
       if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
       if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
+      if(!methods.length) {
+        toast('Select or import a protocol first','warn');
+        return;
+      }
       const ev={
         id: 'evt_'+Date.now(),siteId: activeSiteId,name,eventDate: dateVal,notes: '',
         transects: +document.getElementById('new-event-transects').value||4,
@@ -3750,7 +3786,7 @@
         coverPts: +document.getElementById('new-event-coverpts').value||2,
         frameW: +document.getElementById('new-event-fw').value||40,
         frameH: +document.getElementById('new-event-fh').value||40,
-        protocolId,methods: methods.length? methods:['cover','freq'],
+        protocolId,methods,
         coverCats: Array.isArray(protocol?.coverCats)? protocol.coverCats:undefined,
         createdAt: Date.now(),syncStatus: 'pending'
       };
@@ -5129,6 +5165,7 @@
     document.getElementById('wipe-db-btn').addEventListener('click',() => {
       document.getElementById('wipe-db-pw').value='';
       document.getElementById('wipe-db-err').style.display='none';
+      document.getElementById('wipe-db-protocols').checked=false;
       document.getElementById('wipe-db-modal').classList.add('open');
     });
     document.getElementById('wipe-db-cancel-btn').addEventListener('click',() => {
@@ -5136,6 +5173,7 @@
     });
     document.getElementById('wipe-db-confirm-btn').addEventListener('click',async () => {
       const pw=document.getElementById('wipe-db-pw').value;
+      const wipeProtocols=document.getElementById('wipe-db-protocols').checked;
       if(pw!=='1699') {
         document.getElementById('wipe-db-err').style.display='';
         document.getElementById('wipe-db-pw').value='';
@@ -5156,11 +5194,20 @@
         localOnly: true,
         createdAt: 0
       });
+      if(wipeProtocols) {
+        const protocols=await dbGetAll('protocols');
+        for(const p of protocols) {
+          if(!p.builtIn) await dbDelete('protocols',p.id);
+        }
+      }
       // Reset in-memory state
       activeSiteId=null; activeSite=null; activeEventId=null; activeEvent=null;
       renderSiteList();
       renderCollect();
       renderSync();
+      refreshNewEventProtocolSelect();
+      refreshSiteProtocolSelect();
+      renderProtocols();
       toast('Database wiped','ok');
     });
 
@@ -5358,32 +5405,10 @@
         // Migrate old name
         await dbPut('folders',{...existing,name: 'Practice (Not Syncable)'});
       }
-      // Seed built-in protocols (idempotent)
-      const defaultProtocols=[
-        {
-          id: 'proto_rtr_standard',name: 'RTR Standard',builtIn: true,
-          transects: 4,samples: 50,length: 100,unit: 'm',
-          coverPts: 2,frameW: 40,frameH: 40,methods: ['cover','freq','dwr']
-        },
-        {
-          id: 'proto_freq_only',name: 'Frequency Only',builtIn: true,
-          transects: 4,samples: 50,length: 100,unit: 'm',
-          coverPts: 2,frameW: 40,frameH: 40,methods: ['freq']
-        },
-        {
-          id: 'proto_cover_only',name: 'Cover Only',builtIn: true,
-          transects: 4,samples: 50,length: 100,unit: 'm',
-          coverPts: 2,frameW: 40,frameH: 40,methods: ['cover']
-        },
-        {
-          id: 'proto_dwr_only',name: 'DWR Only',builtIn: true,
-          transects: 4,samples: 50,length: 100,unit: 'm',
-          coverPts: 2,frameW: 40,frameH: 40,methods: ['dwr']
-        },
-      ];
-      for(const p of defaultProtocols) {
-        const ep=await dbGet('protocols',p.id);
-        if(!ep) await dbPut('protocols',p);
+      // Remove legacy built-in protocols so users must import/create their own.
+      const existingProtocols=await dbGetAll('protocols');
+      for(const p of existingProtocols) {
+        if(p.builtIn) await dbDelete('protocols',p.id);
       }
 
       loadSpeciesDB();
