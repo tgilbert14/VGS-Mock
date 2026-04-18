@@ -2283,6 +2283,12 @@
       {id: "woody_litter",label: "Woody Litter",icon: "🪵"},
       {id: "live_basal",label: "Live Basal Veg",icon: "🌿"},
     ];
+    const PROTOCOL_METHOD_LABELS={
+      cover: 'Ground Cover',
+      freq: 'Frequency Quadrat',
+      dwr: 'Dry Weight Rank',
+      fetch: 'Fetch',
+    };
 
     function coverIconForLabel(label) {
       const s=String(label||'').toLowerCase();
@@ -2300,10 +2306,47 @@
       return COVER_CATS;
     }
 
+    function protocolMethodLabel(key) {
+      return PROTOCOL_METHOD_LABELS[key]||String(key||'').toUpperCase();
+    }
+
+    function protocolMethodsText(methods) {
+      return (methods||[]).map(protocolMethodLabel).join(', ')||'None';
+    }
+
+    function protocolMethodsOrderedText(methods) {
+      return (methods||[]).map((m,i) => `${i+1}. ${protocolMethodLabel(m)}`).join(' · ')||'None';
+    }
+
+    function protocolImportedMetadataHTML(p) {
+      if(!p?.importedAt||!p?.importAttributes) return '';
+      const evCount=Array.isArray(p.importAttributes.events)? p.importAttributes.events.length:0;
+      const methodCount=Object.keys(p.importAttributes.methods||{}).length;
+      const formAttrCount=Object.keys(p.importAttributes.form||{}).length;
+      const coverCatCount=Array.isArray(p.coverCats)? p.coverCats.length:0;
+      const metaJson=JSON.stringify({
+        methodEntryOrder: p.methodEntryOrder||{},
+        coverCatsSource: p.coverCatsSource||'default',
+        coverCats: p.coverCats||[],
+        importAttributes: p.importAttributes,
+      },null,2)||'{}';
+      const maxLen=5000;
+      const clipped=metaJson.length>maxLen? `${metaJson.slice(0,maxLen)}\n... (truncated)`:metaJson;
+      return `
+        <details style="margin-top:8px;border:1px solid var(--border);border-radius:8px;background:var(--s1);padding:6px 8px;">
+          <summary style="cursor:pointer;font-size:.68rem;color:var(--accent);font-weight:600;">Imported Metadata</summary>
+          <div style="font-size:.64rem;color:var(--muted);margin-top:6px;">
+            Form attrs: ${formAttrCount} · Event defs: ${evCount} · Method groups: ${methodCount} · Cover cats: ${coverCatCount} (${p.coverCatsSource||'default'})
+          </div>
+          <pre style="margin-top:6px;max-height:180px;overflow:auto;font-size:.62rem;line-height:1.35;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;">${esc(clipped)}</pre>
+        </details>`;
+    }
+
     function protocolPreviewHTML(p) {
-      const methods=(p.methods||[]).map(m => m==='cover'? 'Ground Cover':m==='freq'? 'Frequency Quadrat':'Dry Weight Rank').join(', ')||'None';
+      const methods=protocolMethodsText(p.methods);
+      const orderedMethods=protocolMethodsOrderedText(p.methods);
       const coverCatText=Array.isArray(p.coverCats)&&p.coverCats.length
-        ? `${p.coverCats.length} imported categories`
+        ? `${p.coverCats.length} imported categories (${p.coverCatsSource||'definitions'})`
         :'default cover categories';
       return `
         <div style="font-size:.9rem;color:var(--text);font-weight:600;margin-bottom:6px;">${esc(p.name)}</div>
@@ -2315,6 +2358,8 @@
           <div><strong>${p.frameW}×${p.frameH} cm</strong> frame</div>
         </div>
         <div style="margin-bottom:4px;">Methods: ${esc(methods)}</div>
+        <div style="margin-bottom:4px;">Method order: ${esc(orderedMethods)}</div>
+        ${p.fetchMeasuresPerSample!=null? `<div style="margin-bottom:4px;">Fetch measures / sample: <strong>${p.fetchMeasuresPerSample}</strong></div>`:''}
         <div>Cover categories: ${esc(coverCatText)}</div>`;
     }
 
@@ -3520,6 +3565,16 @@
       return doc;
     }
 
+    function parseXmlWithDecodingSteps(rawText,maxDecodeSteps=3) {
+      let txt=String(rawText||'').trim();
+      for(let i=0;i<=maxDecodeSteps;i++) {
+        const doc=parseXmlSafe(txt);
+        if(doc) return doc;
+        txt=decodeHtmlEntities(txt).trim();
+      }
+      return null;
+    }
+
     function firstTagText(root,tagName) {
       const el=root.getElementsByTagName(tagName)[0];
       return el? (el.textContent||'').trim():'';
@@ -3548,28 +3603,252 @@
       return out;
     }
 
-    function parseVgspCoverCatsFromDefs(defs,targetDefPk) {
-      const categoryDefs=defs.filter(d => firstTagText(d,'DefinitionType').toLowerCase()==='categorylist');
-      if(!categoryDefs.length) return [];
+    function buildVgspSpeciesLookup(defs) {
+      const byId={};
+      const norm=s => String(s||'').trim().toLowerCase();
 
-      const selected=categoryDefs.find(d => firstTagText(d,'DefinitionPK')===targetDefPk)||categoryDefs[0];
-      let xmlRaw=firstTagText(selected,'DefinitionXML');
-      xmlRaw=fullyDecodeEntities(xmlRaw).trim();
-      const listDoc=parseXmlSafe(xmlRaw)||parseXmlSafe(fullyDecodeEntities(xmlRaw));
-      if(!listDoc) return [];
+      const record=(rawId,label,list='') => {
+        const id=norm(rawId);
+        if(!id||!label) return;
+        const existing=byId[id];
+        const isGc=String(list||'').trim().toUpperCase()==='GC';
+        if(!existing||(!existing.isGc&&isGc)) {
+          byId[id]={label: String(label).trim(),isGc};
+        }
+      };
 
-      const seen=new Set();
+      defs.forEach(d => {
+        const xmlRaw=firstTagText(d,'DefinitionXML')||'';
+        const doc=parseXmlWithDecodingSteps(xmlRaw,3);
+        if(!doc) return;
+        [...doc.getElementsByTagName('*')].forEach(node => {
+          const rawId=(firstTagText(node,'PK_Species')||firstTagText(node,'FK_Species')||firstTagText(node,'ID')||'').trim();
+          if(!rawId) return;
+          const common=(firstTagText(node,'CommonName')||firstTagText(node,'CK_BestGuess')||firstTagText(node,'DisplayName')||'').trim();
+          const sci=(firstTagText(node,'SpeciesName')||'').trim();
+          const list=(firstTagText(node,'List')||'').trim();
+          record(rawId,common||sci||rawId,list);
+        });
+      });
+
+      return byId;
+    }
+
+    function extractVgspCoverCatsFromDoc(doc,speciesLookup={}) {
       const out=[];
-      [...listDoc.getElementsByTagName('Species')].forEach(sp => {
-        const rawId=(firstTagText(sp,'PK_Species')||'').trim();
-        const id=rawId.toLowerCase();
-        const label=(firstTagText(sp,'CommonName')||firstTagText(sp,'SpeciesName')||rawId).trim();
-        if(!id||!label||seen.has(id)) return;
+      const seen=new Set();
+      const resolve=rawId => speciesLookup[String(rawId||'').trim().toLowerCase()]||null;
+
+      const add=(rawId,label) => {
+        const cleanLabel=String(label||'').trim();
+        if(!cleanLabel) return;
+        const id=(String(rawId||'').trim()||normalizeCoverCatId(cleanLabel)).toLowerCase();
+        if(seen.has(id)) return;
         seen.add(id);
-        out.push({id,label,icon: coverIconForLabel(label)});
+        out.push({id,label: cleanLabel,icon: coverIconForLabel(cleanLabel)});
+      };
+
+      [...doc.getElementsByTagName('*')].forEach(node => {
+        const tag=(node.tagName||'').toLowerCase();
+        if(!['species','category','item','listitem','row','record'].includes(tag)) return;
+        const rawId=(firstTagText(node,'PK_Species')
+          ||firstTagText(node,'FK_Species')
+          ||firstTagText(node,'ID')
+          ||firstTagText(node,'PK')
+          ||'').trim();
+        const lookedUp=resolve(rawId);
+        const label=(firstTagText(node,'CommonName')
+          ||firstTagText(node,'CK_BestGuess')
+          ||firstTagText(node,'SpeciesName')
+          ||firstTagText(node,'Name')
+          ||firstTagText(node,'Label')
+          ||firstTagText(node,'Value')
+          ||lookedUp?.label
+          ||(node.textContent||'')).trim();
+        if(!rawId&&!label) return;
+        add(rawId,label);
       });
 
       return out;
+    }
+
+    function parseVgspCoverCatsFromDefs(defs,targetRefs=[],speciesLookup={}) {
+      const norm=s => String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+      const isCategoryLikeType=t => {
+        const nt=norm(t);
+        return nt.includes('categorylist')||nt.includes('groundcover')||nt.includes('covercategory')||nt.includes('coverlist');
+      };
+      const categoryDefs=defs.filter(d => isCategoryLikeType(firstTagText(d,'DefinitionType')));
+      if(!categoryDefs.length) return [];
+
+      const refs=new Set((targetRefs||[]).map(norm).filter(Boolean));
+      const selected=(refs.size
+        ? categoryDefs.find(d => {
+          const pk=norm(firstTagText(d,'DefinitionPK'));
+          const name=norm(firstTagText(d,'DefinitionName'));
+          const id=norm(firstTagText(d,'ID'));
+          return refs.has(pk)||refs.has(name)||refs.has(id);
+        })
+        :null)||categoryDefs[0];
+
+      const ordered=[selected,...categoryDefs.filter(d => d!==selected)];
+      for(const def of ordered) {
+        const xmlRaw=firstTagText(def,'DefinitionXML');
+        const listDoc=parseXmlWithDecodingSteps(xmlRaw,3);
+        if(!listDoc) continue;
+        const cats=extractVgspCoverCatsFromDoc(listDoc,speciesLookup);
+        if(cats.length) return cats;
+      }
+      return [];
+    }
+
+    function normalizeCoverCatId(label) {
+      return String(label||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'cover_cat';
+    }
+
+    function parseVgspCoverCatsFromAttrValue(raw,speciesLookup={}) {
+      const text=String(raw||'').trim();
+      if(!text) return [];
+
+      const out=[];
+      const seen=new Set();
+      const resolve=rawId => speciesLookup[String(rawId||'').trim().toLowerCase()]||null;
+      const addLabel=label => {
+        const clean=String(label||'').trim();
+        if(!clean) return;
+        const id=normalizeCoverCatId(clean);
+        if(seen.has(id)) return;
+        seen.add(id);
+        out.push({id,label: clean,icon: coverIconForLabel(clean)});
+      };
+
+      const addById=(rawId,fallback='') => {
+        const key=String(rawId||'').trim().toLowerCase();
+        if(!key) return;
+        if(seen.has(key)) return;
+        const lookedUp=resolve(key);
+        const label=(lookedUp?.label||fallback||rawId).trim();
+        seen.add(key);
+        out.push({id: key,label,icon: coverIconForLabel(label)});
+      };
+
+      const doc=parseXmlWithDecodingSteps(text,3);
+      if(doc) {
+        [...doc.getElementsByTagName('*')].forEach(node => {
+          const rawId=(firstTagText(node,'FK_Species')||firstTagText(node,'PK_Species')||firstTagText(node,'ID')||'').trim();
+          const lbl=(firstTagText(node,'CommonName')
+            ||firstTagText(node,'CK_BestGuess')
+            ||firstTagText(node,'SpeciesName')
+            ||firstTagText(node,'Name')
+            ||firstTagText(node,'Label')
+            ||firstTagText(node,'Value')
+            ||'').trim();
+          if(rawId) {addById(rawId,lbl); return;}
+          addLabel(lbl||node.textContent||'');
+        });
+        if(out.length) return out;
+      }
+
+      text.split(/[\r\n,;|]+/).forEach(token => {
+        const clean=token.trim();
+        if(!clean) return;
+        const simple=clean.replace(/[{}"']/g,'').trim();
+        const lookedUp=resolve(simple);
+        if(lookedUp) addById(simple,lookedUp.label);
+        else addLabel(simple);
+      });
+      return out;
+    }
+
+    function collectVgspCoverCatAttributeCandidates(formMap,eventAttrMaps) {
+      const candidates=[];
+      const keyLikeCoverCats=k => /gccategorylist|groundcover|covercat|categorylist/i.test(k||'');
+
+      const collectFromMap=map => {
+        Object.entries(map||{}).forEach(([k,v]) => {
+          if(!v) return;
+          if(keyLikeCoverCats(k)) {
+            if(v.value) candidates.push(v.value);
+            if(v.qualifier) candidates.push(v.qualifier);
+          }
+        });
+      };
+
+      collectFromMap(formMap);
+      (eventAttrMaps||[]).forEach(collectFromMap);
+      return candidates;
+    }
+
+    function parseVgspCoverCatsFromAttributes(formMap,eventAttrMaps,speciesLookup={}) {
+      const candidates=collectVgspCoverCatAttributeCandidates(formMap,eventAttrMaps);
+
+      const out=[];
+      const seen=new Set();
+      candidates.forEach(raw => {
+        parseVgspCoverCatsFromAttrValue(raw,speciesLookup).forEach(cat => {
+          if(seen.has(cat.id)) return;
+          seen.add(cat.id);
+          out.push(cat);
+        });
+      });
+      return out;
+    }
+
+    function getAttrByNormKey(attrMap,normKey) {
+      const keys=Object.keys(attrMap||{});
+      const hit=keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g,'')===normKey);
+      return hit? attrMap[hit]:null;
+    }
+
+    function asBoolOrNull(v) {
+      const s=String(v||'').trim().toLowerCase();
+      if(!s) return null;
+      if(['1','true','yes','y','on','checked','active'].includes(s)) return true;
+      if(['0','false','no','n','off','unchecked','inactive'].includes(s)) return false;
+      return null;
+    }
+
+    function isVgspEventActive(ev,evAttrMap) {
+      const candidates=[
+        firstTagText(ev,'Active'),
+        firstTagText(ev,'IsActive'),
+        firstTagText(ev,'Enabled'),
+        firstTagText(ev,'Checked'),
+        evAttrMap?.Active?.value,
+        evAttrMap?.IsActive?.value,
+        evAttrMap?.Enabled?.value,
+        evAttrMap?.Checked?.value,
+        getAttrByNormKey(evAttrMap,'active')?.value,
+        getAttrByNormKey(evAttrMap,'isactive')?.value,
+        getAttrByNormKey(evAttrMap,'enabled')?.value,
+        getAttrByNormKey(evAttrMap,'checked')?.value,
+      ];
+      for(const c of candidates) {
+        const b=asBoolOrNull(c);
+        if(b!==null) return b;
+      }
+      return true;
+    }
+
+    function parseAbsIntOrFallback(v,fallback) {
+      const n=parseInt(String(v??''),10);
+      if(Number.isFinite(n)) return Math.max(1,Math.abs(n));
+      const m=String(v??'').match(/-?\d+/);
+      if(m) return Math.max(1,Math.abs(parseInt(m[0],10)));
+      return fallback;
+    }
+
+    function parseVgspEntryOrder(ev,evAttrMap) {
+      const candidates=[
+        firstTagText(ev,'EntryOrder'),
+        evAttrMap?.EntryOrder?.value,
+        getAttrByNormKey(evAttrMap,'entryorder')?.value,
+      ];
+      for(const c of candidates) {
+        const n=parseInt(String(c??''),10);
+        if(Number.isFinite(n)) return Math.abs(n);
+      }
+      return null;
     }
 
     function parseVgspProtocol(fileText) {
@@ -3577,6 +3856,7 @@
       if(!outer) throw new Error('Invalid XML');
 
       const defs=[...outer.getElementsByTagName('Definitions')];
+      const speciesLookup=buildVgspSpeciesLookup(defs);
       const protoDef=defs.find(d => firstTagText(d,'DefinitionType').toUpperCase()==='PROTOCOL');
       if(!protoDef) throw new Error('No PROTOCOL definition found');
 
@@ -3601,33 +3881,95 @@
 
       const events=[...inner.getElementsByTagName('Events')];
       const methods=[];
+      const methodEntryOrder={};
+      const methodFirstSeen={};
+      const eventAttrMaps=[];
+      const eventAttributes=[];
+      const methodAttributes={};
       let coverPts=2;
       let frameW=40;
       let frameH=40;
-      let gcCategoryListPk='';
+      let fetchMeasuresPerSample=1;
+
+      function registerMethod(methodKey,entryOrder,eventSnapshot) {
+        if(!methods.includes(methodKey)) {
+          methods.push(methodKey);
+          methodFirstSeen[methodKey]=methods.length-1;
+        }
+        if(Number.isFinite(entryOrder)&&!Number.isNaN(entryOrder)) {
+          const prev=methodEntryOrder[methodKey];
+          if(prev==null||entryOrder<prev) methodEntryOrder[methodKey]=entryOrder;
+        }
+        if(!methodAttributes[methodKey]) methodAttributes[methodKey]=[];
+        methodAttributes[methodKey].push({
+          eventName: eventSnapshot.eventName,
+          entryOrder: eventSnapshot.entryOrder,
+          active: eventSnapshot.active,
+          attributes: eventSnapshot.attributes,
+        });
+      }
 
       events.forEach(ev => {
-        const evName=(firstTagText(ev,'EventName')||firstTagText(ev,'ListItem')||'').toLowerCase();
+        const evDisplayName=(firstTagText(ev,'EventName')||firstTagText(ev,'ListItem')||'').trim();
+        const evName=evDisplayName.toLowerCase();
         const evAttrMap=parseAttributeXmlToMap(firstTagText(ev,'EventAttributesXML'));
+        eventAttrMaps.push(evAttrMap);
+        const entryOrder=parseVgspEntryOrder(ev,evAttrMap);
+        const active=isVgspEventActive(ev,evAttrMap);
+        const eventSnapshot={
+          eventName: evDisplayName,
+          entryOrder,
+          active,
+          attributes: evAttrMap,
+          mappedMethods: [],
+        };
+        eventAttributes.push(eventSnapshot);
+        if(!active) return;
         if(evName.includes('ground cover')||evName.includes('point ground cover')) {
-          if(!methods.includes('cover')) methods.push('cover');
+          eventSnapshot.mappedMethods.push('cover');
+          registerMethod('cover',entryOrder,eventSnapshot);
           coverPts=Math.max(1,parseInt((evAttrMap.PointsPerSample?.value)||String(coverPts),10)||coverPts);
-          gcCategoryListPk=(evAttrMap.GCCategoryList?.value||'').trim()||gcCategoryListPk;
         }
         if(evName.includes('frequency')) {
-          if(!methods.includes('freq')) methods.push('freq');
+          eventSnapshot.mappedMethods.push('freq');
+          registerMethod('freq',entryOrder,eventSnapshot);
           frameW=Math.max(1,parseInt((evAttrMap.Quadrat1Width?.value)||String(frameW),10)||frameW);
           frameH=Math.max(1,parseInt((evAttrMap.Quadrat1Height?.value)||String(frameH),10)||frameH);
         }
         if(evName.includes('dwr')) {
-          if(!methods.includes('dwr')) methods.push('dwr');
+          eventSnapshot.mappedMethods.push('dwr');
+          registerMethod('dwr',entryOrder,eventSnapshot);
           frameW=Math.max(1,parseInt((evAttrMap.Quadrat1Width?.value)||String(frameW),10)||frameW);
           frameH=Math.max(1,parseInt((evAttrMap.Quadrat1Height?.value)||String(frameH),10)||frameH);
         }
+        if(evName.includes('fetch')) {
+          eventSnapshot.mappedMethods.push('fetch');
+          registerMethod('fetch',entryOrder,eventSnapshot);
+          const fetchAttr=getAttrByNormKey(evAttrMap,'measurespersample')
+            ||getAttrByNormKey(evAttrMap,'measurepersample')
+            ||getAttrByNormKey(evAttrMap,'measurementspersample');
+          fetchMeasuresPerSample=parseAbsIntOrFallback(fetchAttr?.value,fetchMeasuresPerSample);
+        }
       });
-
-      if(!methods.length) methods.push('cover','freq');
-      const coverCats=parseVgspCoverCatsFromDefs(defs,gcCategoryListPk);
+      methods.sort((a,b) => {
+        const ao=methodEntryOrder[a];
+        const bo=methodEntryOrder[b];
+        if(ao!=null&&bo!=null&&ao!==bo) return ao-bo;
+        if(ao!=null&&bo==null) return -1;
+        if(ao==null&&bo!=null) return 1;
+        return (methodFirstSeen[a]??0)-(methodFirstSeen[b]??0);
+      });
+      const coverCatRefs=collectVgspCoverCatAttributeCandidates(formMap,eventAttrMaps);
+      let coverCatsSource='default';
+      let coverCats=parseVgspCoverCatsFromDefs(defs,coverCatRefs,speciesLookup);
+      if(coverCats.length) coverCatsSource='definitions';
+      if(!coverCats.length) {
+        const attrCats=parseVgspCoverCatsFromAttributes(formMap,eventAttrMaps,speciesLookup);
+        if(attrCats.length) {
+          coverCats=attrCats;
+          coverCatsSource='attributes';
+        }
+      }
 
       return {
         id: 'proto_vgsp_'+Date.now(),
@@ -3643,6 +3985,14 @@
         frameW,
         frameH,
         methods,
+        methodEntryOrder,
+        fetchMeasuresPerSample,
+        coverCatsSource,
+        importAttributes: {
+          form: formMap,
+          events: eventAttributes,
+          methods: methodAttributes,
+        },
         coverCats,
         importedAt: Date.now()
       };
@@ -3715,7 +4065,7 @@
       ev.coverPts=protocol.coverPts;
       ev.frameW=protocol.frameW;
       ev.frameH=protocol.frameH;
-      ev.methods=(protocol.methods||[]).length? [...protocol.methods]:['cover','freq'];
+      ev.methods=Array.isArray(protocol.methods)? [...protocol.methods]:[];
       ev.coverCats=Array.isArray(protocol.coverCats)? protocol.coverCats:undefined;
       if(overwriteName||!ev.name) ev.name=protocol.name;
       return ev;
@@ -3768,13 +4118,21 @@
         new Date().toISOString().slice(0,10);
       document.getElementById('new-event-date').value='';
       const protocolId=document.getElementById('new-event-protocol').value||null;
+      if(!protocolId) {
+        toast('Select, import, or create a protocol first','warn');
+        return;
+      }
       const protocol=protocolId? await dbGet('protocols',protocolId):null;
-      const methods=[];
-      if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
-      if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
-      if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
+      let methods=[];
+      if(protocolId&&protocol&&Array.isArray(protocol.methods)) {
+        methods=[...protocol.methods];
+      } else {
+        if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
+        if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
+        if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
+      }
       if(!methods.length) {
-        toast('Select or import a protocol first','warn');
+        toast('Selected protocol has no active supported methods','warn');
         return;
       }
       const ev={
@@ -5037,8 +5395,10 @@
       if(!protocols.length) {listEl.innerHTML='<div style="font-size:.75rem;color:var(--muted);">No protocols.</div>'; return;}
       listEl.innerHTML=protocols.map(p => {
         const cfgStr=`${p.transects}T × ${p.samples}S · ${p.length}${p.unit} · ${p.frameW}×${p.frameH}cm`;
-        const methodStr=(p.methods||['cover','freq']).map(m => m==='cover'? 'Ground Cover':m==='freq'? 'Frequency Quadrat':'Dry Weight Rank').join(', ');
+        const methodStr=protocolMethodsText(p.methods);
+        const orderedMethodStr=protocolMethodsOrderedText(p.methods);
         const desc=p.description? `<div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${esc(p.description)}</div>`:'';
+        const importMeta=protocolImportedMetadataHTML(p);
         const sourceBadge=p.builtIn
           ? '<span class="badge" style="margin-left:4px;font-size:.6rem;">built-in</span>'
           :p.importedAt
@@ -5049,7 +5409,9 @@
             <div style="font-size:.82rem;font-weight:600;">${esc(p.name)}${sourceBadge}</div>
             <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${cfgStr}</div>
             <div style="font-size:.65rem;color:var(--muted);">${methodStr}</div>
+            <div style="font-size:.62rem;color:var(--dim);">Order: ${esc(orderedMethodStr)}</div>
             ${desc}
+            ${importMeta}
           </div>
           ${!p.builtIn? `<button class="btn btn-danger btn-sm proto-delete-btn" data-proto-id="${p.id}" title="Delete protocol" style="flex-shrink:0;">🗑</button>`:''}
         </div>`;
