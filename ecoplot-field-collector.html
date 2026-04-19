@@ -1600,6 +1600,7 @@
       width: 100%;
       max-height: 80vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .modal-title {
@@ -1624,6 +1625,47 @@
       border-radius: 2px;
     }
 
+    .info-icon-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--s2);
+      color: var(--muted);
+      font-family: var(--font-ui);
+      font-size: .66rem;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .info-icon-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent);
+    }
+
+    #help-modal-body {
+      font-size: .8rem;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 14px;
+      white-space: normal;
+    }
+
+    #help-modal-body p {
+      margin-bottom: 9px;
+    }
+
+    #help-modal-body p:last-child {
+      margin-bottom: 0;
+    }
+
     /* ── Panel load flash ── */
     @keyframes panelFlash {
       from {
@@ -1643,7 +1685,6 @@
 
     /* ── Panel header two-line title ── */
     #sample-panel-title {
-      flex: 1;
       min-width: 0;
     }
 
@@ -1651,9 +1692,9 @@
       font-family: var(--font-ui);
       font-weight: 800;
       font-size: 1rem;
-      color: var(--gold);
       letter-spacing: -.01em;
     }
+
 
     .spt-sub {
       font-size: .6rem;
@@ -1665,10 +1706,8 @@
     .spt-ctx {
       font-size: .68rem;
       color: var(--gold);
-      font-weight: 600;
       margin-top: 3px;
       letter-spacing: .01em;
-      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -1682,7 +1721,6 @@
     .transect-jump-label {
       font-size: .62rem;
       color: var(--muted);
-      letter-spacing: .04em;
       text-transform: uppercase;
     }
 
@@ -1934,7 +1972,9 @@
                   title="Cancel">✕</button>
               </div>
               <div class="field">
-                <label>Protocol</label>
+                <label>Protocol
+                  <button type="button" class="info-icon-btn" data-info-key="event-protocol" title="Protocol help">i</button>
+                </label>
                 <select id="new-event-protocol">
                   <option value="">— No Protocol (manual settings) —</option>
                 </select>
@@ -2040,7 +2080,7 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">Species Database <span class="badge" id="species-db-badge">Built-in list</span></div>
+          <div class="card-title"><span style="display:inline-flex;align-items:center;">Species Database <button type="button" class="info-icon-btn" data-info-key="setup-species" title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in list</span></div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
@@ -2058,18 +2098,19 @@
             </div>
           </div>
           <div id="species-list-wrap" style="margin-top:12px;display:none;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--s3);border:1px solid var(--accent2);border-radius:10px;">
+              <span style="font-size:1rem;">🌿</span>
               <label for="species-list-select"
-                style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;">Plant
+                style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;">Plant
                 List</label>
-              <select id="species-list-select" style="width:auto;min-width:170px;"></select>
+              <select id="species-list-select" style="width:auto;min-width:170px;border-color:var(--accent2);"></select>
               <span id="species-list-meta" style="font-size:.72rem;color:var(--muted);"></span>
             </div>
           </div>
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
         </div>
         <div class="card">
-          <div class="card-title">Survey Protocols</div>
+          <div class="card-title">Survey Protocols <button type="button" class="info-icon-btn" data-info-key="setup-protocols" title="Survey protocols help">i</button></div>
           <div id="protocols-list" style="margin-bottom:10px;"></div>
           <button class="btn btn-outline btn-sm" id="import-protocol-btn">📂 Import protocol (.vgsp/.xml)</button>
           <input type="file" id="protocol-file-input" accept=".vgsp,.xml,.txt" style="display:none;">
@@ -2155,6 +2196,11 @@
           </label>
           <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, alerts before advancing past a
             sample that has no species recorded or fewer cover hits than the site target.</div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.8rem;color:var(--text);margin-top:10px;">
+            <input type="checkbox" id="cfg-auto-sync" style="width:auto;accent-color:var(--accent);">
+            Auto-sync when back online
+          </label>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync automatically after connectivity returns.</div>
           <div class="field" style="margin-top:10px;">
             <label>USDA Species Display</label>
             <select id="cfg-species-display">
@@ -2167,7 +2213,7 @@
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
         </div>
         <div class="card">
-          <div class="card-title">Azure Connection</div>
+          <div class="card-title">Azure Connection <button type="button" class="info-icon-btn" data-info-key="setup-azure" title="Azure connection help">i</button></div>
           <div class="field">
             <label>Azure Function URL</label>
             <input type="url" id="cfg-url" placeholder="https://yourapp.azurewebsites.net/api/ecoplot">
@@ -2178,9 +2224,18 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">Sync Status <span class="badge" id="pending-badge">0 pending</span></div>
+          <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button type="button" class="info-icon-btn" data-info-key="setup-sync" title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
           <div id="sync-site-list"></div>
-          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Pending</button>
+          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Unsynced</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Export / Backup</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Download all local data as a JSON file for inspection or backup. This is a raw dump of all stores — useful for debugging before server sync is built out.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="export-json-btn">⬇ Export JSON</button>
+            <button class="btn btn-ghost btn-sm" id="export-csv-btn">⬇ Export CSV (samples)</button>
+          </div>
+          <div id="export-status" style="font-size:.67rem;color:var(--muted);margin-top:10px;">No exports yet on this device.</div>
         </div>
         <div class="card" style="border-color:var(--danger);">
           <div class="card-title" style="color:var(--danger);">⚠️ Developer Tools</div>
@@ -2444,6 +2499,91 @@
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="protocol-preview-cancel-btn">Cancel</button>
         <button class="btn btn-primary btn-full" id="protocol-preview-confirm-btn">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="edit-site-modal">
+    <div class="modal">
+      <div class="modal-title">Edit Site</div>
+      <input type="hidden" id="edit-site-id">
+      <div class="field">
+        <label>Site Name *</label>
+        <input type="text" id="edit-site-name" placeholder="e.g. Meadow Ridge A">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input type="text" id="edit-site-desc" placeholder="e.g. North slope, riparian buffer">
+      </div>
+      <div class="field">
+        <label>Default Protocol</label>
+        <select id="edit-site-protocol"></select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Latitude</label>
+          <input type="number" id="edit-site-lat" placeholder="e.g. 36.7783" step="any">
+        </div>
+        <div class="field">
+          <label>Longitude</label>
+          <input type="number" id="edit-site-lng" placeholder="e.g. -119.4179" step="any">
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-full" id="edit-get-gps-btn" style="margin-bottom:10px;" type="button">📍 Use My GPS Location</button>
+      <div class="row3">
+        <div class="field">
+          <label>Elevation (ft)</label>
+          <input type="number" id="edit-site-elev" placeholder="e.g. 7200" min="0">
+        </div>
+        <div class="field">
+          <label>Slope (%)</label>
+          <input type="number" id="edit-site-slope" placeholder="e.g. 12" min="0" max="100">
+        </div>
+        <div class="field">
+          <label>Aspect (°)</label>
+          <input type="number" id="edit-site-aspect" placeholder="e.g. 180" min="0" max="360">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Site Type</label>
+          <select id="edit-site-type">
+            <option value="None">None</option>
+            <option value="Key Area">Key Area</option>
+            <option value="Non-Site">Non-Site</option>
+            <option value="Other">Other</option>
+            <option value="Photo Point">Photo Point</option>
+            <option value="Exclosure">Exclosure</option>
+            <option value="Critical Area">Critical Area</option>
+            <option value="DMA">DMA</option>
+            <option value="Benchmark">Benchmark</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="edit-site-status">
+            <option value="Active">Active</option>
+            <option value="None">None</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="btn btn-ghost btn-full" id="edit-site-cancel-btn">Cancel</button>
+        <button class="btn btn-primary btn-full" id="edit-site-save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="help-modal">
+    <div class="modal">
+      <div class="modal-title" id="help-modal-title">Quick Help</div>
+      <div id="help-modal-body"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline btn-full" id="help-modal-setup-btn" style="display:none;">Go to Setup</button>
+        <button class="btn btn-primary btn-full" id="help-modal-close-btn">Got it</button>
       </div>
     </div>
   </div>
@@ -3009,14 +3149,16 @@
       const freqNote=document.getElementById('species-scope-note');
       const dwrNote=document.getElementById('dwr-scope-note');
       const scopeLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
-      const noteText=speciesAllRecords.length? `Plant List: ${scopeLabel}`:'No plant list loaded';
+      const noteHtml=speciesAllRecords.length
+        ? `Plant List: ${esc(scopeLabel)}`
+        :'No plant list loaded <button type="button" class="info-icon-btn" data-info-key="plant-list-missing" title="Plant list help">i</button>';
 
       if(freqNote) {
-        freqNote.textContent=noteText;
+        freqNote.innerHTML=noteHtml;
         freqNote.style.display=methods.includes('freq')? '':'none';
       }
       if(dwrNote) {
-        dwrNote.textContent=noteText;
+        dwrNote.innerHTML=noteHtml;
         dwrNote.style.display=methods.includes('dwr')? '':'none';
       }
     }
@@ -3031,7 +3173,9 @@
         return;
       }
       const scopeLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
-      scopeEl.textContent=speciesAllRecords.length? `Plant List in use: ${scopeLabel}`:'No plant list loaded';
+      scopeEl.innerHTML=speciesAllRecords.length
+        ? `Plant List in use: ${esc(scopeLabel)}`
+        :'No plant list loaded <button type="button" class="info-icon-btn" data-info-key="plant-list-missing" title="Plant list help">i</button>';
       scopeEl.style.display='';
     }
 
@@ -3532,8 +3676,25 @@
       pill.classList.toggle('online',on);
       document.getElementById('signal-lbl').textContent=on? 'ON':'OFF';
     }
-    window.addEventListener('online',updateSignal);
-    window.addEventListener('offline',updateSignal);
+
+    function handleConnectivityChange() {
+      updateSignal();
+      if(document.getElementById('page-sync')?.classList.contains('active')) {
+        renderSync();
+      }
+      if(navigator.onLine) {
+        const settings=getSettings();
+        if(settings.autoSync) {
+          toast('Back online. Auto-sync enabled, syncing pending records…','ok');
+          syncPendingSamples({silent: true,source: 'auto'});
+        } else {
+          toast('Back online. You can sync pending records.','ok');
+        }
+      }
+    }
+
+    window.addEventListener('online',handleConnectivityChange);
+    window.addEventListener('offline',handleConnectivityChange);
     updateSignal();
 
     // ══════════════════════════════════════════════════════
@@ -3545,6 +3706,84 @@
       el.textContent=msg; el.className='show '+(type==='ok'? 'ok':type==='err'? 'err':'');
       clearTimeout(_tt); _tt=setTimeout(() => el.className='',2600);
     }
+
+    function goToPage(page) {
+      const tab=document.querySelector(`.nav-tab[data-page="${page}"]`);
+      if(tab) tab.click();
+    }
+
+    function openHelpModal(title,html,opts={}) {
+      const modal=document.getElementById('help-modal');
+      const titleEl=document.getElementById('help-modal-title');
+      const bodyEl=document.getElementById('help-modal-body');
+      const setupBtn=document.getElementById('help-modal-setup-btn');
+      if(!modal||!titleEl||!bodyEl) {
+        toast('Help panel unavailable on this build.','err');
+        return;
+      }
+      titleEl.textContent=title||'Quick Help';
+      bodyEl.innerHTML=html||'';
+      if(setupBtn) setupBtn.style.display=opts.showSetup? '':'none';
+      modal.classList.add('open');
+    }
+
+    function closeHelpModal() {
+      const modal=document.getElementById('help-modal');
+      if(modal) modal.classList.remove('open');
+    }
+
+    document.getElementById('help-modal-close-btn')?.addEventListener('click',closeHelpModal);
+    document.getElementById('help-modal-setup-btn')?.addEventListener('click',() => {
+      closeHelpModal();
+      goToPage('sync');
+    });
+    document.getElementById('help-modal')?.addEventListener('click',e => {
+      if(e.target===document.getElementById('help-modal')) closeHelpModal();
+    });
+
+    function showInfoHelp(key) {
+      const helpByKey={
+        'event-protocol': {
+          title: 'Protocol Help',
+          html: '<p>Protocols auto-fill event settings like transects, samples, methods, and frame size.</p><p>Select one to standardize collection, or leave it blank for manual settings.</p>'
+        },
+        'setup-species': {
+          title: 'Species List Help',
+          html: '<p>Import <strong>speciesList.csv</strong> to enable your plant list and full species search for collection.</p><p>After import, choose the active Plant List scope and start collecting.</p>',
+          showSetup: true
+        },
+        'setup-protocols': {
+          title: 'Protocols Help',
+          html: '<p>Protocols are reusable templates for event setup.</p><p>Import a .vgsp/.xml file or create one manually so teams collect data consistently.</p>'
+        },
+        'setup-azure': {
+          title: 'Azure Sync Help',
+          html: '<p>Paste your Azure Function endpoint URL here and add an API key if required.</p><p>Then use Sync to upload pending local records when online.</p>'
+        },
+        'setup-sync': {
+          title: 'Sync Status Help',
+          html: '<p>This section shows all pending records waiting to upload.</p><p>Only non-archived sites outside local-only folders are queued for sync.</p>'
+        },
+        'plant-list-missing': {
+          title: 'No Plant List Loaded',
+          html: '<p>No imported plant list is active for this method.</p><p>Go to <strong>Setup -> Species Database</strong>, tap <strong>Import speciesList.csv</strong>, then return to Collect.</p>',
+          showSetup: true
+        }
+      };
+      const info=helpByKey[key]||{
+        title: 'Quick Help',
+        html: '<p>No additional help text is available for this item yet.</p>',
+        showSetup: false
+      };
+      openHelpModal(info.title,info.html,{showSetup: !!info.showSetup});
+    }
+
+    document.addEventListener('click',e => {
+      const infoBtn=e.target.closest('[data-info-key]');
+      if(!infoBtn) return;
+      e.preventDefault();
+      showInfoHelp(infoBtn.dataset.infoKey||'');
+    });
 
     // ══════════════════════════════════════════════════════
     //  SITES PAGE
@@ -3626,6 +3865,94 @@
       }
     });
 
+    // ── Edit Site modal ──
+    async function openEditSiteModal(siteId) {
+      const site=await dbGet('sites',siteId);
+      if(!site) {toast('Site not found','err'); return;}
+      const protocols=await dbGetAll('protocols');
+      const sel=document.getElementById('edit-site-protocol');
+      sel.innerHTML=`<option value="">— None —</option>`+
+        protocols.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+      document.getElementById('edit-site-id').value=site.id;
+      document.getElementById('edit-site-name').value=site.name||'';
+      document.getElementById('edit-site-desc').value=site.desc||'';
+      sel.value=site.protocolId||'';
+      document.getElementById('edit-site-lat').value=site.lat!=null? site.lat:'';
+      document.getElementById('edit-site-lng').value=site.lng!=null? site.lng:'';
+      document.getElementById('edit-site-elev').value=site.elev!=null? site.elev:'';
+      document.getElementById('edit-site-slope').value=site.slope!=null? site.slope:'';
+      document.getElementById('edit-site-aspect').value=site.aspect!=null? site.aspect:'';
+      document.getElementById('edit-site-type').value=site.siteType||'None';
+      document.getElementById('edit-site-status').value=site.status||'Active';
+      document.getElementById('edit-site-modal').classList.add('open');
+    }
+
+    document.getElementById('edit-site-cancel-btn').addEventListener('click',() => {
+      document.getElementById('edit-site-modal').classList.remove('open');
+    });
+
+    document.getElementById('edit-site-modal').addEventListener('click',e => {
+      if(e.target===document.getElementById('edit-site-modal'))
+        document.getElementById('edit-site-modal').classList.remove('open');
+    });
+
+    document.getElementById('edit-get-gps-btn').addEventListener('click',() => {
+      if(!navigator.geolocation) {toast('Geolocation not supported on this device','err'); return;}
+      const btn=document.getElementById('edit-get-gps-btn');
+      btn.textContent='📍 Getting location…';
+      btn.disabled=true;
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          document.getElementById('edit-site-lat').value=pos.coords.latitude.toFixed(6);
+          document.getElementById('edit-site-lng').value=pos.coords.longitude.toFixed(6);
+          if(pos.coords.altitude!==null&&!document.getElementById('edit-site-elev').value)
+            document.getElementById('edit-site-elev').value=Math.round(pos.coords.altitude*3.28084);
+          btn.textContent='📍 Use My GPS Location';
+          btn.disabled=false;
+          toast('Location captured','ok');
+        },
+        err => {
+          btn.textContent='📍 Use My GPS Location';
+          btn.disabled=false;
+          const msg={1:'Permission denied',2:'Position unavailable',3:'Timed out'};
+          toast('GPS error: '+(msg[err.code]||err.message),'err');
+        },
+        {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+      );
+    });
+
+    document.getElementById('edit-site-save-btn').addEventListener('click',async () => {
+      const id=document.getElementById('edit-site-id').value;
+      if(!id) return;
+      const name=document.getElementById('edit-site-name').value.trim();
+      if(!name) {toast('Site name required','err'); return;}
+      const site=await dbGet('sites',id);
+      if(!site) {toast('Site not found','err'); return;}
+      Object.assign(site,{
+        name,
+        desc: document.getElementById('edit-site-desc').value.trim(),
+        protocolId: document.getElementById('edit-site-protocol').value||null,
+        lat: document.getElementById('edit-site-lat').value.trim()||null,
+        lng: document.getElementById('edit-site-lng').value.trim()||null,
+        elev: document.getElementById('edit-site-elev').value.trim()||null,
+        slope: document.getElementById('edit-site-slope').value.trim()||null,
+        aspect: document.getElementById('edit-site-aspect').value.trim()||null,
+        siteType: document.getElementById('edit-site-type').value||'None',
+        status: document.getElementById('edit-site-status').value||'Active',
+        syncStatus: 'pending',
+      });
+      try {
+        await dbPut('sites',site);
+        document.getElementById('edit-site-modal').classList.remove('open');
+        toast('Site updated','ok');
+        // refresh activeSite if it's the one being edited
+        if(activeSiteId===id) { activeSite=site; renderCollect(); }
+        renderSiteList();
+      } catch(err) {
+        toast('Save error: '+err.message,'err');
+      }
+    });
+
     let showArchived=false;
     let currentFolderId=null; // null = root
 
@@ -3689,7 +4016,7 @@
         const subCount=folders.filter(sf => sf.parentId===f.id).length;
         const siteCount=countSitesInFolder(f.id,folders,allSites);
         const isLocal=f.localOnly===true;
-        const icon=isLocal? '🧪':'📁';
+        const icon='📁';
         const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
         const actions=isLocal
           ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
@@ -3749,6 +4076,7 @@
               <div class="site-name">${esc(s.name)}</div>
               <div class="site-sub">${subStr}</div>
             </div>
+            <span class="site-arrow" data-edit="${s.id}" title="Edit site" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">✏️</span>
             <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
             <span class="site-arrow">›</span>
           </div>`;
@@ -3759,7 +4087,7 @@
       localFolders.forEach(f => {
         const subCount=folders.filter(sf => sf.parentId===f.id).length;
         const siteCount=countSitesInFolder(f.id,folders,allSites);
-        const icon='🧪';
+        const icon='📁';
         const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
         const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
         html+=`<div class="folder-item" data-folder-id="${f.id}">
@@ -3800,6 +4128,8 @@
       // ── Wire site clicks ──
       el.querySelectorAll('.site-item').forEach(item => {
         item.addEventListener('click',e => {
+          const editBtn=e.target.closest('[data-edit]');
+          if(editBtn) {e.stopPropagation(); openEditSiteModal(editBtn.dataset.edit); return;}
           const delBtn=e.target.closest('[data-del]');
           if(delBtn) {promptDelete(delBtn.dataset.del); return;}
           const restoreBtn=e.target.closest('[data-restore]');
@@ -6444,32 +6774,39 @@
       const archivedIds=new Set(sites.filter(s => s.archived).map(s => s.id));
       const localOnlyIds=getLocalOnlySiteIds(folders,sites);
       const excludedIds=new Set([...archivedIds,...localOnlyIds]);
-      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!excludedIds.has(x.siteId)).length;
-      document.getElementById('pending-badge').textContent=`${pending} pending`;
+      const unsyncedCount=samples.filter(x => x.hasData&&x.syncStatus!=='synced'&&!excludedIds.has(x.siteId)).length;
+      const failedCount=samples.filter(x => x.hasData&&x.syncStatus==='failed'&&!excludedIds.has(x.siteId)).length;
+      document.getElementById('pending-badge').textContent=failedCount
+        ? `${unsyncedCount} unsynced · ${failedCount} failed`
+        :`${unsyncedCount} unsynced`;
 
       const rows=activeSites.map(site => {
         const isLocal=localOnlyIds.has(site.id);
         const sTotal=site.transects*site.samples;
         const sDone=samples.filter(x => x.siteId===site.id&&x.hasData).length;
         const sPend=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='pending').length;
+        const sFail=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='failed').length;
         const sSynced=samples.filter(x => x.siteId===site.id&&x.syncStatus==='synced').length;
         return `<div class="sync-status-row">
       <div style="flex:1;min-width:0;">
         <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${isLocal? ' <span style="font-size:.6rem;color:var(--gold);">🧪 local only</span>':''}</div>
-        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' · not synced':` · ${sPend} pending · ${sSynced} synced`}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' · not synced':` · ${sPend} pending · ${sFail} failed · ${sSynced} synced`}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
         ${!isLocal&&sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
+        ${!isLocal&&sFail>0? `<div class="status-dot sd-failed" title="Failed"></div>`:''}
         ${!isLocal&&sSynced>0? `<div class="status-dot sd-synced" title="Synced"></div>`:''}
       </div>
     </div>`;
       }).join('')||'<div class="empty"><span class="e-icon">📡</span><p>No sites created yet.</p></div>';
 
       document.getElementById('sync-site-list').innerHTML=rows;
-      document.getElementById('sync-btn').disabled=pending===0||!navigator.onLine;
+      document.getElementById('sync-btn').disabled=unsyncedCount===0||!navigator.onLine;
       // load Collection Settings
       const iwVal=localStorage.getItem('ep_incomplete_warn');
+      const autoSyncVal=localStorage.getItem('ep_auto_sync');
       document.getElementById('cfg-incomplete-warn').checked=(iwVal===null||iwVal==='1');
+      document.getElementById('cfg-auto-sync').checked=(autoSyncVal==='1');
       document.getElementById('cfg-species-display').value=speciesDisplayMode;
       // load Protocols list
       renderProtocols();
@@ -6594,7 +6931,15 @@
 
     document.getElementById('protocol-preview-cancel-btn').addEventListener('click',closeProtocolPreview);
 
-    function getSettings() {return {url: localStorage.getItem('ep_url')||'',key: localStorage.getItem('ep_key')||'',incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1',speciesDisplay: localStorage.getItem('ep_species_display_mode')||'species'};}
+    function getSettings() {
+      return {
+        url: localStorage.getItem('ep_url')||'',
+        key: localStorage.getItem('ep_key')||'',
+        incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1',
+        speciesDisplay: localStorage.getItem('ep_species_display_mode')||'species',
+        autoSync: localStorage.getItem('ep_auto_sync')==='1',
+      };
+    }
 
     // Returns a Set of siteIds that live inside localOnly folders (never synced)
     function getLocalOnlySiteIds(folders,sites) {
@@ -6611,6 +6956,7 @@
       localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
       localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
       localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
+      localStorage.setItem('ep_auto_sync',document.getElementById('cfg-auto-sync').checked? '1':'0');
       speciesDisplayMode=document.getElementById('cfg-species-display').value||'species';
       localStorage.setItem('ep_species_display_mode',speciesDisplayMode);
       if(samplePanelOpen) {
@@ -6622,6 +6968,153 @@
       renderSummary();
       toast('Settings saved','ok');
     });
+
+    // ── Export / Backup ──
+    function setExportStatus(msg,type='') {
+      const el=document.getElementById('export-status');
+      if(!el) return;
+      el.textContent=msg;
+      el.style.color=type==='ok'? 'var(--accent)':type==='err'? 'var(--danger)':'var(--muted)';
+      localStorage.setItem('ep_export_status',msg);
+    }
+
+    const savedExportStatus=localStorage.getItem('ep_export_status');
+    if(savedExportStatus) setExportStatus(savedExportStatus);
+
+    async function downloadBlob(blob,filename) {
+      const fallbackDownload=() => {
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => {document.body.removeChild(a); URL.revokeObjectURL(url);},1000);
+      };
+
+      // iOS Safari ignores <a download>; use Web Share API (files) when available (iOS 15+)
+      if(navigator.share) {
+        try {
+          if(typeof File!=='undefined'&&navigator.canShare) {
+            const shareType=filename.toLowerCase().endsWith('.json')? 'text/plain':(blob.type||'application/octet-stream');
+            const file=new File([blob],filename,{type: shareType});
+            if(navigator.canShare({files:[file]})) {
+              await navigator.share({files:[file],title:filename});
+              return 'shared';
+            }
+          }
+        } catch(e) {
+          if(e?.name==='AbortError') return 'canceled';
+        }
+      }
+
+      // Desktop / Android, and iOS permission/share failure fallback
+      fallbackDownload();
+      return 'downloaded';
+    }
+
+    document.getElementById('export-json-btn').addEventListener('click',async () => {
+      const btn=document.getElementById('export-json-btn');
+      btn.disabled=true; btn.textContent='Exporting…';
+      setExportStatus('Preparing JSON export…');
+      try {
+        const [sites,events,samples,folders,protocols,species]=await Promise.all([
+          dbGetAll('sites'),dbGetAll('events'),dbGetAll('samples'),
+          dbGetAll('folders'),dbGetAll('protocols'),dbGetAll('species'),
+        ]);
+        const data={
+          exportedAt: new Date().toISOString(),
+          appVersion: APP_VERSION,
+          stores: {sites,events,samples,folders,protocols,species},
+        };
+        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const date=new Date().toISOString().slice(0,10);
+        const result=await downloadBlob(blob,`ecoplot-export-${date}.json`);
+        if(result==='canceled') {
+          toast('Export canceled');
+          setExportStatus('JSON export canceled by user.');
+        } else if(result==='shared') {
+          toast('JSON export shared','ok');
+          setExportStatus(`JSON export ready via share sheet (${date}).`,'ok');
+        } else {
+          toast('JSON exported','ok');
+          setExportStatus(`JSON exported to file (${date}).`,'ok');
+        }
+      } catch(err) {
+        toast('Export failed: '+err.message,'err');
+        setExportStatus('JSON export failed: '+err.message,'err');
+      } finally {
+        btn.disabled=false; btn.textContent='⬇ Export JSON';
+      }
+    });
+
+    document.getElementById('export-csv-btn').addEventListener('click',async () => {
+      const btn=document.getElementById('export-csv-btn');
+      btn.disabled=true; btn.textContent='Exporting…';
+      setExportStatus('Preparing CSV export…');
+      try {
+        const [sites,events,samples]=await Promise.all([
+          dbGetAll('sites'),dbGetAll('events'),dbGetAll('samples'),
+        ]);
+        const siteMap=Object.fromEntries(sites.map(s => [s.id,s]));
+        const eventMap=Object.fromEntries(events.map(e => [e.id,e]));
+
+        const rows=[];
+        rows.push([
+          'site_id','site_name','event_id','event_name','event_date',
+          'transect','sample','species','cover_hits','dwr_entries','fetch_values',
+          'sync_status','has_data',
+        ].join(','));
+
+        samples.forEach(s => {
+          const site=siteMap[s.siteId]||{};
+          const ev=eventMap[s.eventId]||{};
+          const species=(s.species||[]).map(sp => sp.symbol||(sp.code||'')).join(';');
+          const coverHits=(s.coverHits||[]).map(h => h.id||h).join(';');
+          const dwr=(s.dwrEntries||[]).map(e => e.symbol||'').join(';');
+          const fetch=(s.fetchValues||[]).join(';');
+          const csvRow=[
+            s.siteId,
+            csvEsc(site.name||''),
+            s.eventId,
+            csvEsc(ev.name||''),
+            ev.date||'',
+            (s.transectIdx!=null? s.transectIdx+1:''),
+            (s.sampleIdx!=null? s.sampleIdx+1:''),
+            csvEsc(species),
+            csvEsc(coverHits),
+            csvEsc(dwr),
+            csvEsc(fetch),
+            s.syncStatus||'',
+            s.hasData? 'true':'false',
+          ].join(',');
+          rows.push(csvRow);
+        });
+
+        const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+        const date=new Date().toISOString().slice(0,10);
+        const result=await downloadBlob(blob,`ecoplot-samples-${date}.csv`);
+        if(result==='canceled') {
+          toast('Export canceled');
+          setExportStatus('CSV export canceled by user.');
+        } else if(result==='shared') {
+          toast(`Exported ${samples.length} sample rows`,'ok');
+          setExportStatus(`CSV export ready via share sheet (${date}).`,'ok');
+        } else {
+          toast(`Exported ${samples.length} sample rows`,'ok');
+          setExportStatus(`CSV exported to file (${date}).`,'ok');
+        }
+      } catch(err) {
+        toast('Export failed: '+err.message,'err');
+        setExportStatus('CSV export failed: '+err.message,'err');
+      } finally {
+        btn.disabled=false; btn.textContent='⬇ Export CSV (samples)';
+      }
+    });
+
+    function csvEsc(v) {
+      const s=String(v==null?'':v);
+      if(s.includes(',')||s.includes('"')||s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"';
+      return s;
+    }
 
     // ── Wipe database ──
     document.getElementById('wipe-db-btn').addEventListener('click',() => {
@@ -6686,54 +7179,77 @@
       toast(wipeSpecies? 'Database and species list wiped':'Database wiped','ok');
     });
 
-    document.getElementById('sync-btn').addEventListener('click',async () => {
+    let isSyncInProgress=false;
+
+    async function syncPendingSamples({silent=false,source='manual'}={}) {
+      if(isSyncInProgress) return;
       const {url,key}=getSettings();
-      if(!url) {toast('Set Azure URL first','err'); return;}
+      if(!url) {
+        if(!silent) toast('Set Azure URL first','err');
+        return;
+      }
       const samples=await dbGetAll('samples');
       const sites=await dbGetAll('sites');
       const folders=await dbGetAll('folders');
       const archivedSiteIds=new Set(sites.filter(s => s.archived).map(s => s.id));
       const localOnlySiteIds=getLocalOnlySiteIds(folders,sites);
       const excludedSiteIds=new Set([...archivedSiteIds,...localOnlySiteIds]);
-      const pending=samples.filter(x => x.syncStatus==='pending'&&x.hasData&&!excludedSiteIds.has(x.siteId));
-      if(!pending.length) {toast('Nothing to sync'); return;}
+      const unsynced=samples.filter(x => x.hasData&&x.syncStatus!=='synced'&&!excludedSiteIds.has(x.siteId));
+      if(!unsynced.length) {
+        if(!silent&&source==='manual') toast('Nothing to sync');
+        return;
+      }
 
       const btn=document.getElementById('sync-btn');
+      isSyncInProgress=true;
       btn.disabled=true; btn.textContent='Syncing…';
 
       let ok=0,fail=0;
-      for(const samp of pending) {
-        const site=sites.find(s => s.id===samp.siteId);
-        try {
-          const hdrs={'Content-Type': 'application/json'};
-          if(key) hdrs['x-functions-key']=key;
-          const res=await fetch(url,{
-            method: 'POST',headers: hdrs,
-            body: JSON.stringify({
-              id: samp.id,
-              siteId: samp.siteId,
-              siteName: site?.name,
-              transectIdx: samp.transectIdx,
-              sampleIdx: samp.sampleIdx,
-              savedAt: new Date(samp.savedAt).toISOString(),
-              species: samp.species,
-              coverHits: samp.coverHits,
-              fetch: samp.fetch,
-              eventId: samp.eventId,
-              frameW: site?.frameW,
-              frameH: site?.frameH
-            })
-          });
-          samp.syncStatus=res.ok? 'synced':'failed';
-          if(res.ok) ok++; else fail++;
-        } catch {samp.syncStatus='failed'; fail++;}
-        await dbPut('samples',samp);
+      try {
+        for(const samp of unsynced) {
+          const site=sites.find(s => s.id===samp.siteId);
+          try {
+            const hdrs={'Content-Type': 'application/json'};
+            if(key) hdrs['x-functions-key']=key;
+            const res=await fetch(url,{
+              method: 'POST',headers: hdrs,
+              body: JSON.stringify({
+                id: samp.id,
+                siteId: samp.siteId,
+                siteName: site?.name,
+                transectIdx: samp.transectIdx,
+                sampleIdx: samp.sampleIdx,
+                savedAt: new Date(samp.savedAt).toISOString(),
+                species: samp.species,
+                coverHits: samp.coverHits,
+                fetch: samp.fetch,
+                eventId: samp.eventId,
+                frameW: site?.frameW,
+                frameH: site?.frameH
+              })
+            });
+            samp.syncStatus=res.ok? 'synced':'failed';
+            if(res.ok) ok++; else fail++;
+          } catch {
+            samp.syncStatus='failed';
+            fail++;
+          }
+          await dbPut('samples',samp);
+        }
+      } finally {
+        isSyncInProgress=false;
+        btn.textContent='↑ Sync All Unsynced';
+        renderSync();
       }
 
-      btn.textContent='↑ Sync All Pending';
-      renderSync();
-      if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''} `,'ok');
-      else toast(`${ok} synced,${fail} failed`,'err');
+      if(!silent||fail>0) {
+        if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''}`,'ok');
+        else toast(`${ok} synced, ${fail} failed`,'err');
+      }
+    }
+
+    document.getElementById('sync-btn').addEventListener('click',async () => {
+      syncPendingSamples({silent: false,source: 'manual'});
     });
 
     // ══════════════════════════════════════════════════════
