@@ -1169,6 +1169,81 @@
       background: rgba(217, 85, 85, .1);
     }
 
+    .two-code-picks {
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(233, 185, 73, .08), rgba(22, 25, 31, .08));
+    }
+
+    .two-code-picks[hidden] {
+      display: none !important;
+    }
+
+    .two-code-picks-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: .62rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .two-code-picks-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .two-code-pick-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(233, 185, 73, .38);
+      background: rgba(233, 185, 73, .08);
+      color: var(--text);
+      padding: 5px 10px;
+      font-size: .68rem;
+      cursor: pointer;
+    }
+
+    .two-code-pick-btn:hover,
+    .two-code-pick-btn:active {
+      border-color: #e9b949;
+      background: rgba(233, 185, 73, .16);
+    }
+
+    .two-code-pick-btn.active {
+      border-color: #e9b949;
+      color: #e9b949;
+      background: rgba(233, 185, 73, .18);
+    }
+
+    .two-code-pick-btn[disabled] {
+      opacity: .45;
+      cursor: default;
+    }
+
+    .two-code-pick-symbol {
+      font-family: var(--font-mono);
+      font-size: .64rem;
+      color: #e9b949;
+    }
+
+    .two-code-pick-more {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: .68rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
     @keyframes chipIn {
       from {
         transform: scale(.8);
@@ -1976,6 +2051,8 @@
             style="display:none;font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.45;">
             Required columns: Symbol or Code, Scientific Name, and Common Name. Optional columns like State, Native
             Status, Duration, and Growth Habit are allowed. State values must be one state per row.
+            <div style="margin-top:6px;">Built-in unknown/grouped 2-codes like 2FORB and 2GRAM are always available,
+              even without a CSV.</div>
             <div style="margin-top:6px;opacity:.9;">Example header: <span
                 style="font-family:var(--font-mono);font-size:.68rem;">Symbol,Scientific Name,Common Name,State</span>
             </div>
@@ -2177,10 +2254,11 @@
         <div id="species-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;">
         </div>
         <div id="species-search-wrap">
-          <input type="text" id="species-input" placeholder="Search USDA plant name or symbol…" autocomplete="off"
-            autocorrect="off" spellcheck="false">
+          <input type="text" id="species-input" placeholder="Search by symbol, common name, scientific name, or 2-code…"
+            autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="species-clear" style="display:none;">✕</button>
         </div>
+        <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div style="display:flex;justify-content:flex-end;margin:6px 0 8px 0;">
           <button class="seen-toggle-btn" id="species-none-btn"
             title="Record that no species were present in this frame" style="border-color:#d19b1f;color:#d19b1f;">None
@@ -2203,10 +2281,11 @@
         <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Select the top 3 species by estimated dry
           weight in this frame.</div>
         <div id="dwr-search-wrap" style="margin-bottom:10px;">
-          <input type="text" id="dwr-input" placeholder="Search species (max 3)…" autocomplete="off" autocorrect="off"
-            spellcheck="false">
+          <input type="text" id="dwr-input" placeholder="Search species or 2-codes (max 3)…" autocomplete="off"
+            autocorrect="off" spellcheck="false">
           <button id="dwr-clear" style="display:none;">✕</button>
         </div>
+        <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div id="dwr-dropdown"
           style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-bottom:10px;">
         </div>
@@ -2309,8 +2388,8 @@
 
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;">Replace with</div>
       <div id="bulk-replace-search-wrap" style="position:relative;margin-bottom:8px;">
-        <input type="text" id="bulk-replace-input" placeholder="Search USDA species to replace with…" autocomplete="off"
-          autocorrect="off" spellcheck="false" style="padding-right:34px;">
+        <input type="text" id="bulk-replace-input" placeholder="Search species or 2-code to replace with…"
+          autocomplete="off" autocorrect="off" spellcheck="false" style="padding-right:34px;">
         <button id="bulk-replace-clear"
           style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;color:var(--muted);cursor:pointer;">✕</button>
       </div>
@@ -2323,6 +2402,26 @@
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="bulk-replace-cancel-btn">Cancel</button>
         <button class="btn btn-primary btn-full" id="bulk-replace-apply-btn">Replace All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="species-qualifier-modal">
+    <div class="modal">
+      <div class="modal-title">Edit Species Qualifier</div>
+      <div id="species-qualifier-target" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">—</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Use qualifiers to distinguish grouped or
+        unknown entries like 2FORB so you can identify and replace them later.</div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Qualifier</label>
+        <input type="text" id="species-qualifier-input" maxlength="20" placeholder="e.g. yellow flower, basal rosette"
+          autocomplete="off">
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:14px;" id="species-qualifier-help">Leave blank to
+        remove the qualifier.</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="species-qualifier-cancel-btn">Cancel</button>
+        <button class="btn btn-primary btn-full" id="species-qualifier-save-btn">Save Qualifier</button>
       </div>
     </div>
   </div>
@@ -2356,8 +2455,62 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-19';
-    const APP_BUILD_REV=2;
+    const APP_BUILD_REV=10;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
+    const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
+      ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
+      ['2CYAN','Cyanobacteria','Cyanobacteria','?','',''],
+      ['2FA','Forb, annual','Forb, annual','?','Annual','Forb/herb'],
+      ['2FB','Forb, biennial','Forb, biennial','?','Biennial','Forb/herb'],
+      ['2FERN','Fern or Fern Ally','Fern or Fern Ally','?','Perennial','Forb/herb'],
+      ['2FF','Fungus, fleshy (mushroom)','Fungus, fleshy (mushroom)','?','',''],
+      ['2FI','Forb, introduced','Forb, introduced','?','','Forb/herb'],
+      ['2FN','Forb, native','Forb, native','?','','Forb/herb'],
+      ['2FORB','Forb (herbaceous, not grass nor grass-like)','Forb (herbaceous, not grass nor grass-like)','?','','Forb/herb'],
+      ['2FP','Forb, perennial','Forb, perennial','?','Perennial','Forb/herb'],
+      ['2FS','Forb, succulent','Forb, succulent','?','','Forb/herb'],
+      ['2FSA','Forb, succulent, annual','Forb, succulent, annual','?','Annual','Forb/herb'],
+      ['2FSB','Forb, succulent, biennial','Forb, succulent, biennial','?','Biennial','Forb/herb'],
+      ['2FSP','Forb, succulent, perennial','Forb, succulent, perennial','?','Perennial','Forb/herb'],
+      ['2FUNGI','Fungus','Fungus','?','',''],
+      ['2GA','Grass, annual','Grass, annual','?','Annual','Graminoid'],
+      ['2GB','Grass, biennial','Grass, biennial','?','Biennial','Graminoid'],
+      ['2GI','Grass, introduced','Grass, introduced','?','','Graminoid'],
+      ['2GL','Grass-like (not a true grass)','Grass-like (not a true grass)','?','','Graminoid'],
+      ['2GLA','Grass-like, annual','Grass-like, annual','?','Annual','Graminoid'],
+      ['2GLB','Grass-like, biennial','Grass-like, biennial','?','Biennial','Graminoid'],
+      ['2GLP','Grass-like, perennial','Grass-like, perennial','?','Perennial','Graminoid'],
+      ['2GN','Grass, native','Grass, native','?','','Graminoid'],
+      ['2GP','Grass, perennial','Grass, perennial','?','Perennial','Graminoid'],
+      ['2GRAM','Graminoid (grass or grass-like)','Graminoid (grass or grass-like)','?','','Graminoid'],
+      ['2GW','Grass, woody (bamboo, etc.)','Grass, woody (bamboo, etc.)','?','','Shrub/Subshrub'],
+      ['2HORN','Hornwort','Hornwort','?','',''],
+      ['2LICHN','Lichen','Lichen','?','',''],
+      ['2LW','Liverwort','Liverwort','?','',''],
+      ['2MOSS','Moss','Moss','?','',''],
+      ['2PLANT','Unknown: Plant','Unknown: Plant','?','',''],
+      ['2SB','Shrub, broadleaf','Shrub, broadleaf','?','','Shrub/Subshrub'],
+      ['2SD','Shrub, deciduous','Shrub, deciduous','?','','Shrub/Subshrub'],
+      ['2SE','Shrub, evergreen','Shrub, evergreen','?','','Shrub/Subshrub'],
+      ['2SHRUB','Shrub (>.5m)','Shrub (>.5m)','?','','Shrub/Subshrub'],
+      ['2SLIME','Slime Mold','Slime Mold','?','',''],
+      ['2SN','Shrub, needleleaf (coniferous)','Shrub, needleleaf (coniferous)','?','','Shrub/Subshrub'],
+      ['2SS','Shrub, succulent','Shrub, succulent','?','','Shrub/Subshrub'],
+      ['2SSB','Subshrub, broadleaf','Subshrub, broadleaf','?','','Shrub/Subshrub'],
+      ['2SSD','Subshrub, deciduous','Subshrub, deciduous','?','','Shrub/Subshrub'],
+      ['2SSE','Subshrub, evergreen','Subshrub, evergreen','?','','Shrub/Subshrub'],
+      ['2SSN','Subshrub, needleleaf (coniferous)','Subshrub, needleleaf (coniferous)','?','','Shrub/Subshrub'],
+      ['2SSS2','Subshrub, succulent','Subshrub, succulent','?','','Shrub/Subshrub'],
+      ['2SUBS','Subshrub (<.5m)','Subshrub (<.5m)','?','','Shrub/Subshrub'],
+      ['2TB','Tree, broadleaf','Tree, broadleaf','?','','Tree'],
+      ['2TD','Tree, deciduous','Tree, deciduous','?','','Tree'],
+      ['2TE','Tree, evergreen','Tree, evergreen','?','','Tree'],
+      ['2TN','Tree, needleleaf (coniferous)','Tree, needleleaf (coniferous)','?','','Tree'],
+      ['2TREE','Tree','Tree','?','','Tree'],
+      ['2TS','Tree, succulent','Tree, succulent','?','','Tree'],
+      ['2VH','Vine, herbaceous','Vine, herbaceous','?','','Vine, Forb/herb'],
+      ['2VW','Vine, woody','Vine, woody','?','','Vine, Subshrub, Shrub'],
+    ];
     const USDA_PLANTS=[];
     const COVER_CATS=[
       {id: "bare_soil",label: "Bare Soil",icon: "🟤"},
@@ -2603,11 +2756,13 @@
     let swRegistrationRef=null;
     let swUpdateReady=false;
     let swStatusText='Build loaded. Checking offline cache status…';
+    let speciesQualifierState={methodKey: '',entryIndex: -1};
     const USDA_SPECIES_METHODS=[
       {key: 'species',badge: 'freq',label: 'Frequency',uniquePerSample: true},
       {key: 'dwr',badge: 'dwr',label: 'DWR',uniquePerSample: false},
     ];
     const USDA_SPECIES_METHOD_KEYS=USDA_SPECIES_METHODS.map(m => m.key);
+    const FEATURED_TWO_CODE_SYMBOLS=['2FP','2FA','2GA','2GP','2SHRUB','2SUBS','2TREE'];
 
     function toggleSiteSpeciesVisibility() {
       showSiteSpecies=!showSiteSpecies;
@@ -2646,6 +2801,83 @@
       // Accept imperfect files that pack multiple states in one cell.
       // We keep only the first state token so each stored row maps to one state list key.
       return String(raw).split(/[;,|\/]+/).map(s => s.trim()).filter(Boolean)[0]||'';
+    }
+
+    function normalizeSpeciesQualifier(v) {
+      return String(v||'').trim().replace(/\s+/g,' ').slice(0,20);
+    }
+
+    function isAlwaysAvailableTwoCode(spOrSymbol) {
+      const symbol=String(typeof spOrSymbol==='string'? spOrSymbol:spOrSymbol?.symbol||'').trim().toUpperCase();
+      return symbol.startsWith('2');
+    }
+
+    function speciesEntryKey(sp) {
+      const symbol=String(sp?.symbol||'').trim().toUpperCase();
+      const qualifier=normalizeSpeciesQualifier(sp?.qualifier||'');
+      if(!symbol) return '';
+      return isAlwaysAvailableTwoCode(symbol)&&qualifier? `${symbol}::${qualifier.toLowerCase()}`:symbol;
+    }
+
+    function getSearchSpeciesDB() {
+      return [...speciesDB,...ALWAYS_AVAILABLE_TWO_CODE_SPECIES];
+    }
+
+    function hasSearchSpeciesDB() {
+      return getSearchSpeciesDB().length>0;
+    }
+
+    function shouldSearchSpeciesQuery(q) {
+      return q.length>=2||q==='2';
+    }
+
+    function createSpeciesEntry({symbol,common,sci,native,qualifier=''}) {
+      return {
+        symbol: String(symbol||'').trim().toUpperCase(),
+        common: String(common||'').trim(),
+        sci: String(sci||'').trim(),
+        native: String(native||'?').trim()||'?',
+        qualifier: normalizeSpeciesQualifier(qualifier),
+      };
+    }
+
+    function speciesQualifierText(sp) {
+      return normalizeSpeciesQualifier(sp?.qualifier||'');
+    }
+
+    function hasSpeciesEntry(list,entry,excludeIndex=-1) {
+      const key=speciesEntryKey(entry);
+      return (list||[]).some((item,idx) => idx!==excludeIndex&&speciesEntryKey(item)===key);
+    }
+
+    function findSpeciesEntryIndex(list,entry) {
+      const key=speciesEntryKey(entry);
+      return (list||[]).findIndex(item => speciesEntryKey(item)===key);
+    }
+
+    function findUngroupedQualifierGapIndex(list,entry) {
+      const symbol=String(entry?.symbol||'').trim().toUpperCase();
+      if(!isAlwaysAvailableTwoCode(symbol)) return -1;
+      return (list||[]).findIndex(item => String(item?.symbol||'').trim().toUpperCase()===symbol&&!speciesQualifierText(item));
+    }
+
+    function getSpeciesSearchRecord(symbol) {
+      const target=String(symbol||'').trim().toUpperCase();
+      return getSearchSpeciesDB().find(row => String(row?.[0]||'').trim().toUpperCase()===target)||null;
+    }
+
+    function speciesEntryFromSymbol(symbol) {
+      const row=getSpeciesSearchRecord(symbol);
+      return createSpeciesEntry({
+        symbol: row?.[0]||symbol,
+        common: row?.[1]||symbol,
+        sci: row?.[2]||row?.[1]||'',
+        native: row?.[3]||'?',
+      });
+    }
+
+    function featuredTwoCodeSpecies() {
+      return FEATURED_TWO_CODE_SYMBOLS.map(speciesEntryFromSymbol).filter(sp => !!sp.symbol);
     }
 
     function getSpeciesListOptions(rows) {
@@ -2901,9 +3133,10 @@
       const map={};
       const order=[];
       sampleList.forEach(s => (s.species||[]).forEach(sp => {
-        if(!map[sp.symbol]) {map[sp.symbol]=sp; order.push(sp.symbol);}
+        const key=speciesEntryKey(sp);
+        if(!map[key]) {map[key]=sp; order.push(key);}
       }));
-      return order.map(sym => map[sym]);
+      return order.map(key => map[key]);
     }
 
     // Collect species from BOTH frequency (species) and DWR (dwr) arrays across all event samples
@@ -2918,11 +3151,12 @@
       sampleList.forEach(s => {
         methodKeys.forEach(key => {
           (s[key]||[]).forEach(sp => {
-            if(!map[sp.symbol]) {map[sp.symbol]=sp; order.push(sp.symbol);}
+            const entryKey=speciesEntryKey(sp);
+            if(!map[entryKey]) {map[entryKey]=sp; order.push(entryKey);}
           });
         });
       });
-      return order.map(sym => map[sym]);
+      return order.map(key => map[key]);
     }
 
     function collectSeenSpeciesByFreqMethods(sampleList,methodKeys) {
@@ -2932,15 +3166,16 @@
         const symsInSample=new Set();
         methodKeys.forEach(key => {
           (s[key]||[]).forEach(sp => {
-            symsInSample.add(sp.symbol);
-            if(!map[sp.symbol]) map[sp.symbol]=sp;
+            const entryKey=speciesEntryKey(sp);
+            symsInSample.add(entryKey);
+            if(!map[entryKey]) map[entryKey]=sp;
           });
         });
-        symsInSample.forEach(sym => {
-          freq[sym]=(freq[sym]||0)+1;
+        symsInSample.forEach(entryKey => {
+          freq[entryKey]=(freq[entryKey]||0)+1;
         });
       });
-      return Object.values(map).sort((a,b) => (freq[b.symbol]||0)-(freq[a.symbol]||0)||compareSpeciesDisplay(a,b));
+      return Object.values(map).sort((a,b) => (freq[speciesEntryKey(b)]||0)-(freq[speciesEntryKey(a)]||0)||compareSpeciesDisplay(a,b));
     }
 
     function buildSpeciesFreqMapByMethods(sampleList,methodKeys) {
@@ -2948,10 +3183,10 @@
       sampleList.forEach(s => {
         const symsInSample=new Set();
         methodKeys.forEach(key => {
-          (s[key]||[]).forEach(sp => symsInSample.add(sp.symbol));
+          (s[key]||[]).forEach(sp => symsInSample.add(speciesEntryKey(sp)));
         });
-        symsInSample.forEach(sym => {
-          freq[sym]=(freq[sym]||0)+1;
+        symsInSample.forEach(entryKey => {
+          freq[entryKey]=(freq[entryKey]||0)+1;
         });
       });
       return freq;
@@ -2972,13 +3207,16 @@
       const map={};
       const freq={};
       sampleList.forEach(s => {
-        const symsInSample=new Set((s.species||[]).map(sp => sp.symbol));
-        symsInSample.forEach(sym => {
-          freq[sym]=(freq[sym]||0)+1;
+        const symsInSample=new Set((s.species||[]).map(sp => speciesEntryKey(sp)));
+        symsInSample.forEach(entryKey => {
+          freq[entryKey]=(freq[entryKey]||0)+1;
         });
-        (s.species||[]).forEach(sp => {if(!map[sp.symbol]) map[sp.symbol]=sp;});
+        (s.species||[]).forEach(sp => {
+          const key=speciesEntryKey(sp);
+          if(!map[key]) map[key]=sp;
+        });
       });
-      return Object.values(map).sort((a,b) => (freq[b.symbol]||0)-(freq[a.symbol]||0)||compareSpeciesDisplay(a,b));
+      return Object.values(map).sort((a,b) => (freq[speciesEntryKey(b)]||0)-(freq[speciesEntryKey(a)]||0)||compareSpeciesDisplay(a,b));
     }
 
     async function getEventSamplesIncludingCurrentPanel() {
@@ -3012,7 +3250,7 @@
       const evSamples=await getEventSamplesIncludingCurrentPanel();
       const unifiedCurrent=collectEventSpeciesUnified(evSamples);
 
-      const currentSyms=new Set(samplePanelState.species.map(x => x.symbol));
+      const currentSyms=new Set(samplePanelState.species.map(speciesEntryKey));
 
       // Optional: site species (USDA methods), sorted by frequency
       let siteSeen=[];
@@ -3027,19 +3265,19 @@
       }
 
       function chipHTML(sp,greyIfAdded,freq) {
-        const already=currentSyms.has(sp.symbol);
+        const already=currentSyms.has(speciesEntryKey(sp));
         const inv=sp.native==='N';
         const cls=['seen-chip',inv? 'invasive-sp':'',already&&greyIfAdded? 'already':''].filter(Boolean).join(' ');
         const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
-        return `<button class="${cls}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${already? 'disabled title="Already added"':''}>
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>${freqBadge}
+        return `<button class="${cls}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}" ${already? 'disabled title="Already added"':''}>
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>${freqBadge}
         </button>`;
       }
 
       function currentPicksHTML(sp) {
         const inv=sp.native==='N';
-        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>
+        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
@@ -3054,7 +3292,7 @@
         html+=`<div class="seen-section-hdr"><span>Seen at Site (${siteSubLbl})</span>
           <button class="seen-toggle-btn active" data-role="site-species-toggle">■ Hide site species</button>
         </div>`;
-        html+=`<div class="seen-chips" id="seen-site-chips">${siteSeen.map(sp => chipHTML(sp,true,siteFreq[sp.symbol])).join('')}</div>`;
+        html+=`<div class="seen-chips" id="seen-site-chips">${siteSeen.map(sp => chipHTML(sp,true,siteFreq[speciesEntryKey(sp)])).join('')}</div>`;
       } else if(!showSiteSpecies) {
         html+=`<div class="seen-section-hdr" style="margin-top:6px;"><span></span>
           <button class="seen-toggle-btn" data-role="site-species-toggle">▶ Show site species</button>
@@ -3066,32 +3304,14 @@
       // Wire quick-add clicks for current picks (allow duplicates via search within same array)
       sec.querySelectorAll('#seen-current-chips .seen-chip').forEach(btn => {
         btn.addEventListener('click',() => {
-          if(samplePanelState.freqNone) {toast('Turn off None in frame to add species','warn'); return;}
-          const sym=btn.dataset.sym;
-          if(samplePanelState.species.find(x => x.symbol===sym)) return; // Already in freq
-          samplePanelState.species.push({
-            symbol: btn.dataset.sym,common: btn.dataset.common,
-            sci: btn.dataset.sci,native: btn.dataset.native
-          });
-          renderSpeciesChips();
-          renderSeenSpecies();
-          renderDWRSeenSpecies();
+          addSpeciesEntryToMethod('species',speciesFromDataset(btn),{preferQualifier: true});
         });
       });
 
       // Wire quick-add clicks for other sections
       sec.querySelectorAll('#seen-site-chips .seen-chip:not([disabled])').forEach(btn => {
         btn.addEventListener('click',() => {
-          if(samplePanelState.freqNone) {toast('Turn off None in frame to add species','warn'); return;}
-          const sym=btn.dataset.sym;
-          if(samplePanelState.species.find(x => x.symbol===sym)) return;
-          samplePanelState.species.push({
-            symbol: btn.dataset.sym,common: btn.dataset.common,
-            sci: btn.dataset.sci,native: btn.dataset.native
-          });
-          renderSpeciesChips();
-          renderSeenSpecies();
-          renderDWRSeenSpecies();
+          addSpeciesEntryToMethod('species',speciesFromDataset(btn),{preferQualifier: true});
         });
       });
 
@@ -3178,20 +3398,20 @@
     }
 
     function updateSpeciesInputState() {
-      const hasDB=speciesDB.length>0;
+      const hasDB=hasSearchSpeciesDB();
       const speciesInputEl=document.getElementById('species-input');
       const dwrInputEl=document.getElementById('dwr-input');
       if(speciesInputEl) {
         speciesInputEl.disabled=!hasDB;
         speciesInputEl.placeholder=hasDB
-          ? 'Search by symbol, common name or scientific name…'
-          :'Import a species list on the Setup tab first…';
+          ? 'Search by symbol, common name, scientific name, or 2-code…'
+          :'No species options available';
       }
       if(dwrInputEl) {
         dwrInputEl.disabled=!hasDB;
         dwrInputEl.placeholder=hasDB
-          ? 'Search species (max 3)…'
-          :'Import a species list on the Setup tab first…';
+          ? 'Search species or 2-codes (max 3)…'
+          :'No species options available';
       }
     }
 
@@ -4759,6 +4979,7 @@
       samplePanelState.coverHits=rec?.coverHits||[];
       samplePanelState.dwr=rec?.dwr||[];
       samplePanelState.fetch=Array.isArray(rec?.fetch)? rec.fetch.map(normalizeFetchValue):[];
+      renderTwoCodeQuickPicks();
 
       // Header
       const offset=Math.round((sIdx/((ev.samples||50)-1||1))*(ev.length||100));
@@ -4975,15 +5196,218 @@
     const bulkReplaceClear=document.getElementById('bulk-replace-clear');
     const bulkReplaceSelected=document.getElementById('bulk-replace-selected');
     const bulkReplaceMethods=document.getElementById('bulk-replace-methods');
+    const speciesQualifierModal=document.getElementById('species-qualifier-modal');
+    const speciesQualifierTarget=document.getElementById('species-qualifier-target');
+    const speciesQualifierInput=document.getElementById('species-qualifier-input');
     let bulkReplaceState={oldSpecies: null,replacement: null};
 
     function speciesFromDataset(el) {
-      return {
+      return createSpeciesEntry({
         symbol: el.dataset.sym,
         common: el.dataset.common,
         sci: el.dataset.sci,
         native: el.dataset.native,
-      };
+        qualifier: el.dataset.qualifier,
+      });
+    }
+
+    function getMethodEntryList(methodKey) {
+      return methodKey==='dwr'? samplePanelState.dwr:samplePanelState.species;
+    }
+
+    function setMethodEntryList(methodKey,list) {
+      if(methodKey==='dwr') samplePanelState.dwr=list;
+      else samplePanelState.species=list;
+    }
+
+    function methodAllowsMoreEntries(methodKey,list) {
+      if(methodKey!=='dwr') return true;
+      return (list?.length||0)<3;
+    }
+
+    function clearSpeciesSearchUi(methodKey) {
+      if(methodKey==='dwr') {
+        dwrInput.value='';
+        document.getElementById('dwr-clear').style.display='none';
+        dwrDrop.style.display='none';
+        dwrDrop.innerHTML='';
+        return;
+      }
+      speciesInput.value='';
+      document.getElementById('species-clear').style.display='none';
+      speciesDrop.classList.remove('open');
+      speciesDrop.innerHTML='';
+    }
+
+    function refreshSpeciesMethodViews() {
+      renderSpeciesChips();
+      renderDWRChips();
+      renderSeenSpecies();
+      renderDWRSeenSpecies();
+      renderTwoCodeQuickPicks();
+    }
+
+    function openTwoCodeSearch(methodKey) {
+      const input=methodKey==='dwr'? dwrInput:speciesInput;
+      input.value='2';
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+    }
+
+    const twoCodePicksExpanded={};
+
+    function renderTwoCodeQuickPicks() {
+      const panels=[
+        {methodKey: 'species',el: document.getElementById('species-two-code-picks')},
+        {methodKey: 'dwr',el: document.getElementById('dwr-two-code-picks')},
+      ];
+      const picks=featuredTwoCodeSpecies();
+      panels.forEach(({methodKey,el}) => {
+        if(!el) return;
+        const list=getMethodEntryList(methodKey);
+        const disabledByNone=methodKey==='species'&&samplePanelState.freqNone;
+        const atLimit=methodKey==='dwr'&&!methodAllowsMoreEntries(methodKey,list);
+        if(!picks.length) {
+          el.hidden=true;
+          el.innerHTML='';
+          return;
+        }
+        const expanded=!!twoCodePicksExpanded[methodKey];
+        el.hidden=false;
+        el.innerHTML=`<div class="two-code-picks-head" data-method-key="${methodKey}" style="cursor:pointer;user-select:none;">
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:.75rem;transition:transform .15s;display:inline-block;transform:rotate(${expanded? '90deg':'0deg'});">▶</span>
+            <span>Grouped / Unknown 2-Codes</span>
+          </span>
+        </div>
+        <div class="two-code-picks-list" style="display:${expanded? 'flex':'none'};flex-wrap:wrap;gap:6px;margin-top:6px;">
+          ${picks.map(sp => {
+          const active=list.some(item => String(item?.symbol||'').trim().toUpperCase()===sp.symbol);
+          const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
+          return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
+              <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
+              <span>${esc(sp.common||sp.sci||sp.symbol)}</span>
+            </button>`;
+        }).join('')}
+          <button class="two-code-pick-more" data-method-key="${methodKey}" style="align-self:center;">More 2-codes</button>
+        </div>`;
+        el.querySelector('.two-code-picks-head').addEventListener('click',e => {
+          twoCodePicksExpanded[methodKey]=!twoCodePicksExpanded[methodKey];
+          renderTwoCodeQuickPicks();
+        });
+        el.querySelectorAll('.two-code-pick-btn').forEach(btn => {
+          btn.addEventListener('click',() => {
+            addSpeciesEntryToMethod(methodKey,speciesFromDataset(btn),{preferQualifier: true});
+          });
+        });
+        el.querySelectorAll('.two-code-pick-more').forEach(btn => {
+          btn.addEventListener('click',() => openTwoCodeSearch(btn.dataset.methodKey));
+        });
+      });
+    }
+
+    function addSpeciesEntryToMethod(methodKey,entry,{preferQualifier=false}={}) {
+      const list=[...getMethodEntryList(methodKey)];
+      if(methodKey==='species'&&samplePanelState.freqNone) {
+        toast('Turn off None in frame to add species','warn');
+        return false;
+      }
+      if(methodKey==='dwr'&&!methodAllowsMoreEntries(methodKey,list)) {
+        toast('Maximum 3 species','warn');
+        return false;
+      }
+
+      let workingEntry=createSpeciesEntry(entry);
+      // For DWR duplicates, reuse the last qualifier for this 2-code so users can repeat
+      // a qualified entry without getting the qualifier modal each time.
+      if(methodKey==='dwr'&&isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) {
+        const symbol=String(workingEntry.symbol||'').trim().toUpperCase();
+        const prior=[...list].reverse().find(item =>
+          String(item?.symbol||'').trim().toUpperCase()===symbol&&!!speciesQualifierText(item)
+        );
+        if(prior) {
+          workingEntry=createSpeciesEntry({...workingEntry,qualifier: speciesQualifierText(prior)});
+        }
+      }
+
+      const exactIdx=findSpeciesEntryIndex(list,workingEntry);
+      if(exactIdx>=0) {
+        if(methodKey==='dwr') {
+          list.push(workingEntry);
+          setMethodEntryList(methodKey,list);
+          clearSpeciesSearchUi(methodKey);
+          refreshSpeciesMethodViews();
+          if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
+          return true;
+        }
+        if(isAlwaysAvailableTwoCode(workingEntry)) {
+          const blankIdx=findUngroupedQualifierGapIndex(list,workingEntry);
+          if(preferQualifier&&blankIdx>=0) {
+            openSpeciesQualifierModal(methodKey,blankIdx);
+            toast('Add a qualifier to the existing 2-code entry before adding another','warn');
+            return false;
+          }
+        }
+        toast('Already added','warn');
+        return false;
+      }
+      list.push(workingEntry);
+      setMethodEntryList(methodKey,list);
+      clearSpeciesSearchUi(methodKey);
+      refreshSpeciesMethodViews();
+      if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
+      return true;
+    }
+
+    function speciesResultSubtext(p) {
+      const parts=[];
+      if(p[4]) parts.push(p[4]);
+      if(p[5]) parts.push(p[5]);
+      return parts.join(' · ');
+    }
+
+    function speciesSecondaryLine(sp) {
+      const qualifier=speciesQualifierText(sp);
+      return qualifier? `<div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Qualifier: ${esc(qualifier)}</div>`:'';
+    }
+
+    function formatSpeciesKeyBadge(sp) {
+      const qualifier=speciesQualifierText(sp);
+      return `[${sp.symbol}]${qualifier? ` · ${qualifier}`:''}`;
+    }
+
+    function closeSpeciesQualifierModal() {
+      speciesQualifierModal.classList.remove('open');
+      speciesQualifierState={methodKey: '',entryIndex: -1};
+      speciesQualifierInput.value='';
+    }
+
+    function openSpeciesQualifierModal(methodKey,entryIndex) {
+      const list=getMethodEntryList(methodKey);
+      const sp=list?.[entryIndex];
+      if(!sp) return;
+      speciesQualifierState={methodKey,entryIndex};
+      speciesQualifierTarget.textContent=`${speciesDisplayPrimary(sp)} [${sp.symbol}]`;
+      speciesQualifierInput.value=speciesQualifierText(sp);
+      speciesQualifierModal.classList.add('open');
+      speciesQualifierInput.focus();
+      speciesQualifierInput.select();
+    }
+
+    function applySpeciesQualifier() {
+      const {methodKey,entryIndex}=speciesQualifierState;
+      const list=[...getMethodEntryList(methodKey)];
+      const current=list?.[entryIndex];
+      if(!current) return;
+      const updated=createSpeciesEntry({...current,qualifier: speciesQualifierInput.value});
+      if(methodKey!=='dwr'&&hasSpeciesEntry(list,updated,entryIndex)) {
+        toast('That qualifier already exists for this species in the sample','warn');
+        return;
+      }
+      list[entryIndex]=updated;
+      setMethodEntryList(methodKey,list);
+      closeSpeciesQualifierModal();
+      refreshSpeciesMethodViews();
     }
 
     function closeBulkReplaceModal() {
@@ -4996,8 +5420,9 @@
       bulkReplaceSelected.textContent='No replacement selected';
     }
 
-    function countOccurrences(samples,symbol,key) {
-      return samples.reduce((n,s) => n+((s[key]||[]).filter(x => x.symbol===symbol).length),0);
+    function countOccurrences(samples,entry,key) {
+      const targetKey=speciesEntryKey(entry);
+      return samples.reduce((n,s) => n+((s[key]||[]).filter(x => speciesEntryKey(x)===targetKey).length),0);
     }
 
     function selectedBulkReplaceMethodKeys() {
@@ -5022,14 +5447,14 @@
       const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
       const occByKey={};
       USDA_SPECIES_METHODS.forEach(m => {
-        occByKey[m.key]=countOccurrences(evSamples,sp.symbol,m.key);
+        occByKey[m.key]=countOccurrences(evSamples,sp,m.key);
       });
 
       bulkReplaceState.oldSpecies=sp;
       bulkReplaceState.replacement=null;
 
       document.getElementById('bulk-replace-old').textContent=
-        `Replace ${speciesDisplayPrimary(sp)} [${sp.symbol}]`;
+        `Replace ${speciesDisplayPrimary(sp)} ${formatSpeciesKeyBadge(sp)}`;
       document.getElementById('bulk-replace-counts').textContent=
         'Current event occurrences: '+USDA_SPECIES_METHODS.map(m => `${m.label} ${occByKey[m.key]||0}`).join(', ')+'.';
 
@@ -5050,7 +5475,7 @@
 
       const openFromChip=() => openBulkReplaceModal(speciesFromDataset(chipEl));
 
-      const isControlTarget=e => e.target.closest(removeSelector)||e.target.closest('.chip-edit')||e.target.closest('.dwr-edit');
+      const isControlTarget=e => e.target.closest(removeSelector)||e.target.closest('.chip-edit')||e.target.closest('.dwr-edit')||e.target.closest('.chip-qualifier')||e.target.closest('.dwr-qualifier');
 
       chipEl.addEventListener('contextmenu',e => {
         if(isControlTarget(e)) return;
@@ -5077,20 +5502,23 @@
     }
 
     speciesInput.addEventListener('input',() => {
-      if(!speciesDB.length) return;
+      const searchDB=getSearchSpeciesDB();
       const q=speciesInput.value.trim().toLowerCase();
       document.getElementById('species-clear').style.display=q? '':'none';
-      if(q.length<2) {speciesDrop.classList.remove('open'); speciesDrop.innerHTML=''; return;}
-      const results=speciesDB.filter(p =>
-        p[0].toLowerCase().includes(q)||
-        p[1].toLowerCase().includes(q)||
-        p[2].toLowerCase().includes(q)
-      ).slice(0,30);
+      if(!shouldSearchSpeciesQuery(q)) {speciesDrop.classList.remove('open'); speciesDrop.innerHTML=''; return;}
+      const results=searchDB.filter(p => {
+        const symbol=p[0].toLowerCase();
+        if(q==='2') return symbol.startsWith('2');
+        return symbol.includes(q)||
+          p[1].toLowerCase().includes(q)||
+          p[2].toLowerCase().includes(q)||
+          speciesResultSubtext(p).toLowerCase().includes(q);
+      }).slice(0,30);
       if(!results.length) {speciesDrop.classList.remove('open'); return;}
       speciesDrop.innerHTML=results.map(p => {
         const disp={symbol: p[0],common: p[1],sci: p[2]};
         const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesDisplaySecondary(disp);
+        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
         const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
         const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
         return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}">
@@ -5105,19 +5533,10 @@
 
       speciesDrop.querySelectorAll('.species-opt').forEach(opt => {
         opt.addEventListener('click',() => {
-          if(samplePanelState.freqNone) {toast('Turn off None in frame to add species','warn'); return;}
-          const sym=opt.dataset.sym;
-          if(samplePanelState.species.find(x => x.symbol===sym)) {toast('Already added'); return;}
-          samplePanelState.species.push({
+          addSpeciesEntryToMethod('species',createSpeciesEntry({
             symbol: opt.dataset.sym,common: opt.dataset.common,
             sci: opt.dataset.sci,native: opt.dataset.native
-          });
-          renderSpeciesChips();
-          renderSeenSpecies();
-          speciesInput.value='';
-          document.getElementById('species-clear').style.display='none';
-          speciesDrop.classList.remove('open');
-          speciesDrop.innerHTML='';
+          }),{preferQualifier: true});
         });
       });
     });
@@ -5137,23 +5556,25 @@
         speciesDrop.classList.remove('open');
         speciesDrop.innerHTML='';
       }
-      renderSpeciesChips();
-      renderSeenSpecies();
+      refreshSpeciesMethodViews();
     });
 
     bulkReplaceInput.addEventListener('input',() => {
       const q=bulkReplaceInput.value.trim().toLowerCase();
       bulkReplaceClear.style.display=q? '':'none';
-      if(q.length<2) {
+      if(!shouldSearchSpeciesQuery(q)) {
         bulkReplaceDrop.style.display='none';
         bulkReplaceDrop.innerHTML='';
         return;
       }
-      const results=speciesDB.filter(p =>
-        p[0].toLowerCase().includes(q)||
-        p[1].toLowerCase().includes(q)||
-        p[2].toLowerCase().includes(q)
-      ).slice(0,30);
+      const results=getSearchSpeciesDB().filter(p => {
+        const symbol=p[0].toLowerCase();
+        if(q==='2') return symbol.startsWith('2');
+        return symbol.includes(q)||
+          p[1].toLowerCase().includes(q)||
+          p[2].toLowerCase().includes(q)||
+          speciesResultSubtext(p).toLowerCase().includes(q);
+      }).slice(0,30);
       if(!results.length) {
         bulkReplaceDrop.style.display='none';
         bulkReplaceDrop.innerHTML='';
@@ -5162,7 +5583,7 @@
       bulkReplaceDrop.innerHTML=results.map(p => {
         const disp={symbol: p[0],common: p[1],sci: p[2]};
         const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesDisplaySecondary(disp);
+        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
         const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
         const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
         return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;">
@@ -5198,6 +5619,12 @@
     });
 
     document.getElementById('bulk-replace-cancel-btn').addEventListener('click',closeBulkReplaceModal);
+    document.getElementById('species-qualifier-cancel-btn').addEventListener('click',closeSpeciesQualifierModal);
+    document.getElementById('species-qualifier-save-btn').addEventListener('click',applySpeciesQualifier);
+    speciesQualifierInput.addEventListener('keydown',e => {
+      if(e.key==='Enter') applySpeciesQualifier();
+      if(e.key==='Escape') closeSpeciesQualifierModal();
+    });
     document.getElementById('bulk-replace-apply-btn').addEventListener('click',async () => {
       const oldSp=bulkReplaceState.oldSpecies;
       const newSp=bulkReplaceState.replacement;
@@ -5205,7 +5632,7 @@
       if(!oldSp) {toast('No species selected','err'); return;}
       if(!methodKeys.length) {toast('Choose at least one method','warn'); return;}
       if(!newSp) {toast('Choose replacement species','warn'); return;}
-      if(newSp.symbol===oldSp.symbol) {toast('Replacement is the same species','warn'); return;}
+      if(speciesEntryKey(newSp)===speciesEntryKey(oldSp)) {toast('Replacement is the same species','warn'); return;}
 
       const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
       let replacedCount=0;
@@ -5220,7 +5647,7 @@
 
           let localChanges=0;
           const mapped=rec[key].map(sp => {
-            if(sp.symbol===oldSp.symbol) {
+            if(speciesEntryKey(sp)===speciesEntryKey(oldSp)) {
               localChanges++;
               return {...newSp};
             }
@@ -5232,8 +5659,9 @@
             const uniq=[];
             const seen=new Set();
             mapped.forEach(sp => {
-              if(seen.has(sp.symbol)) return;
-              seen.add(sp.symbol);
+              const key=speciesEntryKey(sp);
+              if(seen.has(key)) return;
+              seen.add(key);
               uniq.push(sp);
             });
             rec[key]=uniq;
@@ -5269,20 +5697,23 @@
     const dwrDrop=document.getElementById('dwr-dropdown');
 
     dwrInput.addEventListener('input',() => {
-      if(!speciesDB.length) return;
+      const searchDB=getSearchSpeciesDB();
       const q=dwrInput.value.trim().toLowerCase();
       document.getElementById('dwr-clear').style.display=q? '':'none';
-      if(q.length<2) {dwrDrop.style.display='none'; dwrDrop.innerHTML=''; return;}
-      const results=speciesDB.filter(p =>
-        p[0].toLowerCase().includes(q)||
-        p[1].toLowerCase().includes(q)||
-        p[2].toLowerCase().includes(q)
-      ).slice(0,30);
+      if(!shouldSearchSpeciesQuery(q)) {dwrDrop.style.display='none'; dwrDrop.innerHTML=''; return;}
+      const results=searchDB.filter(p => {
+        const symbol=p[0].toLowerCase();
+        if(q==='2') return symbol.startsWith('2');
+        return symbol.includes(q)||
+          p[1].toLowerCase().includes(q)||
+          p[2].toLowerCase().includes(q)||
+          speciesResultSubtext(p).toLowerCase().includes(q);
+      }).slice(0,30);
       if(!results.length) {dwrDrop.style.display='none'; return;}
       dwrDrop.innerHTML=results.map(p => {
         const disp={symbol: p[0],common: p[1],sci: p[2]};
         const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesDisplaySecondary(disp);
+        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
         const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
         const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
         return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;">
@@ -5297,18 +5728,10 @@
 
       dwrDrop.querySelectorAll('.species-opt').forEach(opt => {
         opt.addEventListener('click',() => {
-          const sym=opt.dataset.sym;
-          if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
-          samplePanelState.dwr.push({
+          addSpeciesEntryToMethod('dwr',createSpeciesEntry({
             symbol: opt.dataset.sym,common: opt.dataset.common,
             sci: opt.dataset.sci,native: opt.dataset.native
-          });
-          renderDWRChips();
-          renderDWRSeenSpecies();
-          dwrInput.value='';
-          document.getElementById('dwr-clear').style.display='none';
-          dwrDrop.style.display='none';
-          dwrDrop.innerHTML='';
+          }),{preferQualifier: true});
         });
       });
     });
@@ -5332,26 +5755,42 @@
       const el=document.getElementById('dwr-chips');
       const countBadge=document.getElementById('dwr-count-badge');
       if(countBadge) countBadge.textContent=`${samplePanelState.dwr.length}/3 species`;
+      renderTwoCodeQuickPicks();
+      const dwrEntryTotals={};
+      samplePanelState.dwr.forEach(sp => {
+        const key=speciesEntryKey(sp);
+        dwrEntryTotals[key]=(dwrEntryTotals[key]||0)+1;
+      });
+      const dwrSeenCounts={};
 
       el.innerHTML=samplePanelState.dwr.map((sp,idx) => {
         const invasive=sp.native==='N';
-        return `<div class="dwr-chip-row" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
+        const entryKey=speciesEntryKey(sp);
+        dwrSeenCounts[entryKey]=(dwrSeenCounts[entryKey]||0)+1;
+        const entryPos=dwrSeenCounts[entryKey];
+        const entryTotal=dwrEntryTotals[entryKey]||1;
+        const repeatBadge=entryTotal>1
+          ? `<span style="display:inline-block;margin-left:6px;font-size:.62rem;padding:1px 6px;border-radius:999px;background:var(--s3);border:1px solid var(--border);color:var(--muted);">repeat ${entryPos}/${entryTotal}</span>`
+          :'';
+        return `<div class="dwr-chip-row" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
           <span style="font-weight:600;min-width:20px;">${idx+1}.</span>
           <div style="flex:1;">
             <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">⚠️</span>':''}</div>
-            <div style="font-size:.7rem;color:var(--muted);">[${sp.symbol}]</div>
+            <div style="font-size:.7rem;color:var(--muted);">${esc(formatSpeciesKeyBadge(sp))}</div>
+            ${repeatBadge}
+            ${speciesSecondaryLine(sp)}
           </div>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" class="dwr-qualifier" data-idx="${idx}" title="Edit qualifier">✎</button>
           <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">↺</button>
           <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">✕</button>
         </div>`;
-      }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.8rem;color:var(--muted);">No species selected yet</span>':'');
+      }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.78rem;font-weight:600;color:#c0392b;">No species selected yet</span>':'');
 
       el.querySelectorAll('.dwr-remove').forEach(btn => {
         btn.addEventListener('click',() => {
           const idx=+btn.dataset.idx;
           samplePanelState.dwr.splice(idx,1);
-          renderDWRChips();
-          renderDWRSeenSpecies();
+          refreshSpeciesMethodViews();
         });
       });
       el.querySelectorAll('.dwr-edit').forEach(btn => {
@@ -5360,6 +5799,12 @@
           const row=btn.closest('.dwr-chip-row[data-sym]');
           if(!row) return;
           openBulkReplaceModal(speciesFromDataset(row));
+        });
+      });
+      el.querySelectorAll('.dwr-qualifier').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          openSpeciesQualifierModal('dwr',+btn.dataset.idx);
         });
       });
       el.querySelectorAll('.dwr-chip-row[data-sym]').forEach(chip => wireBulkReplaceTrigger(chip,'.dwr-remove'));
@@ -5420,7 +5865,7 @@
       const evSamples=await getEventSamplesIncludingCurrentPanel();
       const unifiedCurrent=collectEventSpeciesUnified(evSamples);
 
-      const dwrSyms=new Set(samplePanelState.dwr.map(x => x.symbol));
+      const dwrSyms=new Set(samplePanelState.dwr.map(speciesEntryKey));
 
       // Optional: site species
       let siteSeen=[];
@@ -5435,19 +5880,19 @@
       }
 
       function dwrChipHTML(sp,freq) {
-        const selected=dwrSyms.has(sp.symbol);
+        const selected=dwrSyms.has(speciesEntryKey(sp));
         const inv=sp.native==='N';
         const cls=['seen-chip',inv? 'invasive-sp':'',selected? 'selected':''].filter(Boolean).join(' ');
         const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
-        return `<button class="${cls}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>${freqBadge}
+        return `<button class="${cls}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>${freqBadge}
         </button>`;
       }
 
       function currentPickHTML(sp) {
         const inv=sp.native==='N';
-        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">[${sp.symbol}]</span>
+        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
@@ -5462,7 +5907,7 @@
         html+=`<div class="seen-section-hdr"><span>Seen at Site (${siteSubLbl})</span>
           <button class="seen-toggle-btn active" data-role="site-species-toggle">■ Hide site species</button>
         </div>`;
-        html+=`<div class="seen-chips" id="seen-dwr-site-chips">${siteSeen.map(sp => dwrChipHTML(sp,siteFreq[sp.symbol])).join('')}</div>`;
+        html+=`<div class="seen-chips" id="seen-dwr-site-chips">${siteSeen.map(sp => dwrChipHTML(sp,siteFreq[speciesEntryKey(sp)])).join('')}</div>`;
       } else if(!showSiteSpecies) {
         html+=`<div class="seen-section-hdr" style="margin-top:6px;"><span></span>
           <button class="seen-toggle-btn" data-role="site-species-toggle">▶ Show site species</button>
@@ -5472,15 +5917,7 @@
       sec.innerHTML=html;
 
       function addDwrFromButton(btn) {
-        if(samplePanelState.dwr.length>=3) {toast('Maximum 3 species','warn'); return;}
-        samplePanelState.dwr.push({
-          symbol: btn.dataset.sym,common: btn.dataset.common,
-          sci: btn.dataset.sci,native: btn.dataset.native
-        });
-        renderDWRChips();
-        renderDWRSeenSpecies();
-        renderSpeciesChips();
-        renderSeenSpecies();
+        addSpeciesEntryToMethod('dwr',speciesFromDataset(btn),{preferQualifier: true});
       }
 
       // Wire quick-add clicks
@@ -5508,6 +5945,7 @@
       const noneBtn=document.getElementById('species-none-btn');
       const speciesInputEl=document.getElementById('species-input');
       const speciesClearBtn=document.getElementById('species-clear');
+      renderTwoCodeQuickPicks();
       if(abcBtn) abcBtn.classList.toggle('active',speciesAlphaSort);
       if(noneBtn) {
         noneBtn.classList.toggle('active',samplePanelState.freqNone);
@@ -5516,11 +5954,11 @@
         noneBtn.style.background=samplePanelState.freqNone? '#e9b949':'transparent';
       }
       if(speciesInputEl) {
-        const hasDB=speciesDB.length>0;
+        const hasDB=hasSearchSpeciesDB();
         speciesInputEl.disabled=!!samplePanelState.freqNone||!hasDB;
         speciesInputEl.placeholder=samplePanelState.freqNone
           ? 'None in frame selected'
-          :(hasDB? 'Search by symbol, common name or scientific name…':'Import a species list on the Setup tab first…');
+          :(hasDB? 'Search by symbol, common name, scientific name, or 2-code…':'No species options available');
       }
       if(speciesClearBtn&&samplePanelState.freqNone) speciesClearBtn.style.display='none';
 
@@ -5535,8 +5973,7 @@
         el.querySelectorAll('.chip-remove').forEach(btn => {
           btn.addEventListener('click',() => {
             samplePanelState.freqNone=false;
-            renderSpeciesChips();
-            renderSeenSpecies();
+            refreshSpeciesMethodViews();
           });
         });
         renderSeenSpecies();
@@ -5545,18 +5982,26 @@
 
       el.innerHTML=display.map(sp => {
         const invasive=sp.native==='N';
-        return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}">
-          ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">[${sp.symbol}]</span>
+        return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(sp))}</span>
       ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
+        ${speciesSecondaryLine(sp)}
+        <button class="chip-qualifier" data-key="${esc(speciesEntryKey(sp))}" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.82rem;padding:0 2px;">✎</button>
         <button class="chip-edit" data-sym="${sp.symbol}" title="Replace this species across event" style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.82rem;padding:0 2px;">↺</button>
-        <button class="chip-remove" data-sym="${sp.symbol}">✕</button>
+        <button class="chip-remove" data-key="${esc(speciesEntryKey(sp))}">✕</button>
     </div>`;
-      }).join('')||'<span style="font-size:.7rem;color:var(--muted);">No species added yet</span>';
+      }).join('')||'<span style="font-size:.78rem;font-weight:600;color:#c0392b;">No species added yet</span>';
       el.querySelectorAll('.chip-remove').forEach(btn => {
         btn.addEventListener('click',() => {
-          samplePanelState.species=samplePanelState.species.filter(x => x.symbol!==btn.dataset.sym);
-          renderSpeciesChips();
-          renderSeenSpecies();
+          samplePanelState.species=samplePanelState.species.filter(x => speciesEntryKey(x)!==btn.dataset.key);
+          refreshSpeciesMethodViews();
+        });
+      });
+      el.querySelectorAll('.chip-qualifier').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const idx=samplePanelState.species.findIndex(x => speciesEntryKey(x)===btn.dataset.key);
+          if(idx>=0) openSpeciesQualifierModal('species',idx);
         });
       });
       el.querySelectorAll('.chip-edit').forEach(btn => {
@@ -5667,7 +6112,11 @@
       const evStats=sortedEvents.map((ev,i) => {
         const evFilled=allFilled.filter(s => s.eventId===ev.id);
         const spFreq={},spMeta={};
-        evFilled.forEach(s => (s.species||[]).forEach(sp => {spFreq[sp.symbol]=(spFreq[sp.symbol]||0)+1; spMeta[sp.symbol]=sp;}));
+        evFilled.forEach(s => (s.species||[]).forEach(sp => {
+          const key=speciesEntryKey(sp);
+          spFreq[key]=(spFreq[key]||0)+1;
+          spMeta[key]=sp;
+        }));
         const covTotals={};
         coverCatalog.forEach(c => covTotals[c.id]=0);
         let hits=0;
@@ -5680,7 +6129,11 @@
 
       // Overall aggregation
       const speciesFreq={},speciesMeta={};
-      allFilled.forEach(s => (s.species||[]).forEach(sp => {speciesFreq[sp.symbol]=(speciesFreq[sp.symbol]||0)+1; speciesMeta[sp.symbol]=sp;}));
+      allFilled.forEach(s => (s.species||[]).forEach(sp => {
+        const key=speciesEntryKey(sp);
+        speciesFreq[key]=(speciesFreq[key]||0)+1;
+        speciesMeta[key]=sp;
+      }));
       const coverTotals={};
       coverCatalog.forEach(c => coverTotals[c.id]=0);
       let totalHits=0;
@@ -5938,10 +6391,14 @@
         const tRows=Array.from({length: maxT+1},(_,t) => {
           const tSamples=allFilled.filter(s => s.transectIdx===t);
           const tSpFreq={},tSpMeta={};
-          tSamples.forEach(s => (s.species||[]).forEach(sp => {tSpFreq[sp.symbol]=(tSpFreq[sp.symbol]||0)+1; tSpMeta[sp.symbol]=sp;}));
+          tSamples.forEach(s => (s.species||[]).forEach(sp => {
+            const key=speciesEntryKey(sp);
+            tSpFreq[key]=(tSpFreq[key]||0)+1;
+            tSpMeta[key]=sp;
+          }));
           const richness=Object.keys(tSpFreq).length;
           const topEntry=Object.entries(tSpFreq).sort((a,b) => b[1]-a[1])[0];
-          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} <span style="opacity:.6;font-size:.6rem">[${esc(topEntry[0])}]</span>`:'—';
+          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(tSpMeta[topEntry[0]]))}</span>`:'—';
           return `<tr>
             <td style="font-weight:700;font-family:var(--font-ui);">T${t+1}</td>
             <td style="text-align:center;">${tSamples.length}</td>

@@ -1,0 +1,52 @@
+2BRY,"Bryophyte (moss, liverwort, hornwort)","Bryophyte (moss, liverwort, hornwort)",,,,,,,
+2CYAN,Cyanobacteria,Cyanobacteria,,,,,,,
+2FA,"Forb, annual","Forb, annual",,,,,,Annual,Forb/herb
+2FB,"Forb, biennial","Forb, biennial",,,,,,Biennial,Forb/herb
+2FERN,Fern or Fern Ally,Fern or Fern Ally,,,,,,Perennial,Forb/herb
+2FF,"Fungus, fleshy (mushroom)","Fungus, fleshy (mushroom)",,,,,,,
+2FI,"Forb, introduced","Forb, introduced",,,,,,,Forb/herb
+2FN,"Forb, native","Forb, native",,,,,,,Forb/herb
+2FORB,"Forb (herbaceous, not grass nor grass-like)","Forb (herbaceous, not grass nor grass-like)",,,,,,,Forb/herb
+2FP,"Forb, perennial","Forb, perennial",,,,,,Perennial,Forb/herb
+2FS,"Forb, succulent","Forb, succulent",,,,,,,Forb/herb
+2FSA,"Forb, succulent, annual","Forb, succulent, annual",,,,,,Annual,Forb/herb
+2FSB,"Forb, succulent, biennial","Forb, succulent, biennial",,,,,,Biennial,Forb/herb
+2FSP,"Forb, succulent, perennial","Forb, succulent, perennial",,,,,,Perennial,Forb/herb
+2FUNGI,Fungus,Fungus,,,,,,,
+2GA,"Grass, annual","Grass, annual",,,,,,Annual,Graminoid
+2GB,"Grass, biennial","Grass, biennial",,,,,,Biennial,Graminoid
+2GI,"Grass, introduced","Grass, introduced",,,,,,,Graminoid
+2GL,Grass-like (not a true grass),Grass-like (not a true grass),,,,,,,Graminoid
+2GLA,"Grass-like, annual","Grass-like, annual",,,,,,Annual,Graminoid
+2GLB,"Grass-like, biennial","Grass-like, biennial",,,,,,Biennial,Graminoid
+2GLP,"Grass-like, perennial","Grass-like, perennial",,,,,,Perennial,Graminoid
+2GN,"Grass, native","Grass, native",,,,,,,Graminoid
+2GP,"Grass, perennial","Grass, perennial",,,,,,Perennial,Graminoid
+2GRAM,Graminoid (grass or grass-like),Graminoid (grass or grass-like),,,,,,,Graminoid
+2GW,"Grass, woody (bamboo, etc.)","Grass, woody (bamboo, etc.)",,,,,,,Shrub/Subshrub
+2HORN,Hornwort,Hornwort,,,,,,,
+2LICHN,Lichen,Lichen,,,,,,,
+2LW,Liverwort,Liverwort,,,,,,,
+2MOSS,Moss,Moss,,,,,,,
+2PLANT,Unknown: Plant,Unknown: Plant,,,,,,,
+2SB,"Shrub, broadleaf","Shrub, broadleaf",,,,,,,Shrub/Subshrub
+2SD,"Shrub, deciduous","Shrub, deciduous",,,,,,,Shrub/Subshrub
+2SE,"Shrub, evergreen","Shrub, evergreen",,,,,,,Shrub/Subshrub
+2SHRUB,Shrub (>.5m),Shrub (>.5m),,,,,,,Shrub/Subshrub
+2SLIME,Slime Mold,Slime Mold,,,,,,,
+2SN,"Shrub, needleleaf (coniferous)","Shrub, needleleaf (coniferous)",,,,,,,Shrub/Subshrub
+2SS,"Shrub, succulent","Shrub, succulent",,,,,,,Shrub/Subshrub
+2SSB,"Subshrub, broadleaf","Subshrub, broadleaf",,,,,,,Shrub/Subshrub
+2SSD,"Subshrub, deciduous","Subshrub, deciduous",,,,,,,Shrub/Subshrub
+2SSE,"Subshrub, evergreen","Subshrub, evergreen",,,,,,,Shrub/Subshrub
+2SSN,"Subshrub, needleleaf (coniferous)","Subshrub, needleleaf (coniferous)",,,,,,,Shrub/Subshrub
+2SSS2,"Subshrub, succulent","Subshrub, succulent",,,,,,,Shrub/Subshrub
+2SUBS,Subshrub (<.5m),Subshrub (<.5m),,,,,,,Shrub/Subshrub
+2TB,"Tree, broadleaf","Tree, broadleaf",,,,,,,Tree
+2TD,"Tree, deciduous","Tree, deciduous",,,,,,,Tree
+2TE,"Tree, evergreen","Tree, evergreen",,,,,,,Tree
+2TN,"Tree, needleleaf (coniferous)","Tree, needleleaf (coniferous)",,,,,,,Tree
+2TREE,Tree,Tree,,,,,,,Tree
+2TS,"Tree, succulent","Tree, succulent",,,,,,,Tree
+2VH,"Vine, herbaceous","Vine, herbaceous",,,,,,,"Vine, Forb/herb"
+2VW,"Vine, woody","Vine, woody",,,,,,,"Vine, Subshrub, Shrub"
