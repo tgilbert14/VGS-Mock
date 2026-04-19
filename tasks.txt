@@ -1,7 +1,8 @@
--observer, by login?
--plant list maker
--version tracker/help
 -backup/export database
+-species qualifiers
+-plant list maker
+
+-observer, by login?
 -data security
 -connect to db
 -syncing
