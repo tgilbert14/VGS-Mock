@@ -4440,7 +4440,7 @@
       const species=JSON.parse(JSON.stringify(samplePanelState.species));
       const freqNone=!!samplePanelState.freqNone;
       const coverHits=JSON.parse(JSON.stringify(samplePanelState.coverHits));
-      const dwr=JSON.parse(JSON.stringify(samplePanelState.dwr));
+      const dwr=normalizeDwrForSave(JSON.parse(JSON.stringify(samplePanelState.dwr)));
       const fetch=JSON.parse(JSON.stringify((samplePanelState.fetch||[]).map(normalizeFetchValue)));
       const hasFetch=fetch.some(v => String(v??'').trim()!=='');
       const hasData=species.length>0||freqNone||coverHits.length>0||dwr.length>0||hasFetch;
@@ -4963,6 +4963,13 @@
       const n=Number(s);
       if(!Number.isFinite(n)) return '';
       return String(Math.abs(n));
+    }
+
+    function normalizeDwrForSave(dwrRaw) {
+      const dwr=Array.isArray(dwrRaw)? dwrRaw.slice(0,3):[];
+      if(dwr.length===0) return dwr;
+      while(dwr.length<3) dwr.push(JSON.parse(JSON.stringify(dwr[dwr.length-1])));
+      return dwr;
     }
 
     async function renderDWRSeenSpecies() {
