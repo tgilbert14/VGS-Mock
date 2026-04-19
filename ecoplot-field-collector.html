@@ -1936,7 +1936,19 @@
         <div class="card">
           <div class="card-title">Species Database <span class="badge" id="species-db-badge">Built-in list</span></div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
-          <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
+            <button class="btn btn-ghost btn-sm" id="species-import-help-btn" type="button"
+              title="Show required CSV columns">What CSV works?</button>
+          </div>
+          <div id="species-import-help"
+            style="display:none;font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.45;">
+            Required columns: Symbol or Code, Scientific Name, and Common Name. Optional columns like State, Native
+            Status, Duration, and Growth Habit are allowed. State values must be one state per row.
+            <div style="margin-top:6px;opacity:.9;">Example header: <span
+                style="font-family:var(--font-mono);font-size:.68rem;">Symbol,Scientific Name,Common Name,State</span>
+            </div>
+          </div>
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
         </div>
         <div class="card">
@@ -2100,6 +2112,16 @@
     <div id="panel-sample-map"></div>
     <div id="sample-panel-body">
 
+      <div class="card" id="panel-plant-list-card" style="display:none;padding:12px 14px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label for="species-list-select"
+            style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;">Plant
+            List</label>
+          <select id="species-list-select" style="width:auto;min-width:170px;"></select>
+          <span id="species-list-meta" style="font-size:.72rem;color:var(--muted);"></span>
+        </div>
+      </div>
+
       <!-- Ground cover -->
       <div class="card" id="panel-cover-card">
         <div class="card-title">
@@ -2196,6 +2218,10 @@
       <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text);margin-bottom:12px;">
         <input type="checkbox" id="wipe-db-protocols" style="width:auto;accent-color:var(--danger);">
         Also remove imported and custom protocols
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text);margin-bottom:12px;">
+        <input type="checkbox" id="wipe-db-species" style="width:auto;accent-color:var(--danger);">
+        Also remove imported species list
       </label>
       <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px;">Built-in protocols are kept.</div>
       <div class="field" style="margin-bottom:14px;">
@@ -2390,7 +2416,7 @@
     //  INDEXEDDB
     // ══════════════════════════════════════════════════════
     const DB_NAME='ecoplot2';
-    const DB_VER=5;
+    const DB_VER=6;
 
     function openDB() {
       return new Promise((res,rej) => {
@@ -2409,8 +2435,32 @@
             if(!s.indexNames.contains('eventId'))
               s.createIndex('eventId','eventId',{unique: false});
           }
-          if(!db.objectStoreNames.contains('species'))
-            db.createObjectStore('species',{keyPath: 'symbol'});
+          if(!db.objectStoreNames.contains('species')) {
+            const sp=db.createObjectStore('species',{keyPath: 'id'});
+            sp.createIndex('symbol','symbol',{unique: false});
+            sp.createIndex('listKey','listKey',{unique: false});
+          } else {
+            const sp=tx.objectStore('species');
+            const oldKeyPath=sp.keyPath;
+            if(oldKeyPath==='symbol') {
+              const migrateReq=sp.getAll();
+              migrateReq.onsuccess=() => {
+                const rows=migrateReq.result||[];
+                db.deleteObjectStore('species');
+                const ns=db.createObjectStore('species',{keyPath: 'id'});
+                ns.createIndex('symbol','symbol',{unique: false});
+                ns.createIndex('listKey','listKey',{unique: false});
+                rows.forEach(r => {
+                  const symbol=String(r.symbol||'').trim().toUpperCase();
+                  if(!symbol) return;
+                  ns.put({...r,id: `all::${symbol}`,symbol,listKey: 'all',state: 'All'});
+                });
+              };
+            } else {
+              if(!sp.indexNames.contains('symbol')) sp.createIndex('symbol','symbol',{unique: false});
+              if(!sp.indexNames.contains('listKey')) sp.createIndex('listKey','listKey',{unique: false});
+            }
+          }
           if(!db.objectStoreNames.contains('events')) {
             const ev=db.createObjectStore('events',{keyPath: 'id'});
             ev.createIndex('siteId','siteId',{unique: false});
@@ -2488,11 +2538,27 @@
       });
     }
 
+    async function dbReplaceAll(store,items) {
+      const db=await openDB();
+      return new Promise((res,rej) => {
+        const tx=db.transaction(store,'readwrite');
+        const os=tx.objectStore(store);
+        os.clear();
+        items.forEach(item => os.put(item));
+        tx.oncomplete=() => res();
+        tx.onerror=e => rej(e.target.error);
+      });
+    }
+
     // ══════════════════════════════════════════════════════
     //  SPECIES DATABASE
     // ══════════════════════════════════════════════════════
     // Empty until user imports a CSV via the Setup tab
     let speciesDB=[];
+    let speciesAllRecords=[];
+    let speciesListOptions=[{key: 'all',label: 'All'}];
+    let speciesImportStats={sourceRows: 0,storedRows: 0};
+    let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
     let showSiteSpecies=localStorage.getItem('ep_show_site_species')!=='0';
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
@@ -2508,6 +2574,163 @@
       localStorage.setItem('ep_show_site_species',showSiteSpecies? '1':'0');
       renderSeenSpecies();
       renderDWRSeenSpecies();
+    }
+
+    function normalizeCsvHeader(v) {
+      return String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    }
+
+    function normalizeMissingText(v) {
+      const s=String(v||'').trim();
+      if(!s) return '';
+      if(/^(na|n\/a|null|none|undefined)$/i.test(s)) return '';
+      return s;
+    }
+
+    function findHeaderIndex(headers,candidates) {
+      for(const c of candidates) {
+        const idx=headers.indexOf(c);
+        if(idx>=0) return idx;
+      }
+      return -1;
+    }
+
+    function normalizeSpeciesListKey(v) {
+      const s=String(v||'').trim();
+      if(!s) return 'all';
+      return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'all';
+    }
+    function normalizeSingleStateValue(rawState) {
+      const raw=normalizeMissingText(rawState);
+      if(!raw) return '';
+      // Accept imperfect files that pack multiple states in one cell.
+      // We keep only the first state token so each stored row maps to one state list key.
+      return String(raw).split(/[;,|\/]+/).map(s => s.trim()).filter(Boolean)[0]||'';
+    }
+
+    function getSpeciesListOptions(rows) {
+      const labels=[];
+      const seen=new Set();
+      rows.forEach(r => {
+        const stateList=Array.isArray(r.states)&&r.states.length
+          ? r.states
+          :[r.state||''];
+        const keyList=Array.isArray(r.listKeys)&&r.listKeys.length
+          ? r.listKeys
+          :[r.listKey||''];
+        for(let i=0;i<Math.max(stateList.length,keyList.length);i++) {
+          const label=String(stateList[i]??stateList[0]??'').trim();
+          const key=String(keyList[i]??keyList[0]??'').trim();
+          if(!label||!key||key==='all'||seen.has(key)) continue;
+          seen.add(key);
+          labels.push({key,label});
+        }
+      });
+      labels.sort((a,b) => a.label.localeCompare(b.label));
+      return [{key: 'all',label: 'All'},...labels];
+    }
+
+    function speciesImportRequirementsText() {
+      return 'CSV must include Symbol or Code, Scientific Name, and Common Name. Optional columns like State, Native Status, Duration, and Growth Habit are supported. Include a State column to enable Plant List filtering. State values must be one state per row.';
+    }
+
+    function speciesImportExampleHeader() {
+      return 'Example header: Symbol,Scientific Name,Common Name,State';
+    }
+
+    function aggregateSpeciesImportEntries(entries) {
+      const grouped=new Map();
+      entries.forEach(entry => {
+        const symbol=String(entry.symbol||'').trim().toUpperCase();
+        if(!symbol) return;
+        const sci=String(entry.sci||'').trim();
+        const common=String(entry.common||'').trim();
+        const native=String(entry.native||'?').trim()||'?';
+        const duration=String(entry.duration||'').trim();
+        const growthHabit=String(entry.growthHabit||'').trim();
+        const state=String(entry.state||'All').trim()||'All';
+        const listKey=String(entry.listKey||normalizeSpeciesListKey(state)||'all').trim()||'all';
+        const key=[symbol,sci,common,native,duration,growthHabit].join('\u0001');
+        let group=grouped.get(key);
+        if(!group) {
+          group={
+            id: '',
+            symbol,
+            common,
+            sci,
+            native,
+            duration,
+            growthHabit,
+            state,
+            listKey,
+            states: [],
+            listKeys: [],
+            sourceRowCount: 0,
+          };
+          grouped.set(key,group);
+        }
+        group.sourceRowCount+=1;
+        if(!group.states.includes(state)) group.states.push(state);
+        if(!group.listKeys.includes(listKey)) group.listKeys.push(listKey);
+      });
+      return [...grouped.values()].map((group,idx) => ({
+        ...group,
+        id: `sp::${group.symbol}::${idx+1}`,
+        state: group.states[0]||'All',
+        listKey: group.listKeys[0]||'all',
+        states: group.states.sort((a,b) => a.localeCompare(b)),
+        listKeys: group.listKeys.sort((a,b) => a.localeCompare(b)),
+      }));
+    }
+
+    function rebuildActiveSpeciesDB() {
+      const useAll=selectedSpeciesListKey==='all';
+      const rows=useAll
+        ? speciesAllRecords
+        :speciesAllRecords.filter(r => {
+          const keys=Array.isArray(r.listKeys)&&r.listKeys.length? r.listKeys:[r.listKey||'all'];
+          return keys.includes(selectedSpeciesListKey);
+        });
+      const bySymbol=new Map();
+      rows.forEach(r => {
+        const symbol=String(r.symbol||'').trim().toUpperCase();
+        if(!symbol) return;
+        const existing=bySymbol.get(symbol);
+        if(!existing) {bySymbol.set(symbol,r); return;}
+        const exCommon=normalizeMissingText(existing.common);
+        const newCommon=normalizeMissingText(r.common);
+        if(!exCommon&&newCommon) bySymbol.set(symbol,r);
+      });
+      const dedup=[...bySymbol.values()].sort((a,b) => {
+        const ap=speciesDisplayPrimary(a)||a.symbol;
+        const bp=speciesDisplayPrimary(b)||b.symbol;
+        return ap.localeCompare(bp);
+      });
+      speciesDB=dedup.map(r => [r.symbol,r.common||'',r.sci||'',r.native||'?',r.duration||'',r.growthHabit||'']);
+    }
+
+    function renderSpeciesListSelector() {
+      const wrap=document.getElementById('panel-plant-list-card');
+      const sel=document.getElementById('species-list-select');
+      const meta=document.getElementById('species-list-meta');
+      if(!wrap||!sel||!meta) return;
+
+      const methods=activeEvent?.methods||[];
+      const hasUsdMethod=methods.includes('freq')||methods.includes('dwr');
+      wrap.style.display=hasUsdMethod? '':'none';
+      if(!hasUsdMethod) return;
+
+      sel.innerHTML=speciesListOptions.map(opt => `<option value="${esc(opt.key)}">${esc(opt.label)}</option>`).join('');
+      if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) selectedSpeciesListKey='all';
+      sel.value=selectedSpeciesListKey;
+      sel.disabled=speciesListOptions.length<=1;
+
+      const total=speciesAllRecords.length;
+      const available=speciesDB.length;
+      const scopeLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
+      meta.textContent=total
+        ? `${scopeLabel} list: ${available.toLocaleString()} species (${speciesImportStats.storedRows.toLocaleString()} stored from ${speciesImportStats.sourceRows.toLocaleString()} source rows)`
+        :'No species list imported';
     }
 
     function speciesDisplayPrimary(sp) {
@@ -2756,35 +2979,77 @@
 
     async function loadSpeciesDB() {
       const all=await dbGetAll('species');
-      if(all.length) {
-        speciesDB=all.map(r => [r.symbol,r.common,r.sci,r.native,r.duration||'',r.growthHabit||'']);
-      } else {
-        speciesDB=[];
+      speciesAllRecords=all.map(r => {
+        const symbol=String(r.symbol||'').trim().toUpperCase();
+        const statesRaw=Array.isArray(r.states)? r.states:[String(r.state||'').trim()].filter(Boolean);
+        const listKeysRaw=Array.isArray(r.listKeys)
+          ? r.listKeys
+          :[String(r.listKey||normalizeSpeciesListKey(r.state)||'all').trim()].filter(Boolean);
+        const state=statesRaw[0]||String(r.state||'').trim();
+        const listKey=listKeysRaw[0]||String(r.listKey||normalizeSpeciesListKey(state)||'all');
+        return {
+          ...r,
+          symbol,
+          sci: String(r.sci||'').trim(),
+          common: String(r.common||'').trim(),
+          state,
+          listKey,
+          states: statesRaw,
+          listKeys: listKeysRaw,
+          sourceRowCount: Math.max(1,parseInt(r.sourceRowCount,10)||statesRaw.length||1),
+        };
+      }).filter(r => !!r.symbol);
+      speciesImportStats={
+        sourceRows: speciesAllRecords.reduce((sum,r) => sum+(parseInt(r.sourceRowCount,10)||1),0),
+        storedRows: speciesAllRecords.length,
+      };
+      speciesListOptions=getSpeciesListOptions(speciesAllRecords);
+      if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
+        selectedSpeciesListKey='all';
+        localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
       }
-      updateSpeciesDBUI(all.length);
+      rebuildActiveSpeciesDB();
+      updateSpeciesDBUI(speciesAllRecords.length);
+      renderSpeciesListSelector();
     }
 
     function updateSpeciesDBUI(count) {
       const badge=document.getElementById('species-db-badge');
       const info=document.getElementById('species-db-info');
+      const importBtn=document.getElementById('import-species-btn');
       if(!badge) return;
       if(count) {
-        badge.textContent=count.toLocaleString()+' species';
-        info.textContent='Full USDA database loaded and stored offline.';
-        document.getElementById('import-species-btn').textContent='📂 Re-import CSV';
+        const listCount=Math.max(speciesListOptions.length-1,0);
+        badge.textContent=speciesDB.length.toLocaleString()+' species active';
+        const condensed=speciesImportStats.sourceRows>speciesImportStats.storedRows
+          ? ` Condensed to ${speciesImportStats.storedRows.toLocaleString()} stored species records.`
+          :'';
+        info.textContent=`${speciesImportStats.sourceRows.toLocaleString()} source rows imported offline`+(listCount? ` across ${listCount} state lists.`:'.')+condensed;
+        if(importBtn) importBtn.textContent='📂 Re-import CSV';
       } else {
         badge.textContent='No list loaded';
-        info.textContent='No species list loaded. Import your speciesList.csv on the Setup tab to enable plant search.';
+        info.textContent='No species list loaded. '+speciesImportRequirementsText()+' '+speciesImportExampleHeader();
+        if(importBtn) importBtn.textContent='📂 Import speciesList.csv';
       }
       updateSpeciesInputState();
     }
 
     function updateSpeciesInputState() {
       const hasDB=speciesDB.length>0;
-      speciesInput.disabled=!hasDB;
-      speciesInput.placeholder=hasDB
-        ? 'Search by symbol, common name or scientific name…'
-        :'Import a species list on the Setup tab first…';
+      const speciesInputEl=document.getElementById('species-input');
+      const dwrInputEl=document.getElementById('dwr-input');
+      if(speciesInputEl) {
+        speciesInputEl.disabled=!hasDB;
+        speciesInputEl.placeholder=hasDB
+          ? 'Search by symbol, common name or scientific name…'
+          :'Import a species list on the Setup tab first…';
+      }
+      if(dwrInputEl) {
+        dwrInputEl.disabled=!hasDB;
+        dwrInputEl.placeholder=hasDB
+          ? 'Search species (max 3)…'
+          :'Import a species list on the Setup tab first…';
+      }
     }
 
     async function importSpeciesCSV(file) {
@@ -2800,36 +3065,60 @@
           const parseLine=delim==='\t'
             ? line => line.split('\t').map(f => f.replace(/^"|"$/g,'').trim())
             :parseCSVLine;
-          // Detect column indices from header row (USDA PLANTS standard fallbacks: dur=8, habit=9, native=10)
-          const hdr=parseLine(lines[0]).map(h => h.trim().toLowerCase());
-          const symCol=hdr.findIndex(h => h==='symbol')||0;
-          const sciCol=hdr.findIndex(h => h.includes('scientific'))||1;
-          const comCol=hdr.findIndex(h => h.includes('common'))||2;
-          const durCol=hdr.findIndex(h => h==='duration'||h==='duration ');
-          const habCol=hdr.findIndex(h => h==='growth habit'||h.includes('growth habit')||h.includes('growth_habit'));
-          const natCol=hdr.findIndex(h => (h.includes('native')&&h.includes('status'))||h==='native status');
-          const entries=[];
+          const hdr=parseLine(lines[0]).map(normalizeCsvHeader);
+          const symCol=findHeaderIndex(hdr,['symbol','code']);
+          const sciCol=findHeaderIndex(hdr,['scientificname','scientific']);
+          const comCol=findHeaderIndex(hdr,['commonname','common']);
+          if(symCol<0||sciCol<0||comCol<0) {
+            throw new Error(speciesImportRequirementsText()+' '+speciesImportExampleHeader());
+          }
+          const durCol=findHeaderIndex(hdr,['duration']);
+          const habCol=findHeaderIndex(hdr,['growthhabit','growthform','habit']);
+          const natCol=findHeaderIndex(hdr,['nativestatus','native']);
+          const stateCol=findHeaderIndex(hdr,[
+            'state','states','statename','stateprovince','province','region',
+            'stateabbr','stateabbrev','stateabbreviation','statecode','stusps','usps','postalcode'
+          ]);
+          const rawEntries=[];
           for(let i=1;i<lines.length;i++) {
             const line=lines[i].trim();
             if(!line) continue;
             const f=parseLine(line);
-            if(f.length<3) continue;
-            const symbol=(f[symCol>=0? symCol:0]||'').trim();
-            const sci=(f[sciCol>=0? sciCol:1]||'').trim();
-            const common=(f[comCol>=0? comCol:2]||'').trim();
-            if(!symbol||!common) continue;
-            const native=parseNativeStatus((f[natCol>=0? natCol:10]||''));
-            const duration=(f[durCol>=0? durCol:8]||'').trim();
-            const growthHabit=(f[habCol>=0? habCol:9]||'').trim();
-            entries.push({symbol,common,sci,native,duration,growthHabit});
+            if(f.length<Math.max(symCol,sciCol,comCol)+1) continue;
+            const symbol=String(f[symCol]||'').trim().toUpperCase();
+            const sci=normalizeMissingText(f[sciCol]);
+            const common=normalizeMissingText(f[comCol])||sci;
+            if(!symbol||!sci) continue;
+            const state=normalizeSingleStateValue(stateCol>=0? f[stateCol]:'');
+            const listKey=normalizeSpeciesListKey(state);
+            const native=parseNativeStatus(String(natCol>=0? f[natCol]:''));
+            const duration=normalizeMissingText(durCol>=0? f[durCol]:'');
+            const growthHabit=normalizeMissingText(habCol>=0? f[habCol]:'');
+            rawEntries.push({
+              symbol,common,sci,native,duration,growthHabit,
+              state: state||'All',
+              listKey,
+            });
           }
+          if(!rawEntries.length) throw new Error('No valid species rows found after parsing.');
+          const entries=aggregateSpeciesImportEntries(rawEntries);
           btn.textContent='Saving…';
-          await dbBulkPut('species',entries);
-          speciesDB=entries.map(r => [r.symbol,r.common,r.sci,r.native,r.duration||'',r.growthHabit||'']);
+          await dbReplaceAll('species',entries);
+          speciesAllRecords=entries;
+          speciesImportStats={sourceRows: rawEntries.length,storedRows: entries.length};
+          speciesListOptions=getSpeciesListOptions(speciesAllRecords);
+          if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) selectedSpeciesListKey='all';
+          localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+          rebuildActiveSpeciesDB();
           updateSpeciesDBUI(entries.length);
-          toast('Loaded '+entries.length.toLocaleString()+' species','ok');
+          renderSpeciesListSelector();
+          toast(`Loaded ${rawEntries.length.toLocaleString()} rows as ${entries.length.toLocaleString()} stored species records`,'ok');
+          btn.textContent='📂 Import speciesList.csv';
         } catch(err) {
+          const info=document.getElementById('species-db-info');
+          if(info) info.textContent='Species import failed. '+err.message;
           toast('Import failed: '+err.message,'err');
+          btn.textContent='📂 Import speciesList.csv';
         }
         btn.disabled=false;
       };
@@ -4310,6 +4599,7 @@
           if(card) sampleBody.appendChild(card);
         });
       }
+      renderSpeciesListSelector();
 
       const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
       const rec=await dbGet('samples',sid);
@@ -5076,8 +5366,11 @@
         noneBtn.style.background=samplePanelState.freqNone? '#e9b949':'transparent';
       }
       if(speciesInputEl) {
-        speciesInputEl.disabled=!!samplePanelState.freqNone;
-        speciesInputEl.placeholder=samplePanelState.freqNone? 'None in frame selected':'Search USDA plant name or symbol…';
+        const hasDB=speciesDB.length>0;
+        speciesInputEl.disabled=!!samplePanelState.freqNone||!hasDB;
+        speciesInputEl.placeholder=samplePanelState.freqNone
+          ? 'None in frame selected'
+          :(hasDB? 'Search by symbol, common name or scientific name…':'Import a species list on the Setup tab first…');
       }
       if(speciesClearBtn&&samplePanelState.freqNone) speciesClearBtn.style.display='none';
 
@@ -5728,6 +6021,7 @@
       document.getElementById('wipe-db-pw').value='';
       document.getElementById('wipe-db-err').style.display='none';
       document.getElementById('wipe-db-protocols').checked=false;
+      document.getElementById('wipe-db-species').checked=false;
       document.getElementById('wipe-db-modal').classList.add('open');
     });
     document.getElementById('wipe-db-cancel-btn').addEventListener('click',() => {
@@ -5736,6 +6030,7 @@
     document.getElementById('wipe-db-confirm-btn').addEventListener('click',async () => {
       const pw=document.getElementById('wipe-db-pw').value;
       const wipeProtocols=document.getElementById('wipe-db-protocols').checked;
+      const wipeSpecies=document.getElementById('wipe-db-species').checked;
       if(pw!=='1699') {
         document.getElementById('wipe-db-err').style.display='';
         document.getElementById('wipe-db-pw').value='';
@@ -5762,6 +6057,17 @@
           if(!p.builtIn) await dbDelete('protocols',p.id);
         }
       }
+      if(wipeSpecies) {
+        await dbReplaceAll('species',[]);
+        speciesAllRecords=[];
+        speciesDB=[];
+        speciesListOptions=[{key: 'all',label: 'All'}];
+        speciesImportStats={sourceRows: 0,storedRows: 0};
+        selectedSpeciesListKey='all';
+        localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+        updateSpeciesDBUI(0);
+        renderSpeciesListSelector();
+      }
       // Reset in-memory state
       activeSiteId=null; activeSite=null; activeEventId=null; activeEvent=null;
       renderSiteList();
@@ -5770,7 +6076,7 @@
       refreshNewEventProtocolSelect();
       refreshSiteProtocolSelect();
       renderProtocols();
-      toast('Database wiped','ok');
+      toast(wipeSpecies? 'Database and species list wiped':'Database wiped','ok');
     });
 
     document.getElementById('sync-btn').addEventListener('click',async () => {
@@ -5944,10 +6250,29 @@
     document.getElementById('import-species-btn').addEventListener('click',() => {
       document.getElementById('species-csv-input').click();
     });
+    document.getElementById('species-import-help-btn').addEventListener('click',() => {
+      const help=document.getElementById('species-import-help');
+      if(!help) return;
+      help.style.display=help.style.display==='none'? 'block':'none';
+    });
     document.getElementById('species-csv-input').addEventListener('change',e => {
       const file=e.target.files[0];
       if(file) importSpeciesCSV(file);
       e.target.value='';
+    });
+
+    document.getElementById('species-list-select').addEventListener('change',e => {
+      selectedSpeciesListKey=e.target.value||'all';
+      localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+      rebuildActiveSpeciesDB();
+      updateSpeciesInputState();
+      renderSpeciesListSelector();
+      renderSeenSpecies();
+      renderDWRSeenSpecies();
+      const speciesDropEl=document.getElementById('species-dropdown');
+      if(speciesDropEl) {speciesDropEl.classList.remove('open'); speciesDropEl.innerHTML='';}
+      const dwrDropEl=document.getElementById('dwr-dropdown');
+      if(dwrDropEl) {dwrDropEl.style.display='none'; dwrDropEl.innerHTML='';}
     });
 
     // ══════════════════════════════════════════════════════
