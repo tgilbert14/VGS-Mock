@@ -1,0 +1,7 @@
+-observer, by login?
+-plant list maker
+-version tracker/help
+-backup/export database
+-data security
+-connect to db
+-syncing

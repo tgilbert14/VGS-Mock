@@ -110,6 +110,26 @@
       letter-spacing: .06em;
     }
 
+    .build-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .62rem;
+      letter-spacing: .06em;
+      color: var(--muted);
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 8px;
+      white-space: nowrap;
+    }
+
+    .build-badge.update-ready {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: color-mix(in srgb, var(--gold) 10%, var(--s2));
+    }
+
     #topbar-center {
       flex: 1;
       min-width: 0;
@@ -1683,6 +1703,7 @@
       <div id="topbar-center">
         <div id="site-crumb">No site selected</div>
       </div>
+      <div class="build-badge" id="app-version-badge" title="App version">v--</div>
       <div class="signal" id="signal-pill">
         <div class="dot"></div><span id="signal-lbl">OFF</span>
       </div>
@@ -1934,6 +1955,16 @@
       <!-- ═══ SYNC PAGE ═══ -->
       <div class="page" id="page-sync">
         <div class="card">
+          <div class="card-title">App Build <span class="badge" id="app-build-version-badge">v--</span></div>
+          <div id="app-build-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking build
+            status…</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="app-update-btn" style="display:none;">↻ Reload Latest
+              Build</button>
+            <button class="btn btn-ghost btn-sm" id="app-check-update-btn" type="button">Check for Update</button>
+          </div>
+        </div>
+        <div class="card">
           <div class="card-title">Species Database <span class="badge" id="species-db-badge">Built-in list</span></div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1947,6 +1978,15 @@
             Status, Duration, and Growth Habit are allowed. State values must be one state per row.
             <div style="margin-top:6px;opacity:.9;">Example header: <span
                 style="font-family:var(--font-mono);font-size:.68rem;">Symbol,Scientific Name,Common Name,State</span>
+            </div>
+          </div>
+          <div id="species-list-wrap" style="margin-top:12px;display:none;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <label for="species-list-select"
+                style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;">Plant
+                List</label>
+              <select id="species-list-select" style="width:auto;min-width:170px;"></select>
+              <span id="species-list-meta" style="font-size:.72rem;color:var(--muted);"></span>
             </div>
           </div>
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
@@ -2095,6 +2135,7 @@
         <div class="spt-main" id="spt-main">—</div>
         <div class="spt-sub" id="spt-sub"></div>
         <div class="spt-ctx" id="spt-ctx"></div>
+        <div class="spt-ctx" id="spt-scope" style="display:none;"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <div class="transect-jump-wrap" id="transect-jump-wrap" style="display:none;">
@@ -2111,16 +2152,6 @@
     </div>
     <div id="panel-sample-map"></div>
     <div id="sample-panel-body">
-
-      <div class="card" id="panel-plant-list-card" style="display:none;padding:12px 14px;">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <label for="species-list-select"
-            style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;">Plant
-            List</label>
-          <select id="species-list-select" style="width:auto;min-width:170px;"></select>
-          <span id="species-list-meta" style="font-size:.72rem;color:var(--muted);"></span>
-        </div>
-      </div>
 
       <!-- Ground cover -->
       <div class="card" id="panel-cover-card">
@@ -2142,6 +2173,8 @@
           <span style="display:flex;gap:6px;align-items:center;">
             <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
           </span>
+        </div>
+        <div id="species-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;">
         </div>
         <div id="species-search-wrap">
           <input type="text" id="species-input" placeholder="Search USDA plant name or symbol…" autocomplete="off"
@@ -2166,6 +2199,7 @@
             <span id="dwr-count-badge" class="badge">0/3 species</span>
           </span>
         </div>
+        <div id="dwr-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;"></div>
         <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Select the top 3 species by estimated dry
           weight in this frame.</div>
         <div id="dwr-search-wrap" style="margin-bottom:10px;">
@@ -2321,6 +2355,9 @@
     // ══════════════════════════════════════════════════════
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
+    const APP_BUILD_DATE='2026-04-19';
+    const APP_BUILD_REV=2;
+    const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const USDA_PLANTS=[];
     const COVER_CATS=[
       {id: "bare_soil",label: "Bare Soil",icon: "🟤"},
@@ -2563,6 +2600,9 @@
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
     let spTrendState={sortCol: 'overall',sortDir: 'desc',groupBy: ''};  // persists across tab switches
+    let swRegistrationRef=null;
+    let swUpdateReady=false;
+    let swStatusText='Build loaded. Checking offline cache status…';
     const USDA_SPECIES_METHODS=[
       {key: 'species',badge: 'freq',label: 'Frequency',uniquePerSample: true},
       {key: 'dwr',badge: 'dwr',label: 'DWR',uniquePerSample: false},
@@ -2710,15 +2750,14 @@
     }
 
     function renderSpeciesListSelector() {
-      const wrap=document.getElementById('panel-plant-list-card');
+      const wrap=document.getElementById('species-list-wrap');
       const sel=document.getElementById('species-list-select');
       const meta=document.getElementById('species-list-meta');
       if(!wrap||!sel||!meta) return;
 
-      const methods=activeEvent?.methods||[];
-      const hasUsdMethod=methods.includes('freq')||methods.includes('dwr');
-      wrap.style.display=hasUsdMethod? '':'none';
-      if(!hasUsdMethod) return;
+      const hasRecords=speciesAllRecords.length>0;
+      wrap.style.display=hasRecords? '':'none';
+      if(!hasRecords) return;
 
       sel.innerHTML=speciesListOptions.map(opt => `<option value="${esc(opt.key)}">${esc(opt.label)}</option>`).join('');
       if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) selectedSpeciesListKey='all';
@@ -2731,6 +2770,110 @@
       meta.textContent=total
         ? `${scopeLabel} list: ${available.toLocaleString()} species (${speciesImportStats.storedRows.toLocaleString()} stored from ${speciesImportStats.sourceRows.toLocaleString()} source rows)`
         :'No species list imported';
+      renderSamplePanelSpeciesScope();
+    }
+
+    function renderSpeciesMethodScopeLabels(methods=(activeEvent?.methods||[])) {
+      const freqNote=document.getElementById('species-scope-note');
+      const dwrNote=document.getElementById('dwr-scope-note');
+      const scopeLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
+      const noteText=speciesAllRecords.length? `Plant List: ${scopeLabel}`:'No plant list loaded';
+
+      if(freqNote) {
+        freqNote.textContent=noteText;
+        freqNote.style.display=methods.includes('freq')? '':'none';
+      }
+      if(dwrNote) {
+        dwrNote.textContent=noteText;
+        dwrNote.style.display=methods.includes('dwr')? '':'none';
+      }
+    }
+
+    function renderSamplePanelSpeciesScope(methods=(activeEvent?.methods||[])) {
+      const scopeEl=document.getElementById('spt-scope');
+      if(!scopeEl) return;
+      const hasUsdaMethod=methods.includes('freq')||methods.includes('dwr');
+      if(!hasUsdaMethod) {
+        scopeEl.textContent='';
+        scopeEl.style.display='none';
+        return;
+      }
+      const scopeLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
+      scopeEl.textContent=speciesAllRecords.length? `Plant List in use: ${scopeLabel}`:'No plant list loaded';
+      scopeEl.style.display='';
+    }
+
+    function renderAppVersion() {
+      const versionLabel=`v${APP_VERSION}`;
+      const badge=document.getElementById('app-version-badge');
+      if(badge) {
+        badge.textContent=swUpdateReady? `${versionLabel} update`:versionLabel;
+        badge.classList.toggle('update-ready',swUpdateReady);
+      }
+      const syncBadge=document.getElementById('app-build-version-badge');
+      if(syncBadge) syncBadge.textContent=versionLabel;
+      const syncStatus=document.getElementById('app-build-status');
+      if(syncStatus) syncStatus.textContent=swStatusText;
+      const updateBtn=document.getElementById('app-update-btn');
+      if(updateBtn) updateBtn.style.display=swUpdateReady? '':'none';
+      const checkBtn=document.getElementById('app-check-update-btn');
+      if(checkBtn) checkBtn.disabled=!('serviceWorker' in navigator);
+      document.title=`EcoPlotMobile ${versionLabel}`;
+    }
+
+    function setServiceWorkerStatus(text,{updateReady=swUpdateReady}={}) {
+      swStatusText=text;
+      swUpdateReady=updateReady;
+      renderAppVersion();
+    }
+
+    function watchServiceWorker(worker) {
+      if(!worker) return;
+      worker.addEventListener('statechange',() => {
+        if(worker.state==='installed') {
+          if(navigator.serviceWorker.controller) {
+            setServiceWorkerStatus(`New build downloaded for this device. Reload to switch to v${APP_VERSION} cache update.`,{updateReady: true});
+          } else {
+            setServiceWorkerStatus(`Offline cache ready for v${APP_VERSION}.`,{updateReady: false});
+          }
+        } else if(worker.state==='installing') {
+          setServiceWorkerStatus('Downloading newer build…',{updateReady: false});
+        } else if(worker.state==='activating') {
+          setServiceWorkerStatus('Activating newer build…',{updateReady: swUpdateReady});
+        }
+      });
+    }
+
+    function bindServiceWorkerRegistration(reg) {
+      swRegistrationRef=reg;
+      if(reg.waiting&&navigator.serviceWorker.controller) {
+        setServiceWorkerStatus(`New build ready on this device. Reload to use v${APP_VERSION}.`,{updateReady: true});
+      } else {
+        setServiceWorkerStatus(`Current build on this tab: v${APP_VERSION}.`,{updateReady: false});
+      }
+      if(reg.installing) watchServiceWorker(reg.installing);
+      reg.addEventListener('updatefound',() => {
+        setServiceWorkerStatus('Downloading newer build…',{updateReady: false});
+        watchServiceWorker(reg.installing);
+      });
+    }
+
+    async function checkForAppUpdate() {
+      if(!('serviceWorker' in navigator)) {
+        setServiceWorkerStatus('Service worker updates are not available in this browser.',{updateReady: false});
+        return;
+      }
+      if(!swRegistrationRef) {
+        setServiceWorkerStatus('Service worker not ready yet. Try again in a moment.',{updateReady: false});
+        return;
+      }
+      setServiceWorkerStatus('Checking for newer build…',{updateReady: swUpdateReady});
+      try {
+        await swRegistrationRef.update();
+        if(!swUpdateReady) setServiceWorkerStatus(`No newer build detected. Current build: v${APP_VERSION}.`,{updateReady: false});
+      } catch(err) {
+        setServiceWorkerStatus(`Update check failed: ${err.message||'unknown error'}`,{updateReady: swUpdateReady});
+      }
     }
 
     function speciesDisplayPrimary(sp) {
@@ -3114,6 +3257,7 @@
           renderSpeciesListSelector();
           toast(`Loaded ${rawEntries.length.toLocaleString()} rows as ${entries.length.toLocaleString()} stored species records`,'ok');
           btn.textContent='📂 Import speciesList.csv';
+          renderCollect();
         } catch(err) {
           const info=document.getElementById('species-db-info');
           if(info) info.textContent='Species import failed. '+err.message;
@@ -3621,11 +3765,15 @@
           const cfgStr=`${ev.transects||4}T × ${ev.samples||50}S · ${ev.length||100}${ev.unit||'m'} · ${ev.coverPts||2} cover pts · frame ${ev.frameW||40}×${ev.frameH||40}cm`;
           const proto=ev.protocolId? protocolMap[ev.protocolId]:null;
           const protoTag=proto? `<span class="badge" style="margin-left:4px;font-size:.6rem;">${esc(proto.name)}</span>`:'';
+          const evMethods=ev.methods||[];
+          const hasUsdaMethod=evMethods.includes('freq')||evMethods.includes('dwr');
+          const listLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
+          const listBadge=hasUsdaMethod? `<span class="badge" style="margin-left:4px;font-size:.6rem;background:var(--s3);color:var(--muted);" title="Active plant list">🌿 ${esc(listLabel)}</span>`:'';
           return `
           <div class="event-item${isActive? ' active-event':''}" data-eid="${ev.id}">
             <div class="site-icon" style="font-size:1.1rem;">📅</div>
             <div class="site-meta">
-              <div class="site-name">${esc(ev.name)}${protoTag}</div>
+              <div class="site-name">${esc(ev.name)}${protoTag}${listBadge}</div>
               <div class="site-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
               <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
             </div>
@@ -4600,6 +4748,8 @@
         });
       }
       renderSpeciesListSelector();
+      renderSpeciesMethodScopeLabels(methods);
+      renderSamplePanelSpeciesScope(methods);
 
       const sid=sampleId(activeSiteId,activeEventId,tIdx,sIdx);
       const rec=await dbGet('samples',sid);
@@ -6267,6 +6417,9 @@
       rebuildActiveSpeciesDB();
       updateSpeciesInputState();
       renderSpeciesListSelector();
+      renderSpeciesMethodScopeLabels();
+      renderSamplePanelSpeciesScope();
+      renderCollect();
       renderSeenSpecies();
       renderDWRSeenSpecies();
       const speciesDropEl=document.getElementById('species-dropdown');
@@ -6274,11 +6427,14 @@
       const dwrDropEl=document.getElementById('dwr-dropdown');
       if(dwrDropEl) {dwrDropEl.style.display='none'; dwrDropEl.innerHTML='';}
     });
+    document.getElementById('app-check-update-btn').addEventListener('click',checkForAppUpdate);
+    document.getElementById('app-update-btn').addEventListener('click',() => window.location.reload());
 
     // ══════════════════════════════════════════════════════
     //  INIT
     // ══════════════════════════════════════════════════════
     async function init() {
+      renderAppVersion();
       // Ensure the local-only practice folder always exists
       const existing=await dbGet('folders','folder_local_practice');
       if(!existing) {
@@ -6307,11 +6463,23 @@
 
     // ── Service Worker registration ──
     if('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange',() => {
+        setServiceWorkerStatus('New build activated. Reload to finish switching this tab.',{updateReady: true});
+      });
       window.addEventListener('load',() => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW registered, scope:',reg.scope))
-          .catch(err => console.warn('SW registration failed:',err));
+          .then(reg => {
+            bindServiceWorkerRegistration(reg);
+            console.log('SW registered, scope:',reg.scope);
+            return reg.update().catch(() => null);
+          })
+          .catch(err => {
+            setServiceWorkerStatus(`Service worker failed: ${err.message||'registration error'}`,{updateReady: false});
+            console.warn('SW registration failed:',err);
+          });
       });
+    } else {
+      setServiceWorkerStatus('Service worker updates are unavailable in this browser.',{updateReady: false});
     }
 
     // ── Theme toggle ──
