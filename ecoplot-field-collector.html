@@ -899,6 +899,10 @@
       padding-right: clamp(290px, 34vw, 420px);
     }
 
+    #sample-panel.has-species-drawer.species-drawer-collapsed #sample-panel-body {
+      padding-right: 56px;
+    }
+
     #sample-panel-footer {
       background: var(--s1);
       border-top: 1px solid var(--border);
@@ -1842,6 +1846,13 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
+      transition: width .18s ease, padding .18s ease;
+    }
+
+    #sample-panel.species-drawer-collapsed #species-drawer {
+      width: 46px;
+      padding: 8px 6px;
+      align-items: center;
     }
 
     .drawer-header {
@@ -1849,6 +1860,33 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
+    }
+
+    .drawer-collapse-btn {
+      border: 1px solid var(--border);
+      background: var(--s1);
+      color: var(--text);
+      border-radius: 8px;
+      min-width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: .95rem;
+      line-height: 1;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    #sample-panel.species-drawer-collapsed .drawer-header {
+      width: 100%;
+      margin-bottom: 0;
+      justify-content: center;
+    }
+
+    #sample-panel.species-drawer-collapsed .drawer-header h3,
+    #sample-panel.species-drawer-collapsed #drawer-add-species-btn,
+    #sample-panel.species-drawer-collapsed .drawer-controls,
+    #sample-panel.species-drawer-collapsed #drawer-species-list {
+      display: none;
     }
 
     .drawer-controls {
@@ -1980,6 +2018,10 @@
       #sample-panel.has-species-drawer #sample-panel-body {
         padding-right: min(86vw, 380px);
       }
+
+      #sample-panel.has-species-drawer.species-drawer-collapsed #sample-panel-body {
+        padding-right: 56px;
+      }
     }
 
     @media (max-width: 760px) {
@@ -1989,6 +2031,10 @@
 
       #sample-panel.has-species-drawer #sample-panel-body {
         padding-right: min(92vw, 356px);
+      }
+
+      #sample-panel.has-species-drawer.species-drawer-collapsed #sample-panel-body {
+        padding-right: 52px;
       }
 
       .drawer-modal {
@@ -2478,7 +2524,7 @@
   </div><!-- /app -->
 
   <!-- ══════════════ SAMPLE ENTRY PANEL ══════════════ -->
-  <div id="sample-panel" class="has-species-drawer">
+  <div id="sample-panel" class="has-species-drawer species-drawer-collapsed">
     <div id="sample-panel-header">
       <button class="btn btn-ghost btn-sm" id="sample-close-btn">✕</button>
       <div id="sample-panel-title">
@@ -2495,6 +2541,7 @@
       <div class="drawer-header">
         <h3 style="margin:0;font-size:.9rem;">Species List</h3>
         <button id="drawer-add-species-btn" class="btn btn-ghost btn-sm" title="Search and add species">+ Add</button>
+        <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Collapse species list">❯</button>
       </div>
       <div class="drawer-controls">
         <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn" data-show="false">▶ Show site
@@ -6137,6 +6184,7 @@
     async function openSamplePanel(tIdx,sIdx) {
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
+      applySpeciesDrawerCollapsedState();
       await loadSampleIntoPanel(tIdx,sIdx);
       document.getElementById('sample-panel').classList.add('open');
       samplePanelOpen=true;
@@ -7311,6 +7359,22 @@
 
     // ── Species Drawer ────────────────────────────────────
     let drawerShowSiteSpecies=false;
+    let speciesDrawerCollapsed=localStorage.getItem('ep_species_drawer_collapsed')!=='0';
+
+    function applySpeciesDrawerCollapsedState() {
+      const panel=document.getElementById('sample-panel');
+      const btn=document.getElementById('drawer-collapse-btn');
+      if(!panel||!btn) return;
+      panel.classList.toggle('species-drawer-collapsed',speciesDrawerCollapsed);
+      btn.textContent=speciesDrawerCollapsed? '❮':'❯';
+      btn.title=speciesDrawerCollapsed? 'Open species list':'Collapse species list';
+    }
+
+    function setSpeciesDrawerCollapsed(nextCollapsed) {
+      speciesDrawerCollapsed=!!nextCollapsed;
+      localStorage.setItem('ep_species_drawer_collapsed',speciesDrawerCollapsed? '1':'0');
+      applySpeciesDrawerCollapsedState();
+    }
 
     function getDrawerSpeciesUnified() {
       return [...getEventSpeciesPool()];
@@ -7393,7 +7457,12 @@
       await renderSpeciesDrawer();
     });
 
+    document.getElementById('drawer-collapse-btn').addEventListener('click',() => {
+      setSpeciesDrawerCollapsed(!speciesDrawerCollapsed);
+    });
+
     document.getElementById('drawer-add-species-btn').addEventListener('click',() => {
+      if(speciesDrawerCollapsed) setSpeciesDrawerCollapsed(false);
       openDrawerSpeciesSearchModal();
     });
 
