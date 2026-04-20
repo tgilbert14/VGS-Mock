@@ -2993,7 +2993,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-20';
-    const APP_BUILD_REV=30;
+    const APP_BUILD_REV=32;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
@@ -6550,6 +6550,7 @@
     const speciesQualifierTarget=document.getElementById('species-qualifier-target');
     const speciesQualifierInput=document.getElementById('species-qualifier-input');
     let bulkReplaceState={oldSpecies: null,replacement: null};
+    let bulkReplaceSearchState={token: 0};
 
     function speciesFromDataset(el) {
       return createSpeciesEntry({
@@ -6902,6 +6903,7 @@
 
     function closeBulkReplaceModal() {
       bulkReplaceModal.classList.remove('open');
+      bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
       bulkReplaceState={oldSpecies: null,replacement: null};
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
@@ -6951,9 +6953,42 @@
 
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
+      bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
       bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceSelected.textContent='No replacement selected';
       bulkReplaceModal.classList.add('open');
+    }
+
+    function renderBulkReplaceRowsChunked(results,token) {
+      const FIRST_CHUNK=12;
+      const NEXT_CHUNK=8;
+      const renderRow=p => renderSpeciesSearchOption(p,{compact: true});
+
+      const first=results.slice(0,FIRST_CHUNK);
+      bulkReplaceDrop.innerHTML=first.map(renderRow).join('');
+
+      let idx=FIRST_CHUNK;
+      const appendNext=() => {
+        if(token!==bulkReplaceSearchState.token) return;
+        if(idx>=results.length) return;
+        const next=results.slice(idx,idx+NEXT_CHUNK);
+        bulkReplaceDrop.insertAdjacentHTML('beforeend',next.map(renderRow).join(''));
+        idx+=NEXT_CHUNK;
+        if(idx<results.length) requestAnimationFrame(appendNext);
+      };
+
+      if(idx<results.length) requestAnimationFrame(appendNext);
+
+      bulkReplaceDrop.onclick=evt => {
+        const opt=evt.target.closest('.species-opt');
+        if(!opt) return;
+        bulkReplaceState.replacement=speciesFromDataset(opt);
+        bulkReplaceInput.value=`${opt.dataset.common} [${opt.dataset.sym}]`;
+        bulkReplaceClear.style.display='';
+        bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Replacement chosen. Update search to choose a different species.</div>';
+        bulkReplaceSelected.textContent=
+          `Replacement selected: ${speciesDisplayPrimary({symbol: opt.dataset.sym,common: opt.dataset.common,sci: opt.dataset.sci})} [${opt.dataset.sym}]`;
+      };
     }
 
     function wireBulkReplaceTrigger(chipEl,removeSelector) {
@@ -7044,33 +7079,28 @@
 
     bulkReplaceInput.addEventListener('input',() => {
       const q=bulkReplaceInput.value.trim().toLowerCase();
+      bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
+      const token=bulkReplaceSearchState.token;
       bulkReplaceClear.style.display=q? '':'none';
       if(!shouldSearchSpeciesQuery(q)) {
+        bulkReplaceDrop.onclick=null;
         bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Type to search replacement species</div>';
         return;
       }
       const results=getSearchSpeciesDB().filter(p => speciesSearchMatchesRow(p,q)).slice(0,30);
       if(!results.length) {
+        bulkReplaceDrop.onclick=null;
         bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">No matching species</div>';
         return;
       }
-      bulkReplaceDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p,{compact: true})).join('');
-
-      bulkReplaceDrop.querySelectorAll('.species-opt').forEach(opt => {
-        opt.addEventListener('click',() => {
-          bulkReplaceState.replacement=speciesFromDataset(opt);
-          bulkReplaceInput.value=`${opt.dataset.common} [${opt.dataset.sym}]`;
-          bulkReplaceClear.style.display='';
-          bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Replacement chosen. Update search to choose a different species.</div>';
-          bulkReplaceSelected.textContent=
-            `Replacement selected: ${speciesDisplayPrimary({symbol: opt.dataset.sym,common: opt.dataset.common,sci: opt.dataset.sci})} [${opt.dataset.sym}]`;
-        });
-      });
+      renderBulkReplaceRowsChunked(results,token);
     });
 
     bulkReplaceClear.addEventListener('click',() => {
+      bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
+      bulkReplaceDrop.onclick=null;
       bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceState.replacement=null;
       bulkReplaceSelected.textContent='No replacement selected';
@@ -7571,7 +7601,7 @@
       const resultsDiv=document.getElementById('drawer-search-results');
       const statusEl=document.getElementById('drawer-search-status');
 
-      drawerSearchState={};
+      drawerSearchState={token: 0};
       modal.classList.add('open');
       searchInput.value='';
       // Reset search mode to Code each time the modal opens
@@ -7588,9 +7618,46 @@
     function closeDrawerSearchModal() {
       const modal=document.getElementById('drawer-search-modal');
       const searchInput=document.getElementById('drawer-search-input');
+      const resultsDiv=document.getElementById('drawer-search-results');
       modal.classList.remove('open');
       searchInput.removeEventListener('input',updateDrawerSearchResults);
-      drawerSearchState={};
+      if(resultsDiv) {
+        resultsDiv.onclick=null;
+        resultsDiv.onmouseover=null;
+        resultsDiv.onmouseout=null;
+      }
+      drawerSearchState={token: (drawerSearchState.token||0)+1};
+    }
+
+    function renderDrawerSearchRowsChunked(resultsDiv,results,token) {
+      const FIRST_CHUNK=20;
+      const NEXT_CHUNK=12;
+      const renderRow=row => {
+        const symbol=String(row?.[0]||'').trim().toUpperCase();
+        const common=String(row?.[1]||'').trim();
+        const sci=String(row?.[2]||'').trim();
+        const native=String(row?.[3]||'?').trim()||'?';
+        return `<div class="drawer-search-result" data-sym="${esc(symbol)}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;">
+          <div style="font-weight:600;font-size:.8rem;">${esc(symbol)}</div>
+          <div style="font-size:.7rem;color:var(--muted);">${esc(common||'')}</div>
+          <div style="font-size:.65rem;color:var(--muted);font-style:italic;">${esc(sci||'')}</div>
+        </div>`;
+      };
+
+      const first=results.slice(0,FIRST_CHUNK);
+      resultsDiv.innerHTML=first.map(renderRow).join('');
+
+      let idx=FIRST_CHUNK;
+      const appendNext=() => {
+        if(token!==drawerSearchState.token) return;
+        if(idx>=results.length) return;
+        const next=results.slice(idx,idx+NEXT_CHUNK);
+        resultsDiv.insertAdjacentHTML('beforeend',next.map(renderRow).join(''));
+        idx+=NEXT_CHUNK;
+        if(idx<results.length) requestAnimationFrame(appendNext);
+      };
+
+      if(idx<results.length) requestAnimationFrame(appendNext);
     }
 
     function updateDrawerSearchResults(e) {
@@ -7598,6 +7665,8 @@
       const resultsDiv=document.getElementById('drawer-search-results');
       const statusEl=document.getElementById('drawer-search-status');
       const searchBy=document.querySelector('input[name="drawer-search-by"]:checked')?.value||'code';
+      drawerSearchState.token=(drawerSearchState.token||0)+1;
+      const token=drawerSearchState.token;
 
       if(!query||query.length<1) {
         if(statusEl) statusEl.textContent='Type to search';
@@ -7635,37 +7704,29 @@
           :`${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
       }
 
-      resultsDiv.innerHTML=results.map((row,idx) => {
-        const symbol=String(row?.[0]||'').trim().toUpperCase();
-        const common=String(row?.[1]||'').trim();
-        const sci=String(row?.[2]||'').trim();
-        const native=String(row?.[3]||'?').trim()||'?';
-        return `<div class="drawer-search-result" data-idx="${idx}" data-sym="${esc(symbol)}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;">
-          <div style="font-weight:600;font-size:.8rem;">${esc(symbol)}</div>
-          <div style="font-size:.7rem;color:var(--muted);">${esc(common||'')}</div>
-          <div style="font-size:.65rem;color:var(--muted);font-style:italic;">${esc(sci||'')}</div>
-        </div>`;
-      }).join('');
+      renderDrawerSearchRowsChunked(resultsDiv,results,token);
 
-      // Wire up result clicks
-      resultsDiv.querySelectorAll('.drawer-search-result').forEach(item => {
-        item.addEventListener('click',() => {
-          const sp={
-            symbol: item.dataset.sym,
-            common: item.dataset.common,
-            sci: item.dataset.sci,
-            native: item.dataset.native
-          };
-          closeDrawerSearchModal();
-          upsertEventSpeciesPoolEntry(createSpeciesEntry(sp));
-        });
-        item.addEventListener('mouseenter',() => {
-          item.style.background='var(--s2)';
-        });
-        item.addEventListener('mouseleave',() => {
-          item.style.background='';
-        });
-      });
+      // Delegated handlers keep appended chunks interactive without re-binding.
+      resultsDiv.onclick=evt => {
+        const item=evt.target.closest('.drawer-search-result');
+        if(!item) return;
+        const sp={
+          symbol: item.dataset.sym,
+          common: item.dataset.common,
+          sci: item.dataset.sci,
+          native: item.dataset.native
+        };
+        closeDrawerSearchModal();
+        upsertEventSpeciesPoolEntry(createSpeciesEntry(sp));
+      };
+      resultsDiv.onmouseover=evt => {
+        const item=evt.target.closest('.drawer-search-result');
+        if(item) item.style.background='var(--s2)';
+      };
+      resultsDiv.onmouseout=evt => {
+        const item=evt.target.closest('.drawer-search-result');
+        if(item) item.style.background='';
+      };
     }
 
     // Wire modal close buttons
