@@ -1274,8 +1274,8 @@
     /* ── Ground cover buttons ── */
     .cover-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: 1fr;
+      gap: 6px;
       margin-bottom: 10px;
     }
 
@@ -1283,18 +1283,22 @@
       background: var(--s2);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px 10px;
-      text-align: center;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       cursor: pointer;
-      transition: all .15s;
+      transition: background .15s, border-color .15s, color .15s, transform .15s;
       font-size: .72rem;
       color: var(--muted);
       font-family: var(--font-mono);
-      line-height: 1.4;
+      line-height: 1.2;
+      text-align: left;
     }
 
     .cover-btn:active {
-      transform: scale(.95);
+      transform: scale(.985);
     }
 
     .cover-btn.selected {
@@ -1303,18 +1307,19 @@
       color: var(--accent);
     }
 
-    .cover-btn .cover-icon {
-      font-size: 1.2rem;
-      display: block;
-      margin-bottom: 4px;
+    .cover-btn .cover-label {
+      flex: 1;
+      min-width: 0;
     }
 
     .cover-btn .cover-count {
-      font-size: .9rem;
-      font-weight: 600;
+      font-size: .88rem;
+      font-weight: 700;
       font-family: var(--font-ui);
       color: var(--gold);
-      display: block;
+      min-width: 20px;
+      text-align: right;
+      flex-shrink: 0;
     }
 
     /* ── Cover hit log ── */
@@ -6993,14 +6998,13 @@
           </div>`;
 
       document.getElementById('cover-grid').innerHTML=coverCats.map(c => `
-            <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}">
-              <span class="cover-icon">${c.icon}</span>
-      ${esc(c.label)}
-        <span class="cover-count">${hitCount[c.id]||''}</span>
-    </div>`).join('');
+            <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}" role="button" tabindex="0" aria-label="Add ${esc(c.label)} cover hit">
+              <span class="cover-label">${esc(c.label)}</span>
+              <span class="cover-count">${hitCount[c.id]||''}</span>
+            </div>`).join('');
 
       document.querySelectorAll('.cover-btn').forEach(btn => {
-        btn.addEventListener('click',() => {
+        const addHit=() => {
           if(samplePanelState.coverHits.length>=maxHits) {
             toast(`Max ${maxHits} hits per sample`,'err'); return;
           }
@@ -7008,6 +7012,13 @@
           samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
           renderCoverGrid();
           renderHitLog();
+        };
+        btn.addEventListener('click',addHit);
+        btn.addEventListener('keydown',e => {
+          if(e.key==='Enter'||e.key===' ') {
+            e.preventDefault();
+            addHit();
+          }
         });
       });
     }
