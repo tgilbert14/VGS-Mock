@@ -2361,6 +2361,19 @@
             autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="species-clear" style="display:none;">✕</button>
         </div>
+        <div class="species-search-controls" style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
+          <label style="font-size:.67rem;color:var(--muted);">Search by</label>
+          <select id="species-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
+            <option value="symbol">Code</option>
+            <option value="sci">Scientific</option>
+            <option value="common">Common</option>
+          </select>
+          <select id="species-search-match" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
+            <option value="starts">Starts with</option>
+            <option value="contains">Contains</option>
+          </select>
+        </div>
+        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:-4px 0 8px 0;"></div>
         <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div class="two-code-picks" id="species-custom-list-picks" hidden></div>
         <div style="display:flex;justify-content:flex-end;margin:6px 0 8px 0;">
@@ -2390,6 +2403,19 @@
             autocorrect="off" spellcheck="false">
           <button id="dwr-clear" style="display:none;">✕</button>
         </div>
+        <div class="species-search-controls" style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
+          <label style="font-size:.67rem;color:var(--muted);">Search by</label>
+          <select id="dwr-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
+            <option value="symbol">Code</option>
+            <option value="sci">Scientific</option>
+            <option value="common">Common</option>
+          </select>
+          <select id="dwr-search-match" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
+            <option value="starts">Starts with</option>
+            <option value="contains">Contains</option>
+          </select>
+        </div>
+        <div id="dwr-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:-4px 0 8px 0;"></div>
         <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div class="two-code-picks" id="dwr-custom-list-picks" hidden></div>
         <div id="dwr-dropdown"
@@ -2975,6 +3001,8 @@
     let showSiteSpecies=localStorage.getItem('ep_show_site_species')!=='0';
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
+    let speciesSearchField=localStorage.getItem('ep_species_search_field')||'symbol';
+    let speciesSearchMatchMode=localStorage.getItem('ep_species_search_match')||'starts';
     let customPlantLists=JSON.parse(localStorage.getItem('ep_custom_lists')||'[]');
     let activeCustomListIds=JSON.parse(localStorage.getItem('ep_active_custom_lists')||'[]');
     let editingCustomListId=null;
@@ -3048,20 +3076,45 @@
 
     function getSearchSpeciesDB() {
       const twoCodes=ALWAYS_AVAILABLE_TWO_CODE_SPECIES;
-      if(activeCustomListIds.length>0) {
-        const allSymbols=new Set();
-        activeCustomListIds.forEach(id => {
-          const clist=customPlantLists.find(l => l.id===id);
-          if(clist&&clist.symbols.length>0) {
-            clist.symbols.forEach(s => allSymbols.add(String(s).trim().toUpperCase()));
-          }
-        });
-        if(allSymbols.size>0) {
-          const filtered=speciesDB.filter(row => allSymbols.has(String(row[0]||'').trim().toUpperCase()));
-          return [...filtered,...twoCodes];
+      const sourceRows=speciesAllRecords.length
+        ? speciesAllRecords
+        : speciesDB.map(r => ({
+          symbol: r[0],
+          common: r[1],
+          sci: r[2],
+          native: r[3],
+          duration: r[4]||'',
+          growthHabit: r[5]||'',
+        }));
+
+      const bySymbol=new Map();
+      sourceRows.forEach(r => {
+        const symbol=String(r?.symbol||'').trim().toUpperCase();
+        if(!symbol) return;
+        const existing=bySymbol.get(symbol);
+        if(!existing) {
+          bySymbol.set(symbol,r);
+          return;
         }
-      }
-      return [...speciesDB,...twoCodes];
+        const exCommon=normalizeMissingText(existing.common);
+        const newCommon=normalizeMissingText(r.common);
+        if(!exCommon&&newCommon) bySymbol.set(symbol,r);
+      });
+
+      const allRows=[...bySymbol.values()].sort((a,b) => {
+        const ap=speciesDisplayPrimary(a)||a.symbol;
+        const bp=speciesDisplayPrimary(b)||b.symbol;
+        return ap.localeCompare(bp);
+      }).map(r => [
+        String(r.symbol||'').trim().toUpperCase(),
+        String(r.common||''),
+        String(r.sci||''),
+        String(r.native||'?')||'?',
+        String(r.duration||''),
+        String(r.growthHabit||''),
+      ]);
+
+      return [...allRows,...twoCodes];
     }
 
     function hasSearchSpeciesDB() {
@@ -3069,7 +3122,11 @@
     }
 
     function shouldSearchSpeciesQuery(q) {
-      return q.length>=2||q==='2';
+      const query=String(q||'').trim();
+      if(!query) return false;
+      if(query==='2') return true;
+      if(speciesSearchField==='symbol'&&speciesSearchMatchMode==='starts') return query.length>=1;
+      return query.length>=2;
     }
 
     function createSpeciesEntry({symbol,common,sci,native,qualifier=''}) {
@@ -3084,6 +3141,16 @@
 
     function speciesQualifierText(sp) {
       return normalizeSpeciesQualifier(sp?.qualifier||'');
+    }
+
+    function normalizeSpeciesEntryForStorage(entry) {
+      const base=createSpeciesEntry(entry);
+      if(speciesDisplayMode==='common') {
+        const preferred=base.common||base.sci||base.symbol;
+        return createSpeciesEntry({...base,common: preferred,sci: ''});
+      }
+      const preferred=base.sci||base.common||base.symbol;
+      return createSpeciesEntry({...base,sci: preferred,common: ''});
     }
 
     function hasSpeciesEntry(list,entry,excludeIndex=-1) {
@@ -3263,8 +3330,7 @@
     function getActiveScopeLabel() {
       const activeLists=getActiveCustomLists();
       if(activeLists.length>0) {
-        const names=activeLists.map(l => l.name).join(', ');
-        return `Custom: ${names}`;
+        return activeLists.map(l => l.name).join(', ');
       }
       return speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
     }
@@ -3290,8 +3356,7 @@
         const activeLabel=activeNames.length
           ? `Active: ${activeNames.join(', ')}`
           :'No custom lists active (all species available)';
-        el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;">Custom list filter</div>
-          <div style="font-size:.7rem;color:${activeNames.length? 'var(--accent)':'var(--muted)'};margin-bottom:7px;font-weight:${activeNames.length? '700':'500'};">${esc(activeLabel)}</div>
+        el.innerHTML=`<div style="font-size:.7rem;color:${activeNames.length? 'var(--accent)':'var(--muted)'};margin-bottom:7px;font-weight:${activeNames.length? '700':'500'};">${esc(activeLabel)}</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
             ${lists.map(l => {
               const isActive=activeSet.has(l.id);
@@ -3492,8 +3557,8 @@
       const dropdown=document.getElementById('cl-code-dropdown');
       if(!dropdown) return;
       if(!q||q.length<2) {dropdown.style.display='none'; return;}
-      // Search against full speciesDB (state-filtered) + 2-codes
-      const pool=[...speciesDB,...ALWAYS_AVAILABLE_TWO_CODE_SPECIES];
+      // Search against global all-species pool + 2-codes
+      const pool=getSearchSpeciesDB();
       const qU=q.trim().toUpperCase();
       const qL=q.trim().toLowerCase();
       const results=pool.filter(row => {
@@ -6004,6 +6069,12 @@
     // ── Species search ────────────────────────────────────
     const speciesInput=document.getElementById('species-input');
     const speciesDrop=document.getElementById('species-dropdown');
+    const speciesSearchCount=document.getElementById('species-search-count');
+    const speciesSearchFieldSel=document.getElementById('species-search-field');
+    const speciesSearchMatchSel=document.getElementById('species-search-match');
+    const dwrSearchCount=document.getElementById('dwr-search-count');
+    const dwrSearchFieldSel=document.getElementById('dwr-search-field');
+    const dwrSearchMatchSel=document.getElementById('dwr-search-match');
     const bulkReplaceModal=document.getElementById('bulk-replace-modal');
     const bulkReplaceInput=document.getElementById('bulk-replace-input');
     const bulkReplaceDrop=document.getElementById('bulk-replace-dropdown');
@@ -6045,12 +6116,82 @@
         document.getElementById('dwr-clear').style.display='none';
         dwrDrop.style.display='none';
         dwrDrop.innerHTML='';
+        if(dwrSearchCount) {dwrSearchCount.style.display='none'; dwrSearchCount.textContent='';}
         return;
       }
       speciesInput.value='';
       document.getElementById('species-clear').style.display='none';
       speciesDrop.classList.remove('open');
       speciesDrop.innerHTML='';
+      if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
+    }
+
+    function normalizeSpeciesSearchControls() {
+      if(!['symbol','sci','common'].includes(speciesSearchField)) speciesSearchField='symbol';
+      if(!['starts','contains'].includes(speciesSearchMatchMode)) speciesSearchMatchMode='starts';
+    }
+
+    function syncSpeciesSearchControlValues() {
+      normalizeSpeciesSearchControls();
+      if(speciesSearchFieldSel) speciesSearchFieldSel.value=speciesSearchField;
+      if(dwrSearchFieldSel) dwrSearchFieldSel.value=speciesSearchField;
+      if(speciesSearchMatchSel) speciesSearchMatchSel.value=speciesSearchMatchMode;
+      if(dwrSearchMatchSel) dwrSearchMatchSel.value=speciesSearchMatchMode;
+    }
+
+    function applySpeciesSearchControls({field,matchMode}={}) {
+      if(field) speciesSearchField=field;
+      if(matchMode) speciesSearchMatchMode=matchMode;
+      normalizeSpeciesSearchControls();
+      localStorage.setItem('ep_species_search_field',speciesSearchField);
+      localStorage.setItem('ep_species_search_match',speciesSearchMatchMode);
+      syncSpeciesSearchControlValues();
+      speciesInput.dispatchEvent(new Event('input'));
+      dwrInput.dispatchEvent(new Event('input'));
+    }
+
+    function speciesSearchMatchesRow(row,qRaw) {
+      const q=String(qRaw||'').trim().toLowerCase();
+      if(!q) return false;
+      const symbol=String(row?.[0]||'').toLowerCase();
+      const common=String(row?.[1]||'').toLowerCase();
+      const sci=String(row?.[2]||'').toLowerCase();
+      const sub=speciesResultSubtext(row).toLowerCase();
+      const target=speciesSearchField==='common'
+        ? common
+        : speciesSearchField==='sci'
+          ? sci
+          : symbol;
+      if(!target) return false;
+      const match=speciesSearchMatchMode==='contains'
+        ? target.includes(q)
+        : target.startsWith(q);
+      // Keep 2-code convenience while in default symbol mode.
+      if(speciesSearchField==='symbol'&&q==='2') return symbol.startsWith('2');
+      if(match) return true;
+      // Fallback for richer discoverability in contains mode.
+      if(speciesSearchMatchMode==='contains') return [symbol,sci,common,sub].some(v => v.includes(q));
+      return false;
+    }
+
+    function renderSpeciesSearchOption(p,{compact=false}={}) {
+      const symbol=String(p?.[0]||'').trim().toUpperCase();
+      const common=String(p?.[1]||'').trim();
+      const sci=String(p?.[2]||'').trim();
+      const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
+      const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
+      const scientificLine=sci||'Scientific name not provided';
+      const commonLine=common||'Common name not provided';
+      const optStyle=compact? ' style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;"':'';
+      const secondaryStyle=compact? ' style="font-size:.72rem;color:var(--muted);line-height:1.25;"':'';
+      const nativeStyle=compact? ' style="font-size:.75rem;"':'';
+      return `<div class="species-opt" data-sym="${symbol}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${p[3]}"${optStyle}>
+        <div>
+          <div class="species-common"><span style="font-style:normal;color:var(--dim);">[${esc(symbol)}]</span> ${esc(scientificLine)}</div>
+          <div class="species-sci"${secondaryStyle}>${esc(commonLine)}</div>
+        </div>
+        <span class="species-native ${nCls}"${nativeStyle}>${nLbl}</span>
+      </div>`;
     }
 
     function refreshSpeciesMethodViews() {
@@ -6132,7 +6273,7 @@
         return false;
       }
 
-      let workingEntry=createSpeciesEntry(entry);
+      let workingEntry=normalizeSpeciesEntryForStorage(entry);
       // For DWR duplicates, reuse the last qualifier for this 2-code so users can repeat
       // a qualified entry without getting the qualifier modal each time.
       if(methodKey==='dwr'&&isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) {
@@ -6334,30 +6475,22 @@
       const searchDB=getSearchSpeciesDB();
       const q=speciesInput.value.trim().toLowerCase();
       document.getElementById('species-clear').style.display=q? '':'none';
-      if(!shouldSearchSpeciesQuery(q)) {speciesDrop.classList.remove('open'); speciesDrop.innerHTML=''; return;}
-      const results=searchDB.filter(p => {
-        const symbol=p[0].toLowerCase();
-        if(q==='2') return symbol.startsWith('2');
-        return symbol.includes(q)||
-          p[1].toLowerCase().includes(q)||
-          p[2].toLowerCase().includes(q)||
-          speciesResultSubtext(p).toLowerCase().includes(q);
-      }).slice(0,30);
+      if(!shouldSearchSpeciesQuery(q)) {
+        speciesDrop.classList.remove('open');
+        speciesDrop.innerHTML='';
+        if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
+        return;
+      }
+      const matches=searchDB.filter(p => speciesSearchMatchesRow(p,q));
+      const results=matches.slice(0,30);
+      if(speciesSearchCount) {
+        speciesSearchCount.style.display='';
+        speciesSearchCount.textContent=matches.length>results.length
+          ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
+          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+      }
       if(!results.length) {speciesDrop.classList.remove('open'); return;}
-      speciesDrop.innerHTML=results.map(p => {
-        const disp={symbol: p[0],common: p[1],sci: p[2]};
-        const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
-        const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
-        const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
-        return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}">
-      <div>
-        <div class="species-common">${esc(primary)} <span style="font-style:normal;color:var(--dim)">[${p[0]}]</span></div>
-        ${secondary? `<div class="species-sci">${esc(secondary)}</div>`:''}
-      </div>
-      <span class="species-native ${nCls}">${nLbl}</span>
-    </div>`;
-      }).join('');
+      speciesDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p)).join('');
       speciesDrop.classList.add('open');
 
       speciesDrop.querySelectorAll('.species-opt').forEach(opt => {
@@ -6374,6 +6507,7 @@
       speciesInput.value='';
       document.getElementById('species-clear').style.display='none';
       speciesDrop.classList.remove('open');
+      if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
     });
 
     document.getElementById('species-none-btn').addEventListener('click',() => {
@@ -6384,6 +6518,7 @@
         document.getElementById('species-clear').style.display='none';
         speciesDrop.classList.remove('open');
         speciesDrop.innerHTML='';
+        if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
       }
       refreshSpeciesMethodViews();
     });
@@ -6396,33 +6531,13 @@
         bulkReplaceDrop.innerHTML='';
         return;
       }
-      const results=getSearchSpeciesDB().filter(p => {
-        const symbol=p[0].toLowerCase();
-        if(q==='2') return symbol.startsWith('2');
-        return symbol.includes(q)||
-          p[1].toLowerCase().includes(q)||
-          p[2].toLowerCase().includes(q)||
-          speciesResultSubtext(p).toLowerCase().includes(q);
-      }).slice(0,30);
+      const results=getSearchSpeciesDB().filter(p => speciesSearchMatchesRow(p,q)).slice(0,30);
       if(!results.length) {
         bulkReplaceDrop.style.display='none';
         bulkReplaceDrop.innerHTML='';
         return;
       }
-      bulkReplaceDrop.innerHTML=results.map(p => {
-        const disp={symbol: p[0],common: p[1],sci: p[2]};
-        const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
-        const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
-        const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
-        return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;">
-          <div>
-            <div class="species-common" style="font-weight:600;">${esc(primary)} <span style="font-style:normal;color:var(--dim);">[${p[0]}]</span></div>
-            ${secondary? `<div class="species-sci" style="font-size:.75rem;color:var(--muted);">${esc(secondary)}</div>`:''}
-          </div>
-          <span class="species-native ${nCls}" style="font-size:.75rem;">${nLbl}</span>
-        </div>`;
-      }).join('');
+      bulkReplaceDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p,{compact: true})).join('');
       bulkReplaceDrop.style.display='block';
 
       bulkReplaceDrop.querySelectorAll('.species-opt').forEach(opt => {
@@ -6525,34 +6640,32 @@
     const dwrInput=document.getElementById('dwr-input');
     const dwrDrop=document.getElementById('dwr-dropdown');
 
+    syncSpeciesSearchControlValues();
+    if(speciesSearchFieldSel) speciesSearchFieldSel.addEventListener('change',e => applySpeciesSearchControls({field: e.target.value}));
+    if(dwrSearchFieldSel) dwrSearchFieldSel.addEventListener('change',e => applySpeciesSearchControls({field: e.target.value}));
+    if(speciesSearchMatchSel) speciesSearchMatchSel.addEventListener('change',e => applySpeciesSearchControls({matchMode: e.target.value}));
+    if(dwrSearchMatchSel) dwrSearchMatchSel.addEventListener('change',e => applySpeciesSearchControls({matchMode: e.target.value}));
+
     dwrInput.addEventListener('input',() => {
       const searchDB=getSearchSpeciesDB();
       const q=dwrInput.value.trim().toLowerCase();
       document.getElementById('dwr-clear').style.display=q? '':'none';
-      if(!shouldSearchSpeciesQuery(q)) {dwrDrop.style.display='none'; dwrDrop.innerHTML=''; return;}
-      const results=searchDB.filter(p => {
-        const symbol=p[0].toLowerCase();
-        if(q==='2') return symbol.startsWith('2');
-        return symbol.includes(q)||
-          p[1].toLowerCase().includes(q)||
-          p[2].toLowerCase().includes(q)||
-          speciesResultSubtext(p).toLowerCase().includes(q);
-      }).slice(0,30);
+      if(!shouldSearchSpeciesQuery(q)) {
+        dwrDrop.style.display='none';
+        dwrDrop.innerHTML='';
+        if(dwrSearchCount) {dwrSearchCount.style.display='none'; dwrSearchCount.textContent='';}
+        return;
+      }
+      const matches=searchDB.filter(p => speciesSearchMatchesRow(p,q));
+      const results=matches.slice(0,30);
+      if(dwrSearchCount) {
+        dwrSearchCount.style.display='';
+        dwrSearchCount.textContent=matches.length>results.length
+          ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
+          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+      }
       if(!results.length) {dwrDrop.style.display='none'; return;}
-      dwrDrop.innerHTML=results.map(p => {
-        const disp={symbol: p[0],common: p[1],sci: p[2]};
-        const primary=speciesDisplayPrimary(disp);
-        const secondary=speciesResultSubtext(p)||speciesDisplaySecondary(disp);
-        const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
-        const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
-        return `<div class="species-opt" data-sym="${p[0]}" data-common="${esc(p[1])}" data-sci="${esc(p[2])}" data-native="${p[3]}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;">
-          <div>
-            <div class="species-common" style="font-weight:600;">${esc(primary)} <span style="font-style:normal;color:var(--dim);">[${p[0]}]</span></div>
-            ${secondary? `<div class="species-sci" style="font-size:.75rem;color:var(--muted);">${esc(secondary)}</div>`:''}
-          </div>
-          <span class="species-native ${nCls}" style="font-size:.75rem;">${nLbl}</span>
-        </div>`;
-      }).join('');
+      dwrDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p,{compact: true})).join('');
       dwrDrop.style.display='block';
 
       dwrDrop.querySelectorAll('.species-opt').forEach(opt => {
@@ -6569,6 +6682,7 @@
       dwrInput.value='';
       document.getElementById('dwr-clear').style.display='none';
       dwrDrop.style.display='none';
+      if(dwrSearchCount) {dwrSearchCount.style.display='none'; dwrSearchCount.textContent='';}
     });
 
     document.getElementById('dwr-abc-btn').addEventListener('click',() => {
