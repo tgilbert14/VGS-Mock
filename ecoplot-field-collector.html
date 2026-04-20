@@ -236,6 +236,54 @@
       white-space: nowrap;
     }
 
+    #update-banner {
+      display: none;
+      background: #1a3a24;
+      border-bottom: 2px solid var(--accent);
+      padding: 10px 16px;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #update-banner.visible {
+      display: flex;
+    }
+
+    #update-banner p {
+      flex: 1;
+      font-size: .72rem;
+      color: #d6f5e0;
+      line-height: 1.4;
+    }
+
+    #update-banner strong {
+      color: var(--accent);
+    }
+
+    #update-reload-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #update-later-btn {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: .65rem;
+      color: rgba(255, 255, 255, .6);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     /* ── Nav tabs ── */
     #nav {
       display: flex;
@@ -1033,12 +1081,32 @@
     .seen-section-hdr {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       margin: 10px 0 6px;
       font-size: .6rem;
       color: var(--muted);
       letter-spacing: .07em;
       text-transform: uppercase;
+    }
+
+    .seen-section-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .seen-sort-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--s2);
+      color: var(--muted);
+      font-size: .56rem;
+      letter-spacing: .05em;
+      padding: 1px 7px;
+      text-transform: uppercase;
+      line-height: 1.5;
     }
 
     .seen-toggle-btn {
@@ -1102,6 +1170,23 @@
       font-weight: 700;
       vertical-align: middle;
       opacity: .8;
+    }
+
+    .seen-sample-dot {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+      background: color-mix(in srgb, var(--accent) 18%, var(--s2));
+      color: var(--text);
+      font-size: .55rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-left: 2px;
     }
 
     .sp-trend-filters {
@@ -1947,6 +2032,23 @@
       border-color: var(--accent);
     }
 
+    .drawer-species-item.newly-added {
+      border-color: #d19b1f;
+      background: rgba(209, 155, 31, .18);
+      box-shadow: 0 0 0 1px rgba(209, 155, 31, .38), 0 0 0 4px rgba(209, 155, 31, .12);
+      animation: drawerNewSpeciesPulse 1.2s ease-in-out 2;
+    }
+
+    @keyframes drawerNewSpeciesPulse {
+      0% {
+        box-shadow: 0 0 0 1px rgba(209, 155, 31, .38), 0 0 0 0 rgba(209, 155, 31, .24);
+      }
+
+      100% {
+        box-shadow: 0 0 0 1px rgba(209, 155, 31, .38), 0 0 0 6px rgba(209, 155, 31, 0);
+      }
+    }
+
     .drawer-species-item .species-name {
       display: flex;
       flex-direction: column;
@@ -2091,6 +2193,13 @@
       <p>📲 <strong>Tip:</strong> Tap Share → <strong>Add to Home Screen</strong> to use EcoPlotMobile offline without a
         connection.</p>
       <button id="install-dismiss">Got it</button>
+    </div>
+
+    <!-- Update banner (shown when a new SW build is waiting) -->
+    <div id="update-banner">
+      <p>🔄 <strong>Update available.</strong> Reload to get the latest version of EcoPlotMobile.</p>
+      <button id="update-reload-btn">Reload now</button>
+      <button id="update-later-btn">Later</button>
     </div>
 
     <!-- Nav -->
@@ -2779,10 +2888,31 @@
         <button id="bulk-replace-clear"
           style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;color:var(--muted);cursor:pointer;">✕</button>
       </div>
+      <div
+        style="display:flex;gap:12px;align-items:center;margin-bottom:8px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);">
+        <span>Search by</span>
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;"><input type="radio"
+            name="bulk-replace-search-field" id="bulk-replace-search-symbol" value="symbol" checked
+            style="width:auto;">Code</label>
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;"><input type="radio"
+            name="bulk-replace-search-field" id="bulk-replace-search-sci" value="sci"
+            style="width:auto;">Scientific</label>
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;"><input type="radio"
+            name="bulk-replace-search-field" id="bulk-replace-search-common" value="common"
+            style="width:auto;">Common</label>
+      </div>
       <div id="bulk-replace-dropdown"
         style="height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--s2);margin-bottom:10px;">
         <div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>
       </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label for="bulk-replace-qualifier" style="font-size:.72rem;color:var(--muted);">Replacement qualifier
+          (optional)</label>
+        <input type="text" id="bulk-replace-qualifier" maxlength="20" placeholder="Leave blank to clear qualifier"
+          autocomplete="off">
+      </div>
+      <div style="font-size:.68rem;color:var(--muted);margin:-4px 0 10px 0;">If left blank, replaced entries will have
+        no qualifier.</div>
 
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="bulk-replace-cancel-btn">Cancel</button>
@@ -2993,7 +3123,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-20';
-    const APP_BUILD_REV=32;
+    const APP_BUILD_REV=41;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
@@ -3991,6 +4121,8 @@
       swStatusText=text;
       swUpdateReady=updateReady;
       renderAppVersion();
+      const banner=document.getElementById('update-banner');
+      if(banner) banner.classList.toggle('visible',!!swUpdateReady);
     }
 
     function watchServiceWorker(worker) {
@@ -4198,19 +4330,36 @@
 
       // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=await getEventSamplesIncludingCurrentPanel();
-      const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
+      const merged=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
+
+      // Frequency map so we can sort most-seen first by default
+      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_METHOD_KEYS);
+
+      // ABC toggle: sort by symbol; default: frequency desc then symbol
+      const unifiedCurrent=speciesAlphaSort
+        ? [...merged].sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''))
+        :[...merged].sort((a,b) => {
+          const fa=freqMap[speciesEntryKey(a)]||0;
+          const fb=freqMap[speciesEntryKey(b)]||0;
+          return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
+        });
 
       function currentPicksHTML(sp) {
         const inv=sp.native==='N';
+        const sampleCount=freqMap[speciesEntryKey(sp)]||0;
+        const sampleDot=sampleCount>0
+          ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
+          :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
       let html='';
 
       if(unifiedCurrent.length) {
-        html+=`<div class="seen-section-hdr"><span>Species List</span></div>`;
+        const sortLabel=speciesAlphaSort? 'A–Z':'Most seen';
+        html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-current-chips">${unifiedCurrent.map(sp => currentPicksHTML(sp)).join('')}</div>`;
       }
 
@@ -4416,6 +4565,9 @@
     let siteSamplesCache={siteId: null,samples: null};
     let siteListCache={folders: null,sites: null,samples: null};
     let seenRefreshTimer=null;
+    let drawerNewestSpeciesKey='';
+    let drawerNewestNeedsFocus=false;
+    let drawerNewestHighlightTimer=null;
 
     function invalidateSiteListCache() {
       siteListCache={folders: null,sites: null,samples: null};
@@ -4442,6 +4594,8 @@
       }
       pool.push(normalized);
       activeEvent.speciesPool=pool;
+      drawerNewestSpeciesKey=key;
+      drawerNewestNeedsFocus=true;
       await dbPut('events',activeEvent);
       if(!silent) toast('Added to event species list','ok');
       renderSpeciesDrawer();
@@ -4456,6 +4610,10 @@
       const pool=[...getEventSpeciesPool()];
       const nextPool=pool.filter(sp => speciesEntryKey(sp)!==targetKey);
       if(nextPool.length===pool.length) return false;
+      if(drawerNewestSpeciesKey===targetKey) {
+        drawerNewestSpeciesKey='';
+        drawerNewestNeedsFocus=false;
+      }
       activeEvent.speciesPool=nextPool;
       await dbPut('events',activeEvent);
       if(!silent) toast('Removed from event species list','ok');
@@ -6329,6 +6487,7 @@
       samplePanelState.fetch=Array.isArray(rec?.fetch)? rec.fetch.map(normalizeFetchValue):[];
       renderTwoCodeQuickPicks();
       renderCustomListPicks();
+      renderEventCustomListToggles();
 
       // Header
       const offset=Math.round((sIdx/((ev.samples||50)-1||1))*(ev.length||100));
@@ -6490,14 +6649,24 @@
       try {
         // ── Incomplete-sample guard (forward only) ───────
         if(dir>0&&(localStorage.getItem('ep_incomplete_warn')==='1'||localStorage.getItem('ep_incomplete_warn')===null)) {
-          const maxHits=activeEvent? (activeEvent.coverPts||0):(activeSite?.coverPts||0);
+          const methods=(Array.isArray(activeEvent?.methods)&&activeEvent.methods.length)
+            ? activeEvent.methods
+            :['cover','freq'];
+          const requireFreq=methods.includes('freq');
+          const requireCover=methods.includes('cover');
+          const requireDwr=methods.includes('dwr');
+          const maxHits=requireCover
+            ? (activeEvent? (activeEvent.coverPts||0):(activeSite?.coverPts||0))
+            :0;
           const totalHits=samplePanelState.coverHits.length;
-          const noSpecies=samplePanelState.species.length===0&&!samplePanelState.freqNone;
-          const coverShort=maxHits>0&&totalHits<maxHits;
-          if(noSpecies||coverShort) {
+          const noSpecies=requireFreq&&samplePanelState.species.length===0&&!samplePanelState.freqNone;
+          const coverShort=requireCover&&maxHits>0&&totalHits<maxHits;
+          const noDwr=requireDwr&&samplePanelState.dwr.length===0;
+          if(noSpecies||coverShort||noDwr) {
             const reasons=[];
             if(noSpecies) reasons.push('no species recorded');
             if(coverShort) reasons.push(`only ${totalHits}/${maxHits} cover hits`);
+            if(noDwr) reasons.push('no DWR species selected');
             document.getElementById('incomplete-modal-msg').textContent=
               'This sample has incomplete data: '+reasons.join(', ')+'.';
             const proceed=await new Promise(resolve => {
@@ -6544,13 +6713,16 @@
     const bulkReplaceInput=document.getElementById('bulk-replace-input');
     const bulkReplaceDrop=document.getElementById('bulk-replace-dropdown');
     const bulkReplaceClear=document.getElementById('bulk-replace-clear');
+    const bulkReplaceQualifierInput=document.getElementById('bulk-replace-qualifier');
     const bulkReplaceSelected=document.getElementById('bulk-replace-selected');
     const bulkReplaceMethods=document.getElementById('bulk-replace-methods');
+    const bulkReplaceSearchFieldEls=[...document.querySelectorAll('input[name="bulk-replace-search-field"]')];
     const speciesQualifierModal=document.getElementById('species-qualifier-modal');
     const speciesQualifierTarget=document.getElementById('species-qualifier-target');
     const speciesQualifierInput=document.getElementById('species-qualifier-input');
     let bulkReplaceState={oldSpecies: null,replacement: null};
     let bulkReplaceSearchState={token: 0};
+    let bulkReplaceSearchField='symbol';
 
     function speciesFromDataset(el) {
       return createSpeciesEntry({
@@ -6907,6 +7079,7 @@
       bulkReplaceState={oldSpecies: null,replacement: null};
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
+      if(bulkReplaceQualifierInput) bulkReplaceQualifierInput.value='';
       bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceSelected.textContent='No replacement selected';
     }
@@ -6918,6 +7091,59 @@
 
     function selectedBulkReplaceMethodKeys() {
       return [...bulkReplaceMethods.querySelectorAll('input[data-method-key]:checked')].map(x => x.dataset.methodKey);
+    }
+
+    function formatSpeciesFullLabel(sp) {
+      const symbol=String(sp?.symbol||'').trim().toUpperCase()||'—';
+      const sci=String(sp?.sci||'').trim()||'—';
+      const common=String(sp?.common||'').trim()||'—';
+      const qualifier=normalizeSpeciesQualifier(sp?.qualifier||'')||'none';
+      return `Code: ${symbol} | Scientific: ${sci} | Common: ${common} | Qualifier: ${qualifier}`;
+    }
+
+    function getBulkReplacePreparedReplacement() {
+      if(!bulkReplaceState.replacement) return null;
+      return createSpeciesEntry({
+        ...bulkReplaceState.replacement,
+        qualifier: normalizeSpeciesQualifier(bulkReplaceQualifierInput?.value||''),
+      });
+    }
+
+    function updateBulkReplaceSelectedSummary() {
+      const prepared=getBulkReplacePreparedReplacement();
+      bulkReplaceSelected.textContent=prepared
+        ? `Replacement selected: ${formatSpeciesFullLabel(prepared)}`
+        :'No replacement selected';
+    }
+
+    function shouldSearchBulkReplaceQuery(qRaw) {
+      const q=String(qRaw||'').trim();
+      if(!q) return false;
+      if(q==='2') return true;
+      if(bulkReplaceSearchField==='symbol') return q.length>=1;
+      return q.length>=2;
+    }
+
+    function bulkReplaceSearchMatchesRow(row,qRaw) {
+      const q=String(qRaw||'').trim().toLowerCase();
+      if(!q) return false;
+      const symbol=String(row?.[0]||'').toLowerCase();
+      const common=String(row?.[1]||'').toLowerCase();
+      const sci=String(row?.[2]||'').toLowerCase();
+      const sub=speciesResultSubtext(row).toLowerCase();
+      const target=bulkReplaceSearchField==='common'
+        ? common
+        :bulkReplaceSearchField==='sci'
+          ? sci
+          :symbol;
+      if(!target) return false;
+      if(bulkReplaceSearchField==='symbol'&&q==='2') return symbol.startsWith('2');
+      const match=bulkReplaceSearchField==='symbol'
+        ? target.startsWith(q)
+        :target.includes(q);
+      if(match) return true;
+      if(bulkReplaceSearchField!=='symbol') return [symbol,sci,common,sub].some(v => v.includes(q));
+      return false;
     }
 
     function renderBulkReplaceMethodToggles(occByKey) {
@@ -6954,6 +7180,10 @@
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
       bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
+      bulkReplaceSearchField='symbol';
+      const bulkReplaceCodeRadio=document.getElementById('bulk-replace-search-symbol');
+      if(bulkReplaceCodeRadio) bulkReplaceCodeRadio.checked=true;
+      if(bulkReplaceQualifierInput) bulkReplaceQualifierInput.value='';
       bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceSelected.textContent='No replacement selected';
       bulkReplaceModal.classList.add('open');
@@ -6986,8 +7216,7 @@
         bulkReplaceInput.value=`${opt.dataset.common} [${opt.dataset.sym}]`;
         bulkReplaceClear.style.display='';
         bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Replacement chosen. Update search to choose a different species.</div>';
-        bulkReplaceSelected.textContent=
-          `Replacement selected: ${speciesDisplayPrimary({symbol: opt.dataset.sym,common: opt.dataset.common,sci: opt.dataset.sci})} [${opt.dataset.sym}]`;
+        updateBulkReplaceSelectedSummary();
       };
     }
 
@@ -7082,12 +7311,12 @@
       bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
       const token=bulkReplaceSearchState.token;
       bulkReplaceClear.style.display=q? '':'none';
-      if(!shouldSearchSpeciesQuery(q)) {
+      if(!shouldSearchBulkReplaceQuery(q)) {
         bulkReplaceDrop.onclick=null;
         bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Type to search replacement species</div>';
         return;
       }
-      const results=getSearchSpeciesDB().filter(p => speciesSearchMatchesRow(p,q)).slice(0,30);
+      const results=getSearchSpeciesDB().filter(p => bulkReplaceSearchMatchesRow(p,q)).slice(0,30);
       if(!results.length) {
         bulkReplaceDrop.onclick=null;
         bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">No matching species</div>';
@@ -7096,10 +7325,24 @@
       renderBulkReplaceRowsChunked(results,token);
     });
 
+    bulkReplaceSearchFieldEls.forEach(radio => {
+      radio.addEventListener('change',() => {
+        bulkReplaceSearchField=radio.value||'symbol';
+        if(bulkReplaceInput.value.trim()) bulkReplaceInput.dispatchEvent(new Event('input'));
+      });
+    });
+
+    if(bulkReplaceQualifierInput) {
+      bulkReplaceQualifierInput.addEventListener('input',() => {
+        if(bulkReplaceState.replacement) updateBulkReplaceSelectedSummary();
+      });
+    }
+
     bulkReplaceClear.addEventListener('click',() => {
       bulkReplaceSearchState.token=(bulkReplaceSearchState.token||0)+1;
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
+      if(bulkReplaceQualifierInput) bulkReplaceQualifierInput.value='';
       bulkReplaceDrop.onclick=null;
       bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceState.replacement=null;
@@ -7115,12 +7358,27 @@
     });
     document.getElementById('bulk-replace-apply-btn').addEventListener('click',async () => {
       const oldSp=bulkReplaceState.oldSpecies;
-      const newSp=bulkReplaceState.replacement;
+      const newSp=getBulkReplacePreparedReplacement();
       const methodKeys=selectedBulkReplaceMethodKeys();
       if(!oldSp) {toast('No species selected','err'); return;}
       if(!methodKeys.length) {toast('Choose at least one method','warn'); return;}
       if(!newSp) {toast('Choose replacement species','warn'); return;}
       if(speciesEntryKey(newSp)===speciesEntryKey(oldSp)) {toast('Replacement is the same species','warn'); return;}
+
+      const methodLabels=USDA_SPECIES_METHODS
+        .filter(m => methodKeys.includes(m.key))
+        .map(m => m.label)
+        .join(', ')||'None';
+      const confirmMsg=[
+        'Confirm Replace Species In Event',
+        '',
+        `From: ${formatSpeciesFullLabel(oldSp)}`,
+        `To:   ${formatSpeciesFullLabel(newSp)}`,
+        `Methods: ${methodLabels}`,
+        '',
+        'This will update every matching occurrence in this event and cannot be undone.'
+      ].join('\n');
+      if(!confirm(confirmMsg)) return;
 
       const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
       let replacedCount=0;
@@ -7236,6 +7494,7 @@
       }
       document.getElementById('dwr-abc-btn').classList.toggle('active');
       renderDWRChips();
+      renderDWRSeenSpecies();
     });
 
     function renderDWRChips() {
@@ -7351,19 +7610,37 @@
 
       // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=await getEventSamplesIncludingCurrentPanel();
-      const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
+      const merged=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
+
+      // Frequency map so we can sort most-seen first by default
+      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_METHOD_KEYS);
+
+      // DWR ABC toggle: sort by symbol; default: frequency desc then symbol
+      const dwrAlphaSort=document.getElementById('dwr-abc-btn')?.classList.contains('active')??false;
+      const unifiedCurrent=dwrAlphaSort
+        ? [...merged].sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''))
+        :[...merged].sort((a,b) => {
+          const fa=freqMap[speciesEntryKey(a)]||0;
+          const fb=freqMap[speciesEntryKey(b)]||0;
+          return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
+        });
 
       function currentPickHTML(sp) {
         const inv=sp.native==='N';
+        const sampleCount=freqMap[speciesEntryKey(sp)]||0;
+        const sampleDot=sampleCount>0
+          ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
+          :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
       let html='';
 
       if(unifiedCurrent.length) {
-        html+=`<div class="seen-section-hdr"><span>Species List</span></div>`;
+        const sortLabel=dwrAlphaSort? 'A–Z':'Most seen';
+        html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-dwr-current-chips">${unifiedCurrent.map(sp => currentPickHTML(sp)).join('')}</div>`;
       }
 
@@ -7497,14 +7774,16 @@
       if(!drawerList||!activeSiteId) return;
 
       let html='';
-      const drawerSpecies=(await getDrawerSpeciesUnified()).sort(compareSpeciesDisplay);
+      const drawerSpecies=(await getDrawerSpeciesUnified()).sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''));
 
       if(drawerSpecies.length===0) {
         html='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">No species added yet</div>';
       } else {
         html=drawerSpecies.map((sp,idx) => {
           const qualifier=speciesQualifierText(sp);
-          return `<div class="drawer-species-item" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
+          const key=speciesEntryKey(sp);
+          const newestClass=key===drawerNewestSpeciesKey? ' newly-added':'';
+          return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
             <div class="species-name">
               <span class="species-code">${esc(sp.symbol)}</span>
               <span class="species-common">${esc(sp.common||'')}</span>
@@ -7541,6 +7820,25 @@
       }
 
       drawerList.innerHTML=html;
+
+      if(drawerNewestSpeciesKey) {
+        const newestRow=[...drawerList.querySelectorAll('.drawer-species-item:not([data-site-species])')]
+          .find(row => row.dataset.key===drawerNewestSpeciesKey);
+        if(newestRow&&drawerNewestNeedsFocus) {
+          newestRow.scrollIntoView({block: 'center',behavior: 'smooth'});
+          drawerNewestNeedsFocus=false;
+        }
+        if(drawerNewestHighlightTimer) clearTimeout(drawerNewestHighlightTimer);
+        const highlightedKey=drawerNewestSpeciesKey;
+        drawerNewestHighlightTimer=setTimeout(() => {
+          if(drawerNewestSpeciesKey!==highlightedKey) return;
+          drawerNewestSpeciesKey='';
+          drawerNewestNeedsFocus=false;
+          const current=[...drawerList.querySelectorAll('.drawer-species-item:not([data-site-species])')]
+            .find(row => row.dataset.key===highlightedKey);
+          if(current) current.classList.remove('newly-added');
+        },5000);
+      }
 
       // Wire tap-to-assign for current event species
       drawerList.querySelectorAll('.drawer-species-item:not([data-site-species])').forEach(item => {
@@ -8813,6 +9111,11 @@
     });
     document.getElementById('app-check-update-btn').addEventListener('click',checkForAppUpdate);
     document.getElementById('app-update-btn').addEventListener('click',() => window.location.reload());
+    document.getElementById('update-reload-btn').addEventListener('click',() => window.location.reload());
+    document.getElementById('update-later-btn').addEventListener('click',() => {
+      const banner=document.getElementById('update-banner');
+      if(banner) banner.classList.remove('visible');
+    });
 
     // ══════════════════════════════════════════════════════
     //  INIT
@@ -8842,6 +9145,7 @@
       loadSpeciesDB();
       renderCustomListsSetup();
       renderCustomListPicks();
+      renderEventCustomListToggles();
       renderSiteList({invalidate: true});
       document.getElementById('collect-no-site').style.display='';
     }
