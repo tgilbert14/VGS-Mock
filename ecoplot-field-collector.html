@@ -3556,23 +3556,18 @@
     function renderClCodeDropdown(q) {
       const dropdown=document.getElementById('cl-code-dropdown');
       if(!dropdown) return;
-      if(!q||q.length<2) {dropdown.style.display='none'; return;}
+      const qNorm=String(q||'').trim().toLowerCase();
+      if(!shouldSearchSpeciesQuery(qNorm)) {dropdown.style.display='none'; return;}
       // Search against global all-species pool + 2-codes
       const pool=getSearchSpeciesDB();
-      const qU=q.trim().toUpperCase();
-      const qL=q.trim().toLowerCase();
-      const results=pool.filter(row => {
-        const sym=String(row[0]||'').toUpperCase();
-        const common=String(row[1]||'').toLowerCase();
-        const sci=String(row[2]||'').toLowerCase();
-        return sym.startsWith(qU)||sym===qU||common.includes(qL)||sci.includes(qL);
-      }).slice(0,25);
+      const results=pool.filter(row => speciesSearchMatchesRow(row,qNorm)).slice(0,25);
       if(results.length===0) {dropdown.style.display='none'; return;}
       dropdown.style.display='';
       dropdown.innerHTML=results.map(row =>
         `<div class="cl-drop-row" data-cl-pick="${esc(row[0]||'')}">
           <span style="font-weight:600;">${esc(row[0]||'')}</span>
-          <span style="color:var(--muted);margin-left:6px;">${esc(row[1]||row[2]||'')}</span>
+          <span style="color:var(--muted);margin-left:6px;">${esc(row[2]||'')}</span>
+          <div style="font-size:.68rem;color:var(--dim);margin-top:2px;">${esc(row[1]||'')}</div>
         </div>`
       ).join('');
     }
