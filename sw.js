@@ -1,6 +1,6 @@
 // EcoPlot Field Collector — Service Worker
 // Bump CACHE_VERSION whenever the HTML build revision changes.
-const CACHE_VERSION='2026.04.19.10';
+const CACHE_VERSION='2026.04.19.11';
 const CACHE=`ecoplot-${CACHE_VERSION}`;
 const PRECACHE=[
     './ecoplot-field-collector.html',
