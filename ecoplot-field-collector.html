@@ -895,6 +895,10 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    #sample-panel.has-species-drawer #sample-panel-body {
+      padding-right: clamp(290px, 34vw, 420px);
+    }
+
     #sample-panel-footer {
       background: var(--s1);
       border-top: 1px solid var(--border);
@@ -1743,6 +1747,7 @@
 
 
     .spt-sub {
+      display: none;
       font-size: .6rem;
       color: var(--muted);
       margin-top: 1px;
@@ -1798,9 +1803,9 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 8px;
-      padding: 8px 28px 8px 10px;
-      font-size: .8rem;
-      min-width: 86px;
+      padding: 5px 22px 5px 6px;
+      font-size: .75rem;
+      min-width: 58px;
       width: auto;
     }
 
@@ -1820,6 +1825,181 @@
         width: 100%;
         margin-left: 0;
         justify-content: flex-start;
+      }
+    }
+
+    /* ── Species Drawer ── */
+    #species-drawer {
+      position: absolute;
+      top: 116px;
+      right: 0;
+      bottom: 72px;
+      width: clamp(270px, 32vw, 400px);
+      z-index: 5;
+      background: var(--s2);
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .drawer-controls {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .drawer-species-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+    }
+
+    .drawer-species-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .drawer-species-item:hover {
+      background: var(--s3);
+      border-color: var(--accent);
+    }
+
+    .drawer-species-item .species-name {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .drawer-species-item .species-code {
+      font-weight: 600;
+      font-size: .8rem;
+    }
+
+    .drawer-species-item .species-common {
+      font-size: .65rem;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .drawer-species-item .method-badge {
+      font-size: .6rem;
+      background: var(--gold);
+      color: #1b1b1b;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .drawer-remove-btn {
+      margin-left: 8px;
+      border: 1px solid var(--border);
+      background: var(--s1);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-size: .72rem;
+      line-height: 1;
+    }
+
+    .drawer-remove-btn:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .drawer-species-item.from-site {
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    /* Simplified left-card species UI: drawer-driven assignment */
+    #species-search-wrap,
+    #panel-freq-card .species-search-controls,
+    #species-search-note,
+    #species-two-code-picks,
+    #species-custom-list-picks,
+    #species-search-count,
+    #species-dropdown,
+    #dwr-search-wrap,
+    #panel-dwr-card .species-search-controls,
+    #dwr-search-note,
+    #dwr-two-code-picks,
+    #dwr-custom-list-picks,
+    #dwr-search-count,
+    #dwr-dropdown {
+      display: none !important;
+    }
+
+    .drawer-modal {
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .drawer-modal .modal {
+      border-radius: 14px;
+      width: min(640px, 100%);
+      max-height: min(80vh, 760px);
+    }
+
+    @media (max-width: 980px) {
+      #species-drawer {
+        width: min(86vw, 360px);
+      }
+
+      #sample-panel.has-species-drawer #sample-panel-body {
+        padding-right: min(86vw, 380px);
+      }
+    }
+
+    @media (max-width: 760px) {
+      #species-drawer {
+        width: min(92vw, 340px);
+      }
+
+      #sample-panel.has-species-drawer #sample-panel-body {
+        padding-right: min(92vw, 356px);
+      }
+
+      .drawer-modal {
+        align-items: flex-end;
+        justify-content: stretch;
+        padding: 0;
+      }
+
+      .drawer-modal .modal {
+        border-radius: 16px 16px 0 0;
+        width: 100%;
       }
     }
   </style>
@@ -2298,7 +2478,7 @@
   </div><!-- /app -->
 
   <!-- ══════════════ SAMPLE ENTRY PANEL ══════════════ -->
-  <div id="sample-panel">
+  <div id="sample-panel" class="has-species-drawer">
     <div id="sample-panel-header">
       <button class="btn btn-ghost btn-sm" id="sample-close-btn">✕</button>
       <div id="sample-panel-title">
@@ -2309,6 +2489,20 @@
       </div>
     </div>
     <div id="panel-sample-nav"></div>
+
+    <!-- Species Drawer -->
+    <div id="species-drawer">
+      <div class="drawer-header">
+        <h3 style="margin:0;font-size:.9rem;">Species List</h3>
+        <button id="drawer-add-species-btn" class="btn btn-ghost btn-sm" title="Search and add species">+ Add</button>
+      </div>
+      <div class="drawer-controls">
+        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn" data-show="false">▶ Show site
+          species</button>
+      </div>
+      <div id="drawer-species-list" class="drawer-species-list"></div>
+    </div>
+
     <div id="sample-panel-body">
 
       <!-- Ground cover -->
@@ -2353,7 +2547,8 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not
+        <div id="species-search-note" style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the
+          full species pool (not
           limited by active custom lists).</div>
         <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div class="two-code-picks" id="species-custom-list-picks" hidden></div>
@@ -2399,7 +2594,8 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not
+        <div id="dwr-search-note" style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full
+          species pool (not
           limited by active custom lists).</div>
         <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div class="two-code-picks" id="dwr-custom-list-picks" hidden></div>
@@ -2690,14 +2886,37 @@
     </div>
   </div>
 
+  <!-- Drawer Species Search Modal -->
+  <div class="modal-backdrop drawer-modal" id="drawer-search-modal">
+    <div class="modal" style="max-width:600px;max-height:80vh;display:flex;flex-direction:column;">
+      <div class="modal-title">Add Species to Event</div>
+      <div class="field" style="margin-bottom:8px;margin-top:8px;">
+        <input type="text" id="drawer-search-input" placeholder="Search by symbol, common, or scientific name…"
+          autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">
+        <label style="display:flex;gap:4px;align-items:center;">
+          <input type="checkbox" id="drawer-search-by-code" checked>
+          <span>By code</span>
+        </label>
+      </div>
+      <div id="drawer-search-results"
+        style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);margin-bottom:12px;font-size:.75rem;">
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-full" id="drawer-search-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
   <script>
     // ══════════════════════════════════════════════════════
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
-    const APP_BUILD_DATE='2026-04-19';
-    const APP_BUILD_REV=11;
+    const APP_BUILD_DATE='2026-04-20';
+    const APP_BUILD_REV=12;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
@@ -3835,8 +4054,14 @@
     }
 
     async function getEventSamplesIncludingCurrentPanel() {
-      const evSamples=(await dbGetByIndex('samples','eventId',activeEventId))
-        .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx);
+      if(!eventSamplesCache.samples||eventSamplesCache.eventId!==activeEventId) {
+        eventSamplesCache={
+          eventId: activeEventId,
+          samples: (await dbGetByIndex('samples','eventId',activeEventId))
+            .sort((a,b) => a.transectIdx-b.transectIdx||a.sampleIdx-b.sampleIdx),
+        };
+      }
+      const evSamples=[...(eventSamplesCache.samples||[])];
       if(!samplePanelOpen||!activeSiteId||!activeEventId) return evSamples;
 
       const sid=sampleId(activeSiteId,activeEventId,samplePanelState.transectIdx,samplePanelState.sampleIdx);
@@ -3857,13 +4082,23 @@
       return evSamples;
     }
 
+    async function getSiteSamplesCached() {
+      if(!siteSamplesCache.samples||siteSamplesCache.siteId!==activeSiteId) {
+        siteSamplesCache={
+          siteId: activeSiteId,
+          samples: await dbGetByIndex('samples','siteId',activeSiteId),
+        };
+      }
+      return siteSamplesCache.samples||[];
+    }
+
     async function renderSeenSpecies() {
       const sec=document.getElementById('species-seen-section');
       if(!sec||!activeEventId) {if(sec) sec.innerHTML=''; return;}
 
       // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=await getEventSamplesIncludingCurrentPanel();
-      const unifiedCurrent=collectEventSpeciesUnified(evSamples);
+      const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
       const currentSyms=new Set(samplePanelState.species.map(sp => String(sp?.symbol||'').trim().toUpperCase()).filter(Boolean));
 
@@ -3871,7 +4106,7 @@
       let siteSeen=[];
       let siteFreq={};
       if(showSiteSpecies) {
-        const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
+        const siteSamples=await getSiteSamplesCached();
         siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
         const siteAll=speciesAlphaSort
           ? collectSeenSpeciesUnified(siteSamples).sort(compareSpeciesDisplay)
@@ -4122,6 +4357,73 @@
       fetch: []
     };
     let samplePanelOpen=false;
+    let eventSamplesCache={eventId: null,samples: null};
+    let siteSamplesCache={siteId: null,samples: null};
+    let seenRefreshTimer=null;
+
+    function invalidateSeenSpeciesCaches({event=false,site=false}={}) {
+      if(event) eventSamplesCache={eventId: null,samples: null};
+      if(site) siteSamplesCache={siteId: null,samples: null};
+    }
+
+    function getEventSpeciesPool() {
+      return Array.isArray(activeEvent?.speciesPool)? activeEvent.speciesPool:[];
+    }
+
+    async function upsertEventSpeciesPoolEntry(entry,{silent=false}={}) {
+      if(!activeEvent||!activeEventId) return false;
+      const normalized=normalizeSpeciesEntryForStorage(entry);
+      if(!normalized?.symbol) return false;
+      const pool=[...getEventSpeciesPool()];
+      const key=speciesEntryKey(normalized);
+      if(pool.some(sp => speciesEntryKey(sp)===key)) {
+        if(!silent) toast('Species already on event list','warn');
+        return false;
+      }
+      pool.push(normalized);
+      activeEvent.speciesPool=pool;
+      await dbPut('events',activeEvent);
+      if(!silent) toast('Added to event species list','ok');
+      renderSpeciesDrawer();
+      scheduleSeenRefresh(0);
+      return true;
+    }
+
+    async function removeEventSpeciesPoolEntry(entry,{silent=false}={}) {
+      if(!activeEvent||!activeEventId) return false;
+      const targetKey=speciesEntryKey(entry);
+      if(!targetKey) return false;
+      const pool=[...getEventSpeciesPool()];
+      const nextPool=pool.filter(sp => speciesEntryKey(sp)!==targetKey);
+      if(nextPool.length===pool.length) return false;
+      activeEvent.speciesPool=nextPool;
+      await dbPut('events',activeEvent);
+      if(!silent) toast('Removed from event species list','ok');
+      renderSpeciesDrawer();
+      scheduleSeenRefresh(0);
+      return true;
+    }
+
+    function mergeWithEventSpeciesPool(speciesList) {
+      const merged=[];
+      const seen=new Set();
+      [...(speciesList||[]),...getEventSpeciesPool()].forEach(sp => {
+        const key=speciesEntryKey(sp);
+        if(!key||seen.has(key)) return;
+        seen.add(key);
+        merged.push(sp);
+      });
+      return merged;
+    }
+
+    function scheduleSeenRefresh(delay=80) {
+      if(seenRefreshTimer) clearTimeout(seenRefreshTimer);
+      seenRefreshTimer=setTimeout(() => {
+        seenRefreshTimer=null;
+        renderSeenSpecies();
+        renderDWRSeenSpecies();
+      },delay);
+    }
 
     // ══════════════════════════════════════════════════════
     //  NAVIGATION
@@ -5924,6 +6226,7 @@
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(ev);
+      renderSpeciesDrawer();
     }
 
     let _sampleJumpBusy=false;
@@ -6010,6 +6313,7 @@
         species,freqNone,coverHits,dwr,fetch,
         hasData,savedAt: Date.now(),syncStatus: 'pending'
       });
+      invalidateSeenSpeciesCaches({event: true,site: true});
     }
 
     document.getElementById('sample-save-btn').addEventListener('click',async () => {
@@ -6209,13 +6513,40 @@
       </div>`;
     }
 
-    function refreshSpeciesMethodViews() {
+    function refreshSpeciesMethodViews({refreshSeen=true,refreshDrawer=true}={}) {
       renderSpeciesChips();
       renderDWRChips();
-      renderSeenSpecies();
-      renderDWRSeenSpecies();
-      renderTwoCodeQuickPicks();
-      renderCustomListPicks();
+      if(refreshSeen) {
+        scheduleSeenRefresh(0);
+      }
+      if(refreshDrawer) renderSpeciesDrawer();
+    }
+
+    function updateSeenChipStatesInPlace() {
+      const speciesKeys=new Set((samplePanelState.species||[]).map(speciesEntryKey));
+      const dwrKeys=new Set((samplePanelState.dwr||[]).map(speciesEntryKey));
+
+      document.querySelectorAll('#seen-current-chips .seen-chip').forEach(btn => {
+        const selected=speciesKeys.has(String(btn.dataset.key||''));
+        btn.classList.toggle('selected',selected);
+      });
+
+      document.querySelectorAll('#seen-site-chips .seen-chip').forEach(btn => {
+        const added=speciesKeys.has(String(btn.dataset.key||''));
+        btn.classList.toggle('already',added);
+        btn.disabled=added;
+        btn.title=added? 'Already added':'';
+      });
+
+      document.querySelectorAll('#seen-dwr-current-chips .seen-chip').forEach(btn => {
+        const selected=dwrKeys.has(String(btn.dataset.key||''));
+        btn.classList.toggle('selected',selected);
+      });
+
+      document.querySelectorAll('#seen-dwr-site-chips .seen-chip').forEach(btn => {
+        const selected=dwrKeys.has(String(btn.dataset.key||''));
+        btn.classList.toggle('selected',selected);
+      });
     }
 
     function openTwoCodeSearch(methodKey) {
@@ -6321,7 +6652,8 @@
           list.push(workingEntry);
           setMethodEntryList(methodKey,list);
           clearSpeciesSearchUi(methodKey);
-          refreshSpeciesMethodViews();
+          refreshSpeciesMethodViews({refreshSeen: false,refreshDrawer: false});
+          updateSeenChipStatesInPlace();
           if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
           return true;
         }
@@ -6339,7 +6671,8 @@
       list.push(workingEntry);
       setMethodEntryList(methodKey,list);
       clearSpeciesSearchUi(methodKey);
-      refreshSpeciesMethodViews();
+      refreshSpeciesMethodViews({refreshSeen: false,refreshDrawer: false});
+      updateSeenChipStatesInPlace();
       if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
       return true;
     }
@@ -6535,7 +6868,8 @@
         speciesDrop.innerHTML='';
         if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
       }
-      refreshSpeciesMethodViews();
+      renderSpeciesChips();
+      scheduleSeenRefresh(120);
     });
 
     bulkReplaceInput.addEventListener('input',() => {
@@ -6822,7 +7156,7 @@
 
       // Build unified current picks from ALL samples in the event (both frequency and DWR)
       const evSamples=await getEventSamplesIncludingCurrentPanel();
-      const unifiedCurrent=collectEventSpeciesUnified(evSamples);
+      const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
       const dwrSyms=new Set(samplePanelState.dwr.map(speciesEntryKey));
 
@@ -6830,7 +7164,7 @@
       let siteSeen=[];
       let siteFreq={};
       if(showSiteSpecies) {
-        const siteSamples=await dbGetByIndex('samples','siteId',activeSiteId);
+        const siteSamples=await getSiteSamplesCached();
         siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
         const siteAll=speciesAlphaSort
           ? collectSeenSpeciesUnified(siteSamples).sort(compareSpeciesDisplay)
@@ -6895,7 +7229,9 @@
         // Also sort current chips in-place so insertion order becomes ABC
         samplePanelState.species.sort(compareSpeciesDisplay);
       }
-      renderSpeciesChips(); // also calls renderSeenSpecies internally
+      renderSpeciesChips();
+      scheduleSeenRefresh(0);
+      renderSpeciesDrawer();
     });
 
     function renderSpeciesChips() {
@@ -6904,8 +7240,6 @@
       const noneBtn=document.getElementById('species-none-btn');
       const speciesInputEl=document.getElementById('species-input');
       const speciesClearBtn=document.getElementById('species-clear');
-      renderTwoCodeQuickPicks();
-      renderCustomListPicks();
       if(abcBtn) abcBtn.classList.toggle('active',speciesAlphaSort);
       if(noneBtn) {
         noneBtn.classList.toggle('active',samplePanelState.freqNone);
@@ -6933,10 +7267,10 @@
         el.querySelectorAll('.chip-remove').forEach(btn => {
           btn.addEventListener('click',() => {
             samplePanelState.freqNone=false;
-            refreshSpeciesMethodViews();
+            refreshSpeciesMethodViews({refreshSeen: false});
+            scheduleSeenRefresh(0);
           });
         });
-        renderSeenSpecies();
         return;
       }
 
@@ -6973,8 +7307,190 @@
         });
       });
       el.querySelectorAll('.species-chip[data-sym]').forEach(chip => wireBulkReplaceTrigger(chip,'.chip-remove'));
-      renderSeenSpecies();
     }
+
+    // ── Species Drawer ────────────────────────────────────
+    let drawerShowSiteSpecies=false;
+
+    function getDrawerSpeciesUnified() {
+      return [...getEventSpeciesPool()];
+    }
+
+    async function renderSpeciesDrawer() {
+      const drawerList=document.getElementById('drawer-species-list');
+      if(!drawerList||!activeSiteId) return;
+
+      let html='';
+      const drawerSpecies=getDrawerSpeciesUnified();
+
+      if(drawerSpecies.length===0) {
+        html='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">No species added yet</div>';
+      } else {
+        html=drawerSpecies.map(sp => {
+          return `<div class="drawer-species-item" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}">
+            <div class="species-name">
+              <span class="species-code">${esc(sp.symbol)}</span>
+              <span class="species-common">${esc(sp.common||'')}</span>
+            </div>
+            <span class="method-badge">List</span>
+            <button class="drawer-remove-btn" data-role="remove-event-species" title="Remove from event list">✕</button>
+          </div>`;
+        }).join('');
+      }
+
+      // Add site species if toggle is on
+      if(drawerShowSiteSpecies&&activeSiteId) {
+        const siteSamples=await getSiteSamplesCached();
+        const siteAll=collectSeenSpeciesUnified(siteSamples).sort(compareSpeciesDisplay);
+        const drawerKeys=new Set(drawerSpecies.map(s => speciesEntryKey(s)));
+        const siteOnly=siteAll.filter(s => !drawerKeys.has(speciesEntryKey(s)));
+
+        if(siteOnly.length>0) {
+          html+=`<div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-size:.65rem;color:var(--muted);font-weight:600;padding:6px 8px;text-align:center;">Seen at Site</div>`;
+          html+=siteOnly.map(sp => {
+            return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-site-species="true">
+              <div class="species-name">
+                <span class="species-code">${esc(sp.symbol)}</span>
+                <span class="species-common">${esc(sp.common||'')}</span>
+              </div>
+              <span class="method-badge">+Add</span>
+            </div>`;
+          }).join('');
+        }
+      }
+
+      drawerList.innerHTML=html;
+
+      // Wire tap-to-assign for current event species
+      drawerList.querySelectorAll('.drawer-species-item:not([data-site-species])').forEach(item => {
+        item.addEventListener('click',() => {
+          toast('Species list updated. Use From Current Event chips to assign to methods','ok');
+        });
+      });
+
+      drawerList.querySelectorAll('.drawer-remove-btn[data-role="remove-event-species"]').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const row=btn.closest('.drawer-species-item');
+          if(!row) return;
+          removeEventSpeciesPoolEntry(speciesFromDataset(row));
+        });
+      });
+
+      // Wire add-from-site for site species
+      drawerList.querySelectorAll('.drawer-species-item[data-site-species]').forEach(item => {
+        item.addEventListener('click',() => {
+          upsertEventSpeciesPoolEntry(speciesFromDataset(item));
+        });
+      });
+    }
+
+    document.getElementById('drawer-toggle-site-species-btn').addEventListener('click',async e => {
+      drawerShowSiteSpecies=!drawerShowSiteSpecies;
+      e.currentTarget.dataset.show=drawerShowSiteSpecies;
+      e.currentTarget.textContent=drawerShowSiteSpecies? '■ Hide site species':'▶ Show site species';
+      e.currentTarget.classList.toggle('active',drawerShowSiteSpecies);
+      await renderSpeciesDrawer();
+    });
+
+    document.getElementById('drawer-add-species-btn').addEventListener('click',() => {
+      openDrawerSpeciesSearchModal();
+    });
+
+    let drawerSearchState={};
+
+    function openDrawerSpeciesSearchModal() {
+      const modal=document.getElementById('drawer-search-modal');
+      const searchInput=document.getElementById('drawer-search-input');
+      const resultsDiv=document.getElementById('drawer-search-results');
+
+      drawerSearchState={};
+      modal.classList.add('open');
+      searchInput.value='';
+      resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.72rem;">Start typing to search species</div>';
+      searchInput.focus();
+
+      // Wire up search input
+      searchInput.addEventListener('input',updateDrawerSearchResults);
+    }
+
+    function closeDrawerSearchModal() {
+      const modal=document.getElementById('drawer-search-modal');
+      const searchInput=document.getElementById('drawer-search-input');
+      modal.classList.remove('open');
+      searchInput.removeEventListener('input',updateDrawerSearchResults);
+      drawerSearchState={};
+    }
+
+    function updateDrawerSearchResults(e) {
+      const query=(e.target.value||'').trim().toLowerCase();
+      const resultsDiv=document.getElementById('drawer-search-results');
+      const codeOnly=document.getElementById('drawer-search-by-code')?.checked;
+
+      if(!query||query.length<1) {
+        resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.7rem;">Enter search term</div>';
+        return;
+      }
+
+      const rows=getSearchSpeciesDB();
+      if(!rows.length) {
+        resultsDiv.innerHTML='<div style="padding:12px;color:var(--danger);">No species database loaded</div>';
+        return;
+      }
+
+      const matches=rows.filter(row => {
+        const symbol=String(row?.[0]||'').toLowerCase();
+        const common=String(row?.[1]||'').toLowerCase();
+        const sci=String(row?.[2]||'').toLowerCase();
+        if(codeOnly) return symbol.startsWith(query);
+        return symbol.includes(query)||common.includes(query)||sci.includes(query);
+      });
+      const results=matches.slice(0,50);
+
+      if(results.length===0) {
+        resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.7rem;">No species found</div>';
+        return;
+      }
+
+      resultsDiv.innerHTML=results.map((row,idx) => {
+        const symbol=String(row?.[0]||'').trim().toUpperCase();
+        const common=String(row?.[1]||'').trim();
+        const sci=String(row?.[2]||'').trim();
+        const native=String(row?.[3]||'?').trim()||'?';
+        return `<div class="drawer-search-result" data-idx="${idx}" data-sym="${esc(symbol)}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;">
+          <div style="font-weight:600;font-size:.8rem;">${esc(symbol)}</div>
+          <div style="font-size:.7rem;color:var(--muted);">${esc(common||'')}</div>
+          <div style="font-size:.65rem;color:var(--muted);font-style:italic;">${esc(sci||'')}</div>
+        </div>`;
+      }).join('');
+
+      // Wire up result clicks
+      resultsDiv.querySelectorAll('.drawer-search-result').forEach(item => {
+        item.addEventListener('click',() => {
+          const sp={
+            symbol: item.dataset.sym,
+            common: item.dataset.common,
+            sci: item.dataset.sci,
+            native: item.dataset.native
+          };
+          closeDrawerSearchModal();
+          upsertEventSpeciesPoolEntry(createSpeciesEntry(sp));
+        });
+        item.addEventListener('mouseenter',() => {
+          item.style.background='var(--s2)';
+        });
+        item.addEventListener('mouseleave',() => {
+          item.style.background='';
+        });
+      });
+    }
+
+    // Wire modal close buttons
+    document.getElementById('drawer-search-cancel-btn').addEventListener('click',closeDrawerSearchModal);
+    document.getElementById('drawer-search-by-code').addEventListener('change',() => {
+      const input=document.getElementById('drawer-search-input');
+      if(input&&input.value.trim()) updateDrawerSearchResults({target: input});
+    });
 
     // ── Cover grid ────────────────────────────────────────
     function renderCoverGrid() {
