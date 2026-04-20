@@ -2373,10 +2373,11 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:-4px 0 8px 0;"></div>
+        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not limited by active custom lists).</div>
         <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div class="two-code-picks" id="species-custom-list-picks" hidden></div>
-        <div style="display:flex;justify-content:flex-end;margin:6px 0 8px 0;">
+        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;"></div>
+        <div style="display:flex;justify-content:flex-start;margin:6px 0 8px 0;">
           <button class="seen-toggle-btn" id="species-none-btn"
             title="Record that no species were present in this frame" style="border-color:#d19b1f;color:#d19b1f;">None
             in frame</button>
@@ -2415,9 +2416,10 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div id="dwr-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:-4px 0 8px 0;"></div>
+        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not limited by active custom lists).</div>
         <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div class="two-code-picks" id="dwr-custom-list-picks" hidden></div>
+        <div id="dwr-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;"></div>
         <div id="dwr-dropdown"
           style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-bottom:10px;">
         </div>
@@ -2678,15 +2680,16 @@
         <input type="text" id="cl-name-input" placeholder="e.g. Common Grasses" maxlength="60">
       </div>
       <div class="field" style="margin-bottom:8px;">
-        <label>Add Species by Code or Name</label>
+        <label>Add Species by Code</label>
         <div style="display:flex;gap:6px;align-items:flex-start;">
           <div style="flex:1;position:relative;">
-            <input type="text" id="cl-code-input" placeholder="Type symbol or name…" autocomplete="off" autocorrect="off" spellcheck="false">
+            <input type="text" id="cl-code-input" placeholder="Type code (e.g. BOGR2)…" autocomplete="off" autocorrect="off" spellcheck="false">
             <div id="cl-code-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:200;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);box-shadow:0 4px 12px rgba(0,0,0,.18);"></div>
           </div>
           <button class="btn btn-outline btn-sm" id="cl-code-add-btn" type="button" style="white-space:nowrap;">Add</button>
         </div>
-        <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Search by species code (e.g. BOGR2), common name, or scientific name. 2-codes like 2GRAM are always available during collection.</div>
+        <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Code search is locked to starts with. 2-codes like 2GRAM are always available during collection.</div>
+        <div id="cl-code-count" style="display:none;font-size:.67rem;color:var(--muted);margin-top:4px;"></div>
       </div>
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;" id="cl-species-count">0 species in list</div>
       <div id="cl-species-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;min-height:36px;"></div>
@@ -3518,8 +3521,10 @@
       if(modal) modal.style.display='none';
       const codeInput=document.getElementById('cl-code-input');
       const dropdown=document.getElementById('cl-code-dropdown');
+      const countEl=document.getElementById('cl-code-count');
       if(codeInput) codeInput.value='';
       if(dropdown) {dropdown.style.display='none'; dropdown.innerHTML='';}
+      if(countEl) {countEl.style.display='none'; countEl.textContent='';}
     }
 
     function renderEditCustomListSpecies() {
@@ -3549,18 +3554,43 @@
       renderEditCustomListSpecies();
       const codeInput=document.getElementById('cl-code-input');
       const dropdown=document.getElementById('cl-code-dropdown');
+      const countEl=document.getElementById('cl-code-count');
       if(codeInput) codeInput.value='';
       if(dropdown) {dropdown.style.display='none'; dropdown.innerHTML='';}
+      if(countEl) {countEl.style.display='none'; countEl.textContent='';}
+    }
+
+    function shouldSearchCustomListQuery(q) {
+      return String(q||'').trim().length>=1;
+    }
+
+    function customListSearchMatchesRow(row,qRaw) {
+      const q=String(qRaw||'').trim().toUpperCase();
+      if(!q) return false;
+      const symbol=String(row?.[0]||'').trim().toUpperCase();
+      return symbol.startsWith(q);
     }
 
     function renderClCodeDropdown(q) {
       const dropdown=document.getElementById('cl-code-dropdown');
+      const countEl=document.getElementById('cl-code-count');
       if(!dropdown) return;
-      const qNorm=String(q||'').trim().toLowerCase();
-      if(!shouldSearchSpeciesQuery(qNorm)) {dropdown.style.display='none'; return;}
+      const qNorm=String(q||'').trim().toUpperCase();
+      if(!shouldSearchCustomListQuery(qNorm)) {
+        dropdown.style.display='none';
+        if(countEl) {countEl.style.display='none'; countEl.textContent='';}
+        return;
+      }
       // Search against global all-species pool + 2-codes
       const pool=getSearchSpeciesDB();
-      const results=pool.filter(row => speciesSearchMatchesRow(row,qNorm)).slice(0,25);
+      const matches=pool.filter(row => customListSearchMatchesRow(row,qNorm));
+      const results=matches.slice(0,25);
+      if(countEl) {
+        countEl.style.display='';
+        countEl.textContent=matches.length>results.length
+          ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
+          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+      }
       if(results.length===0) {dropdown.style.display='none'; return;}
       dropdown.style.display='';
       dropdown.innerHTML=results.map(row =>
@@ -4430,8 +4460,16 @@
         if(!confirm(`Delete custom list "${list.name}"?`)) return;
         customPlantLists=customPlantLists.filter(l => l.id!==id);
         saveCustomLists();
-        if(activeCustomListIds.includes(id)) toggleCustomListActive(id);
-        else renderCustomListsSetup();
+        if(activeCustomListIds.includes(id)) {
+          applyActiveCustomListIds(activeCustomListIds.filter(x => x!==id));
+        } else {
+          renderCustomListsSetup();
+          renderCustomListPicks();
+          renderSpeciesMethodScopeLabels();
+          renderSamplePanelSpeciesScope();
+          renderSeenSpecies();
+          renderDWRSeenSpecies();
+        }
         toast(`Deleted "${list.name}"`,'ok');
       }
     });
