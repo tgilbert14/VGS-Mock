@@ -1753,97 +1753,69 @@
       text-overflow: ellipsis;
     }
 
-    .transect-jump-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .transect-jump-label {
-      font-size: .62rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .transect-jump-sel {
-      background: var(--s2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 4px 6px;
-      font-size: .7rem;
-      min-width: 72px;
-    }
-
-    /* ── Panel sample mini-map ── */
-    #panel-sample-map {
+    /* ── Panel sample navigator ── */
+    #panel-sample-nav {
       background: var(--s1);
       border-bottom: 1px solid var(--border);
       padding: 8px 14px 10px;
-      overflow-x: auto;
       flex-shrink: 0;
     }
 
-    .psm-row {
+    .sample-nav-row {
       display: flex;
       align-items: center;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-
-    .psm-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .psm-label {
-      font-family: var(--font-mono);
-      font-size: .58rem;
-      color: var(--muted);
-      width: 18px;
-      flex-shrink: 0;
-      text-align: right;
-    }
-
-    .psm-dots {
-      display: flex;
-      gap: 4px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
-    .psm-dot {
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      background: var(--s3);
-      border: 1.5px solid var(--border);
+    .sample-nav-btn {
+      min-width: 38px;
+      padding: 8px 10px;
+    }
+
+    .sample-nav-group {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: .6rem;
-      font-family: var(--font-mono);
-      color: var(--dim);
-      cursor: pointer;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .sample-nav-label {
+      font-size: .62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
       flex-shrink: 0;
-      transition: border-color .15s;
     }
 
-    .psm-dot.complete {
-      background: var(--accent2);
-      border-color: var(--accent);
-      color: #0a120a;
-      font-weight: 600;
+    .sample-nav-select {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 28px 8px 10px;
+      font-size: .8rem;
+      min-width: 86px;
+      width: auto;
     }
 
-    .psm-dot.current {
-      border: 2px solid var(--gold);
+    .sample-nav-summary {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 0;
+      font-size: .7rem;
       color: var(--gold);
-      font-weight: 800;
+      text-align: right;
     }
 
-    .psm-dot.complete.current {
-      background: var(--accent2);
-      border: 2px solid var(--gold);
-      color: var(--gold);
+    @media (max-width: 640px) {
+      .sample-nav-summary {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+      }
     }
   </style>
 </head>
@@ -2014,7 +1986,8 @@
               </div>
               <div class="field">
                 <label>Protocol
-                  <button type="button" class="info-icon-btn" data-info-key="event-protocol" title="Protocol help">i</button>
+                  <button type="button" class="info-icon-btn" data-info-key="event-protocol"
+                    title="Protocol help">i</button>
                 </label>
                 <select id="new-event-protocol">
                   <option value="">— No Protocol (manual settings) —</option>
@@ -2121,7 +2094,10 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title"><span style="display:inline-flex;align-items:center;">Species Database <button type="button" class="info-icon-btn" data-info-key="setup-species" title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in list</span></div>
+          <div class="card-title"><span style="display:inline-flex;align-items:center;">Species Database <button
+                type="button" class="info-icon-btn" data-info-key="setup-species"
+                title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in
+              list</span></div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
@@ -2139,7 +2115,8 @@
             </div>
           </div>
           <div id="species-list-wrap" style="margin-top:12px;display:none;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--s3);border:1px solid var(--accent2);border-radius:10px;">
+            <div
+              style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--s3);border:1px solid var(--accent2);border-radius:10px;">
               <span style="font-size:1rem;">🌿</span>
               <label for="species-list-select"
                 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;">Plant
@@ -2152,12 +2129,14 @@
         </div>
         <div class="card">
           <div class="card-title">Custom Plant Lists <span class="badge" id="custom-lists-badge">0 lists</span></div>
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;">Create focused species lists for specific pastures or area types. Activate one during collection to filter the search to only those plants.</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;">Create focused species lists for specific
+            pastures or area types. Activate one during collection to filter the search to only those plants.</div>
           <div id="custom-lists-container" style="margin-bottom:10px;"></div>
           <button class="btn btn-outline btn-sm" id="add-custom-list-btn">＋ New Custom List</button>
         </div>
         <div class="card">
-          <div class="card-title">Survey Protocols <button type="button" class="info-icon-btn" data-info-key="setup-protocols" title="Survey protocols help">i</button></div>
+          <div class="card-title">Survey Protocols <button type="button" class="info-icon-btn"
+              data-info-key="setup-protocols" title="Survey protocols help">i</button></div>
           <div id="protocols-list" style="margin-bottom:10px;"></div>
           <button class="btn btn-outline btn-sm" id="import-protocol-btn">📂 Import protocol (.vgsp/.xml)</button>
           <input type="file" id="protocol-file-input" accept=".vgsp,.xml,.txt" style="display:none;">
@@ -2243,11 +2222,13 @@
           </label>
           <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, alerts before advancing past a
             sample that has no species recorded or fewer cover hits than the site target.</div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.8rem;color:var(--text);margin-top:10px;">
+          <label
+            style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.8rem;color:var(--text);margin-top:10px;">
             <input type="checkbox" id="cfg-auto-sync" style="width:auto;accent-color:var(--accent);">
             Auto-sync when back online
           </label>
-          <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync automatically after connectivity returns.</div>
+          <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync
+            automatically after connectivity returns.</div>
           <div class="field" style="margin-top:10px;">
             <label>USDA Species Display</label>
             <select id="cfg-species-display">
@@ -2260,7 +2241,8 @@
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
         </div>
         <div class="card">
-          <div class="card-title">Azure Connection <button type="button" class="info-icon-btn" data-info-key="setup-azure" title="Azure connection help">i</button></div>
+          <div class="card-title">Azure Connection <button type="button" class="info-icon-btn"
+              data-info-key="setup-azure" title="Azure connection help">i</button></div>
           <div class="field">
             <label>Azure Function URL</label>
             <input type="url" id="cfg-url" placeholder="https://yourapp.azurewebsites.net/api/ecoplot">
@@ -2271,18 +2253,22 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button type="button" class="info-icon-btn" data-info-key="setup-sync" title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
+          <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
+                type="button" class="info-icon-btn" data-info-key="setup-sync"
+                title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
           <div id="sync-site-list"></div>
           <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Unsynced</button>
         </div>
         <div class="card">
           <div class="card-title">Export / Backup</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Download collected field data (sites, events, and samples) as JSON or CSV for inspection or backup.</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Download collected field data (sites,
+            events, and samples) as JSON or CSV for inspection or backup.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" id="export-json-btn">⬇ Export JSON</button>
             <button class="btn btn-ghost btn-sm" id="export-csv-btn">⬇ Export CSV (samples)</button>
           </div>
-          <div id="export-status" style="font-size:.67rem;color:var(--muted);margin-top:10px;">No exports yet on this device.</div>
+          <div id="export-status" style="font-size:.67rem;color:var(--muted);margin-top:10px;">No exports yet on this
+            device.</div>
         </div>
         <div class="card" style="border-color:var(--danger);">
           <div class="card-title" style="color:var(--danger);">⚠️ Developer Tools</div>
@@ -2316,20 +2302,8 @@
         <div class="spt-ctx" id="spt-ctx"></div>
         <div class="spt-ctx" id="spt-scope" style="display:none;"></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-        <div class="transect-jump-wrap" id="transect-jump-wrap" style="display:none;">
-          <span class="transect-jump-label">Transect</span>
-          <button class="btn btn-ghost btn-sm" id="transect-prev-btn" title="Previous transect">◀</button>
-          <select id="transect-jump-select" class="transect-jump-sel" aria-label="Jump to transect"></select>
-          <button class="btn btn-ghost btn-sm" id="transect-next-btn" title="Next transect">▶</button>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost btn-sm" id="sample-prev-btn">◀ Prev</button>
-          <button class="btn btn-ghost btn-sm" id="sample-next-btn">Next ▶</button>
-        </div>
-      </div>
     </div>
-    <div id="panel-sample-map"></div>
+    <div id="panel-sample-nav"></div>
     <div id="sample-panel-body">
 
       <!-- Ground cover -->
@@ -2361,7 +2335,8 @@
             autocomplete="off" autocorrect="off" spellcheck="false">
           <button id="species-clear" style="display:none;">✕</button>
         </div>
-        <div class="species-search-controls" style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
+        <div class="species-search-controls"
+          style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
           <label style="font-size:.67rem;color:var(--muted);">Search by</label>
           <select id="species-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
             <option value="symbol">Code</option>
@@ -2373,10 +2348,12 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not limited by active custom lists).</div>
+        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not
+          limited by active custom lists).</div>
         <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div class="two-code-picks" id="species-custom-list-picks" hidden></div>
-        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;"></div>
+        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;">
+        </div>
         <div style="display:flex;justify-content:flex-start;margin:6px 0 8px 0;">
           <button class="seen-toggle-btn" id="species-none-btn"
             title="Record that no species were present in this frame" style="border-color:#d19b1f;color:#d19b1f;">None
@@ -2404,7 +2381,8 @@
             autocorrect="off" spellcheck="false">
           <button id="dwr-clear" style="display:none;">✕</button>
         </div>
-        <div class="species-search-controls" style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
+        <div class="species-search-controls"
+          style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
           <label style="font-size:.67rem;color:var(--muted);">Search by</label>
           <select id="dwr-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
             <option value="symbol">Code</option>
@@ -2416,7 +2394,8 @@
             <option value="contains">Contains</option>
           </select>
         </div>
-        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not limited by active custom lists).</div>
+        <div style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full species pool (not
+          limited by active custom lists).</div>
         <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div class="two-code-picks" id="dwr-custom-list-picks" hidden></div>
         <div id="dwr-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;"></div>
@@ -2612,7 +2591,8 @@
           <input type="number" id="edit-site-lng" placeholder="e.g. -119.4179" step="any">
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-full" id="edit-get-gps-btn" style="margin-bottom:10px;" type="button">📍 Use My GPS Location</button>
+      <button class="btn btn-ghost btn-sm btn-full" id="edit-get-gps-btn" style="margin-bottom:10px;" type="button">📍
+        Use My GPS Location</button>
       <div class="row3">
         <div class="field">
           <label>Elevation (ft)</label>
@@ -2683,12 +2663,17 @@
         <label>Add Species by Code</label>
         <div style="display:flex;gap:6px;align-items:flex-start;">
           <div style="flex:1;position:relative;">
-            <input type="text" id="cl-code-input" placeholder="Type code (e.g. BOGR2)…" autocomplete="off" autocorrect="off" spellcheck="false">
-            <div id="cl-code-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:200;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);box-shadow:0 4px 12px rgba(0,0,0,.18);"></div>
+            <input type="text" id="cl-code-input" placeholder="Type code (e.g. BOGR2)…" autocomplete="off"
+              autocorrect="off" spellcheck="false">
+            <div id="cl-code-dropdown"
+              style="display:none;position:absolute;left:0;right:0;top:100%;z-index:200;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);box-shadow:0 4px 12px rgba(0,0,0,.18);">
+            </div>
           </div>
-          <button class="btn btn-outline btn-sm" id="cl-code-add-btn" type="button" style="white-space:nowrap;">Add</button>
+          <button class="btn btn-outline btn-sm" id="cl-code-add-btn" type="button"
+            style="white-space:nowrap;">Add</button>
         </div>
-        <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Code search is locked to starts with. 2-codes like 2GRAM are always available during collection.</div>
+        <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Code search is locked to starts with. 2-codes
+          like 2GRAM are always available during collection.</div>
         <div id="cl-code-count" style="display:none;font-size:.67rem;color:var(--muted);margin-top:4px;"></div>
       </div>
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;" id="cl-species-count">0 species in list</div>
@@ -3081,7 +3066,7 @@
       const twoCodes=ALWAYS_AVAILABLE_TWO_CODE_SPECIES;
       const sourceRows=speciesAllRecords.length
         ? speciesAllRecords
-        : speciesDB.map(r => ({
+        :speciesDB.map(r => ({
           symbol: r[0],
           common: r[1],
           sci: r[2],
@@ -3362,13 +3347,13 @@
         el.innerHTML=`<div style="font-size:.7rem;color:${activeNames.length? 'var(--accent)':'var(--muted)'};margin-bottom:7px;font-weight:${activeNames.length? '700':'500'};">${esc(activeLabel)}</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
             ${lists.map(l => {
-              const isActive=activeSet.has(l.id);
-              const btnText=isActive? `✓ ${l.name}`:l.name;
-              const btnStyle=isActive
-                ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;box-shadow:0 0 0 2px var(--accent2);'
-                :'opacity:.82;border-style:dashed;';
-              return `<button class="seen-toggle-btn${isActive? ' active':''}" data-cl-id="${esc(l.id)}" title="Click: toggle list. Shift+click, right-click, or press-hold: only this list" style="${btnStyle}">${esc(btnText)}</button>`;
-            }).join('')}
+          const isActive=activeSet.has(l.id);
+          const btnText=isActive? `✓ ${l.name}`:l.name;
+          const btnStyle=isActive
+            ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;box-shadow:0 0 0 2px var(--accent2);'
+            :'opacity:.82;border-style:dashed;';
+          return `<button class="seen-toggle-btn${isActive? ' active':''}" data-cl-id="${esc(l.id)}" title="Click: toggle list. Shift+click, right-click, or press-hold: only this list" style="${btnStyle}">${esc(btnText)}</button>`;
+        }).join('')}
           </div>`;
 
         el.querySelectorAll('button[data-cl-id]').forEach(btn => {
@@ -3482,7 +3467,7 @@
       const container=document.getElementById('custom-lists-container');
       const badge=document.getElementById('custom-lists-badge');
       if(!container) return;
-      if(badge) badge.textContent=`${customPlantLists.length} list${customPlantLists.length===1?'':'s'}`;
+      if(badge) badge.textContent=`${customPlantLists.length} list${customPlantLists.length===1? '':'s'}`;
       if(customPlantLists.length===0) {
         container.innerHTML='<div style="font-size:.72rem;color:var(--muted);">No custom lists yet. Create one to get started.</div>';
         return;
@@ -3490,13 +3475,13 @@
       const activeIds=new Set(activeCustomListIds);
       container.innerHTML=customPlantLists.map(l => {
         const isActive=activeIds.has(l.id);
-        const preview=l.symbols.slice(0,6).join(', ')+(l.symbols.length>6?'…':'');
+        const preview=l.symbols.slice(0,6).join(', ')+(l.symbols.length>6? '…':'');
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:.82rem;font-weight:600;color:${isActive?'var(--accent)':'var(--text)'};">${esc(l.name)}${isActive?' <span style="font-size:.67rem;background:var(--accent2);color:var(--accent);border-radius:8px;padding:1px 6px;font-weight:normal;">active</span>':''}</div>
-            <div style="font-size:.67rem;color:var(--muted);">${l.symbols.length} species${l.symbols.length?': '+esc(preview):''}</div>
+            <div style="font-size:.82rem;font-weight:600;color:${isActive? 'var(--accent)':'var(--text)'};">${esc(l.name)}${isActive? ' <span style="font-size:.67rem;background:var(--accent2);color:var(--accent);border-radius:8px;padding:1px 6px;font-weight:normal;">active</span>':''}</div>
+            <div style="font-size:.67rem;color:var(--muted);">${l.symbols.length} species${l.symbols.length? ': '+esc(preview):''}</div>
           </div>
-          <button class="btn btn-ghost btn-sm" data-cl-toggle="${esc(l.id)}" style="font-size:.7rem;white-space:nowrap;">${isActive?'\u25A2 Off':'\u2705 On'}</button>
+          <button class="btn btn-ghost btn-sm" data-cl-toggle="${esc(l.id)}" style="font-size:.7rem;white-space:nowrap;">${isActive? '\u25A2 Off':'\u2705 On'}</button>
           <button class="btn btn-ghost btn-sm" data-cl-edit="${esc(l.id)}" title="Edit">\u270F\uFE0F</button>
           <button class="btn btn-ghost btn-sm" data-cl-del="${esc(l.id)}" title="Delete" style="color:var(--danger);">\uD83D\uDDD1</button>
         </div>`;
@@ -3589,7 +3574,7 @@
         countEl.style.display='';
         countEl.textContent=matches.length>results.length
           ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
-          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+          :`${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
       }
       if(results.length===0) {dropdown.style.display='none'; return;}
       dropdown.style.display='';
@@ -4396,10 +4381,10 @@
         err => {
           btn.textContent='📍 Use My GPS Location';
           btn.disabled=false;
-          const msg={1:'Permission denied',2:'Position unavailable',3:'Timed out'};
+          const msg={1: 'Permission denied',2: 'Position unavailable',3: 'Timed out'};
           toast('GPS error: '+(msg[err.code]||err.message),'err');
         },
-        {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+        {enableHighAccuracy: true,timeout: 15000,maximumAge: 0}
       );
     });
 
@@ -4428,7 +4413,7 @@
         document.getElementById('edit-site-modal').classList.remove('open');
         toast('Site updated','ok');
         // refresh activeSite if it's the one being edited
-        if(activeSiteId===id) { activeSite=site; renderCollect(); }
+        if(activeSiteId===id) {activeSite=site; renderCollect();}
         renderSiteList();
       } catch(err) {
         toast('Save error: '+err.message,'err');
@@ -4452,7 +4437,7 @@
         toggleCustomListActive(toggle.dataset.clToggle);
         return;
       }
-      if(edit) { openCustomListEditor(edit.dataset.clEdit); return; }
+      if(edit) {openCustomListEditor(edit.dataset.clEdit); return;}
       if(del) {
         const id=del.dataset.clDel;
         const list=customPlantLists.find(l => l.id===id);
@@ -4520,10 +4505,10 @@
       if(!name) {toast('Please enter a list name','err'); return;}
       if(editingCustomListId) {
         const existing=customPlantLists.find(l => l.id===editingCustomListId);
-        if(existing) { existing.name=name; existing.symbols=editingCustomListSymbols.slice(); }
+        if(existing) {existing.name=name; existing.symbols=editingCustomListSymbols.slice();}
       } else {
         const newListId=`cl_${Date.now()}`;
-        customPlantLists.push({id:newListId,name,symbols:editingCustomListSymbols.slice()});
+        customPlantLists.push({id: newListId,name,symbols: editingCustomListSymbols.slice()});
         activeCustomListIds.push(newListId);
         localStorage.setItem('ep_active_custom_lists',JSON.stringify(activeCustomListIds));
       }
@@ -5905,11 +5890,7 @@
       document.getElementById('cover-pts-badge').textContent=
         `${ev.coverPts||2} pts/sample`;
 
-      // nav buttons
-      document.getElementById('sample-prev-btn').disabled=(tIdx===0&&sIdx===0);
-      const lastT=(ev.transects||4)-1,lastS=(ev.samples||50)-1;
-      document.getElementById('sample-next-btn').disabled=(tIdx===lastT&&sIdx===lastS);
-      renderTransectJump(tIdx,sIdx,ev);
+      renderPanelSampleNav(tIdx,sIdx,ev);
 
       // ── Highlight current dot + auto-expand its transect ──
       document.querySelectorAll('.sample-dot').forEach(d => d.classList.remove('current'));
@@ -5931,7 +5912,6 @@
       body.classList.add('loading');
       body.scrollTop=0;
 
-      renderPanelSampleMap(tIdx,sIdx);
       renderSpeciesChips();
       renderSeenSpecies();
       renderDWRSeenSpecies();
@@ -5941,62 +5921,62 @@
       renderFetchInputs(ev);
     }
 
-    let _transectJumpBusy=false;
-    function renderTransectJump(tIdx,sIdx,ev) {
-      const wrap=document.getElementById('transect-jump-wrap');
-      const sel=document.getElementById('transect-jump-select');
-      const prevBtn=document.getElementById('transect-prev-btn');
-      const nextBtn=document.getElementById('transect-next-btn');
-      if(!wrap||!sel||!prevBtn||!nextBtn) return;
+    let _sampleJumpBusy=false;
+    function renderPanelSampleNav(tIdx,sIdx,ev) {
+      const navEl=document.getElementById('panel-sample-nav');
+      if(!navEl||!activeSite||!activeEventId) {if(navEl) navEl.innerHTML=''; return;}
 
       const tCount=ev?.transects||4;
-      if(tCount<=1) {
-        wrap.style.display='none';
-        return;
-      }
+      const sCount=ev?.samples||50;
+      const lastT=tCount-1;
+      const lastS=sCount-1;
+      const atStart=tIdx===0&&sIdx===0;
+      const atEnd=tIdx===lastT&&sIdx===lastS;
+      const offset=Math.round((sIdx/((sCount)-1||1))*(ev.length||100));
 
-      wrap.style.display='flex';
-      sel.innerHTML=Array.from({length: tCount},(_,i) => `<option value="${i}">T${i+1}</option>`).join('');
-      sel.value=String(tIdx);
-      prevBtn.disabled=tIdx<=0;
-      nextBtn.disabled=tIdx>=tCount-1;
+      navEl.innerHTML=`<div class="sample-nav-row">
+        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-prev-btn" ${atStart? 'disabled':''} aria-label="Previous sample">◀</button>
+        <div class="sample-nav-group">
+          <span class="sample-nav-label">Transect</span>
+          <select id="transect-jump-select" class="sample-nav-select" aria-label="Jump to transect">
+            ${Array.from({length: tCount},(_,i) => `<option value="${i}">T${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <div class="sample-nav-group">
+          <span class="sample-nav-label">Sample</span>
+          <select id="sample-jump-select" class="sample-nav-select" aria-label="Jump to sample">
+            ${Array.from({length: sCount},(_,i) => `<option value="${i}">S${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-next-btn" ${atEnd? 'disabled':''} aria-label="Next sample">▶</button>
+        <div class="sample-nav-summary">${offset} ${ev.unit||'m'} along transect</div>
+      </div>`;
 
-      const jumpToTransect=async targetT => {
-        if(targetT===samplePanelState.transectIdx) return;
-        if(targetT<0||targetT>=tCount) return;
-        if(_transectJumpBusy) return;
-        _transectJumpBusy=true;
+      const transectSel=document.getElementById('transect-jump-select');
+      const sampleSel=document.getElementById('sample-jump-select');
+      const prevBtn=document.getElementById('sample-prev-btn');
+      const nextBtn=document.getElementById('sample-next-btn');
+      if(!transectSel||!sampleSel||!prevBtn||!nextBtn) return;
+
+      transectSel.value=String(tIdx);
+      sampleSel.value=String(sIdx);
+
+      const jumpToSample=async (targetT,targetS) => {
+        if(targetT===samplePanelState.transectIdx&&targetS===samplePanelState.sampleIdx) return;
+        if(targetT<0||targetT>=tCount||targetS<0||targetS>=sCount) return;
+        if(_sampleJumpBusy) return;
+        _sampleJumpBusy=true;
         try {
           await saveCurrent();
           await renderCollect();
-          await loadSampleIntoPanel(targetT,0);
-        } finally {_transectJumpBusy=false;}
+          await loadSampleIntoPanel(targetT,targetS);
+        } finally {_sampleJumpBusy=false;}
       };
 
-      sel.onchange=() => jumpToTransect(+sel.value);
-      prevBtn.onclick=() => jumpToTransect(tIdx-1);
-      nextBtn.onclick=() => jumpToTransect(tIdx+1);
-    }
-
-    async function renderPanelSampleMap(tIdx,sIdx) {
-      const mapEl=document.getElementById('panel-sample-map');
-      if(!mapEl||!activeSite||!activeEventId) {if(mapEl) mapEl.innerHTML=''; return;}
-      const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
-      const sm={};
-      evSamples.forEach(s => sm[s.id]=s);
-      let html=`<div class="psm-row"><div class="psm-label">T${tIdx+1}</div><div class="psm-dots">`;
-      const evSampCount=(activeEvent?.samples||50);
-      for(let s=0;s<evSampCount;s++) {
-        const rec=sm[sampleId(activeSiteId,activeEventId,tIdx,s)];
-        const isCur=s===sIdx;
-        const cls=(rec?.hasData? 'complete':'')+(isCur? ' current':'');
-        html+=`<div class="psm-dot ${cls}" data-t="${tIdx}" data-s="${s}">${s+1}</div>`;
-      }
-      html+=`</div></div>`;
-      mapEl.innerHTML=html;
-      mapEl.querySelectorAll('.psm-dot').forEach(dot => {
-        dot.addEventListener('click',() => loadSampleIntoPanel(+dot.dataset.t,+dot.dataset.s));
-      });
+      transectSel.onchange=() => jumpToSample(+transectSel.value,+sampleSel.value);
+      sampleSel.onchange=() => jumpToSample(+transectSel.value,+sampleSel.value);
+      prevBtn.onclick=() => advanceSample(-1);
+      nextBtn.onclick=() => advanceSample(1);
     }
 
     document.getElementById('sample-close-btn').addEventListener('click',async () => {
@@ -6047,9 +6027,6 @@
       renderDWRChips();
       renderFetchInputs(activeEvent||{fetchMeasuresPerSample: 1});
     });
-
-    document.getElementById('sample-prev-btn').addEventListener('click',() => advanceSample(-1));
-    document.getElementById('sample-next-btn').addEventListener('click',() => advanceSample(1));
 
     let _advanceBusy=false;
     async function advanceSample(dir,{save=true}={}) {
@@ -6192,13 +6169,13 @@
       const sub=speciesResultSubtext(row).toLowerCase();
       const target=speciesSearchField==='common'
         ? common
-        : speciesSearchField==='sci'
+        :speciesSearchField==='sci'
           ? sci
-          : symbol;
+          :symbol;
       if(!target) return false;
       const match=speciesSearchMatchMode==='contains'
         ? target.includes(q)
-        : target.startsWith(q);
+        :target.startsWith(q);
       // Keep 2-code convenience while in default symbol mode.
       if(speciesSearchField==='symbol'&&q==='2') return symbol.startsWith('2');
       if(match) return true;
@@ -6520,7 +6497,7 @@
         speciesSearchCount.style.display='';
         speciesSearchCount.textContent=matches.length>results.length
           ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
-          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+          :`${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
       }
       if(!results.length) {speciesDrop.classList.remove('open'); return;}
       speciesDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p)).join('');
@@ -6695,7 +6672,7 @@
         dwrSearchCount.style.display='';
         dwrSearchCount.textContent=matches.length>results.length
           ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
-          : `${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
+          :`${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
       }
       if(!results.length) {dwrDrop.style.display='none'; return;}
       dwrDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p,{compact: true})).join('');
@@ -7644,8 +7621,8 @@
           if(typeof File!=='undefined'&&navigator.canShare) {
             const shareType=filename.toLowerCase().endsWith('.json')? 'text/plain':(blob.type||'application/octet-stream');
             const file=new File([blob],filename,{type: shareType});
-            if(navigator.canShare({files:[file]})) {
-              await navigator.share({files:[file],title:filename});
+            if(navigator.canShare({files: [file]})) {
+              await navigator.share({files: [file],title: filename});
               return 'shared';
             }
           }
@@ -7672,7 +7649,7 @@
           appVersion: APP_VERSION,
           stores: {sites,events,samples},
         };
-        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const blob=new Blob([JSON.stringify(data,null,2)],{type: 'application/json'});
         const date=new Date().toISOString().slice(0,10);
         const result=await downloadBlob(blob,`ecoplot-export-${date}.json`);
         if(result==='canceled') {
@@ -7736,7 +7713,7 @@
           rows.push(csvRow);
         });
 
-        const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+        const blob=new Blob([rows.join('\n')],{type: 'text/csv'});
         const date=new Date().toISOString().slice(0,10);
         const result=await downloadBlob(blob,`ecoplot-samples-${date}.csv`);
         if(result==='canceled') {
@@ -7758,7 +7735,7 @@
     });
 
     function csvEsc(v) {
-      const s=String(v==null?'':v);
+      const s=String(v==null? '':v);
       if(s.includes(',')||s.includes('"')||s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"';
       return s;
     }
@@ -7779,7 +7756,7 @@
       const pw=document.getElementById('wipe-db-pw').value;
       const wipeProtocols=document.getElementById('wipe-db-protocols').checked;
       const wipeSpecies=document.getElementById('wipe-db-species').checked;
-        const wipeCustomLists=document.getElementById('wipe-db-custom-lists').checked;
+      const wipeCustomLists=document.getElementById('wipe-db-custom-lists').checked;
       if(pw!=='1699') {
         document.getElementById('wipe-db-err').style.display='';
         document.getElementById('wipe-db-pw').value='';
