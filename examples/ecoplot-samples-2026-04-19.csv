@@ -1,0 +1,4 @@
+site_id,site_name,event_id,event_name,event_date,transect,sample,species,cover_hits,dwr_entries,fetch_values,sync_status,has_data
+site_1776629844891,tst 1,evt_1776629852950,protocl 1,,1,1,GUSA2;2FP,bare_soil;bare_soil,,,pending,true
+site_1776629844891,tst 1,evt_1776629852950,protocl 1,,2,1,BRRU2;GUSA2;2FP,bare_soil;woody_litter,,,pending,true
+site_1776629844891,tst 1,evt_1776629852950,protocl 1,,2,2,,rock;rock,,,pending,true
