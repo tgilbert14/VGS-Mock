@@ -1011,6 +1011,10 @@
       gap: 6px;
       margin-bottom: 12px;
       min-height: 32px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      background: color-mix(in srgb, var(--s1) 82%, var(--s2) 18%);
     }
 
     .species-chips-label {
@@ -1310,8 +1314,19 @@
     }
 
     .cover-btn.selected {
-      background: rgba(79, 168, 61, .12);
-      border-color: var(--accent2);
+      background: linear-gradient(135deg, rgba(79, 168, 61, .26), rgba(79, 168, 61, .14));
+      border-color: var(--accent);
+      border-width: 2px;
+      color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(79, 168, 61, .35), 0 0 0 1px rgba(79, 168, 61, .12);
+    }
+
+    .cover-btn.selected .cover-label {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .cover-btn.selected .cover-count {
       color: var(--accent);
     }
 
@@ -1336,6 +1351,11 @@
       flex-wrap: wrap;
       gap: 5px;
       margin-top: 8px;
+      min-height: 40px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      background: color-mix(in srgb, var(--s1) 82%, var(--s2) 18%);
     }
 
     .hit-chip {
@@ -1999,9 +2019,9 @@
     }
 
     .drawer-modal {
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 14px;
+      padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px 14px;
     }
 
     .drawer-modal .modal {
@@ -2038,14 +2058,15 @@
       }
 
       .drawer-modal {
-        align-items: flex-end;
-        justify-content: stretch;
-        padding: 0;
+        align-items: flex-start;
+        justify-content: center;
+        padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px 8px;
       }
 
       .drawer-modal .modal {
-        border-radius: 16px 16px 0 0;
+        border-radius: 14px;
         width: 100%;
+        max-height: min(74vh, 700px);
       }
     }
   </style>
@@ -2544,7 +2565,7 @@
         <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Collapse species list">❯</button>
       </div>
       <div class="drawer-controls">
-        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn" data-show="false">▶ Show site
+        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn active" data-show="true">■ Hide site
           species</button>
       </div>
       <div id="drawer-species-list" class="drawer-species-list"></div>
@@ -2963,7 +2984,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-20';
-    const APP_BUILD_REV=12;
+    const APP_BUILD_REV=19;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
@@ -3257,7 +3278,6 @@
     let speciesListOptions=[{key: 'all',label: 'All'}];
     let speciesImportStats={sourceRows: 0,storedRows: 0};
     let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
-    let showSiteSpecies=localStorage.getItem('ep_show_site_species')!=='0';
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
     let speciesSearchField=localStorage.getItem('ep_species_search_field')||'symbol';
@@ -3277,13 +3297,6 @@
     ];
     const USDA_SPECIES_METHOD_KEYS=USDA_SPECIES_METHODS.map(m => m.key);
     const FEATURED_TWO_CODE_SYMBOLS=['2FP','2FA','2GA','2GP','2SHRUB','2SUBS','2TREE'];
-
-    function toggleSiteSpeciesVisibility() {
-      showSiteSpecies=!showSiteSpecies;
-      localStorage.setItem('ep_show_site_species',showSiteSpecies? '1':'0');
-      renderSeenSpecies();
-      renderDWRSeenSpecies();
-    }
 
     function normalizeCsvHeader(v) {
       return String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -4147,30 +4160,6 @@
       const evSamples=await getEventSamplesIncludingCurrentPanel();
       const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
-      const currentSyms=new Set(samplePanelState.species.map(sp => String(sp?.symbol||'').trim().toUpperCase()).filter(Boolean));
-
-      // Optional: site species (USDA methods), sorted by frequency
-      let siteSeen=[];
-      let siteFreq={};
-      if(showSiteSpecies) {
-        const siteSamples=await getSiteSamplesCached();
-        siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
-        const siteAll=speciesAlphaSort
-          ? collectSeenSpeciesUnified(siteSamples).sort(compareSpeciesDisplay)
-          :collectSeenSpeciesByFreqUnified(siteSamples);
-        siteSeen=siteAll;
-      }
-
-      function chipHTML(sp,greyIfAdded,freq) {
-        const already=currentSyms.has(String(sp?.symbol||'').trim().toUpperCase());
-        const inv=sp.native==='N';
-        const cls=['seen-chip',inv? 'invasive-sp':'',already&&greyIfAdded? 'already':''].filter(Boolean).join(' ');
-        const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
-        return `<button class="${cls}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}" ${already? 'disabled title="Already added"':''}>
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>${freqBadge}
-        </button>`;
-      }
-
       function currentPicksHTML(sp) {
         const inv=sp.native==='N';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
@@ -4181,19 +4170,8 @@
       let html='';
 
       if(unifiedCurrent.length) {
-        html+=`<div class="seen-section-hdr"><span>From Current Event</span></div>`;
+        html+=`<div class="seen-section-hdr"><span>Species List</span></div>`;
         html+=`<div class="seen-chips" id="seen-current-chips">${unifiedCurrent.map(sp => currentPicksHTML(sp)).join('')}</div>`;
-      }
-      if(showSiteSpecies&&siteSeen.length) {
-        const siteSubLbl=speciesAlphaSort? 'a→z':'by Most Seen First';
-        html+=`<div class="seen-section-hdr"><span>Seen at Site (${siteSubLbl})</span>
-          <button class="seen-toggle-btn active" data-role="site-species-toggle">■ Hide site species</button>
-        </div>`;
-        html+=`<div class="seen-chips" id="seen-site-chips">${siteSeen.map(sp => chipHTML(sp,true,siteFreq[speciesEntryKey(sp)])).join('')}</div>`;
-      } else if(!showSiteSpecies) {
-        html+=`<div class="seen-section-hdr" style="margin-top:6px;"><span></span>
-          <button class="seen-toggle-btn" data-role="site-species-toggle">▶ Show site species</button>
-        </div>`;
       }
 
       sec.innerHTML=html;
@@ -4205,16 +4183,6 @@
         });
       });
 
-      // Wire quick-add clicks for other sections
-      sec.querySelectorAll('#seen-site-chips .seen-chip:not([disabled])').forEach(btn => {
-        btn.addEventListener('click',() => {
-          addSpeciesEntryToMethod('species',speciesFromDataset(btn),{preferQualifier: true});
-        });
-      });
-
-      sec.querySelectorAll('[data-role="site-species-toggle"]').forEach(btn => {
-        btn.addEventListener('click',toggleSiteSpeciesVisibility);
-      });
     }
 
     function parseNativeStatus(s) {
@@ -4446,6 +4414,36 @@
       activeEvent.speciesPool=nextPool;
       await dbPut('events',activeEvent);
       if(!silent) toast('Removed from event species list','ok');
+      renderSpeciesDrawer();
+      scheduleSeenRefresh(0);
+      return true;
+    }
+
+    async function syncEventSpeciesPoolEntryForQualifierEdit(beforeEntry,afterEntry) {
+      if(!activeEvent||!activeEventId) return false;
+      const beforeSymbol=String(beforeEntry?.symbol||'').trim().toUpperCase();
+      if(!beforeSymbol) return false;
+      const beforeKey=speciesEntryKey(beforeEntry);
+      const normalizedAfter=normalizeSpeciesEntryForStorage(afterEntry);
+      const afterKey=speciesEntryKey(normalizedAfter);
+      if(!afterKey) return false;
+
+      const pool=[...getEventSpeciesPool()];
+      let idx=pool.findIndex(sp => speciesEntryKey(sp)===beforeKey);
+      if(idx<0) {
+        idx=pool.findIndex(sp => String(sp?.symbol||'').trim().toUpperCase()===beforeSymbol);
+      }
+      if(idx<0) return false;
+
+      const dupIdx=pool.findIndex((sp,i) => i!==idx&&speciesEntryKey(sp)===afterKey);
+      if(dupIdx>=0) {
+        pool.splice(idx,1);
+      } else {
+        pool[idx]=normalizedAfter;
+      }
+
+      activeEvent.speciesPool=pool;
+      await dbPut('events',activeEvent);
       renderSpeciesDrawer();
       scheduleSeenRefresh(0);
       return true;
@@ -6561,8 +6559,8 @@
       </div>`;
     }
 
-    function refreshSpeciesMethodViews({refreshSeen=true,refreshDrawer=true}={}) {
-      renderSpeciesChips();
+    function refreshSpeciesMethodViews({refreshFreq=true,refreshSeen=true,refreshDrawer=true}={}) {
+      if(refreshFreq) renderSpeciesChips();
       renderDWRChips();
       if(refreshSeen) {
         scheduleSeenRefresh(0);
@@ -6700,7 +6698,7 @@
           list.push(workingEntry);
           setMethodEntryList(methodKey,list);
           clearSpeciesSearchUi(methodKey);
-          refreshSpeciesMethodViews({refreshSeen: false,refreshDrawer: false});
+          refreshSpeciesMethodViews({refreshFreq: false,refreshSeen: false,refreshDrawer: false});
           updateSeenChipStatesInPlace();
           if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
           return true;
@@ -6719,7 +6717,8 @@
       list.push(workingEntry);
       setMethodEntryList(methodKey,list);
       clearSpeciesSearchUi(methodKey);
-      refreshSpeciesMethodViews({refreshSeen: false,refreshDrawer: false});
+      const skipFreq=methodKey==='dwr';
+      refreshSpeciesMethodViews({refreshFreq: !skipFreq,refreshSeen: false,refreshDrawer: false});
       updateSeenChipStatesInPlace();
       if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
       return true;
@@ -6760,7 +6759,7 @@
       speciesQualifierInput.select();
     }
 
-    function applySpeciesQualifier() {
+    async function applySpeciesQualifier() {
       const {methodKey,entryIndex}=speciesQualifierState;
       const list=[...getMethodEntryList(methodKey)];
       const current=list?.[entryIndex];
@@ -6772,6 +6771,7 @@
       }
       list[entryIndex]=updated;
       setMethodEntryList(methodKey,list);
+      await syncEventSpeciesPoolEntryForQualifierEdit(current,updated);
       closeSpeciesQualifierModal();
       refreshSpeciesMethodViews();
     }
@@ -7206,30 +7206,6 @@
       const evSamples=await getEventSamplesIncludingCurrentPanel();
       const unifiedCurrent=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
-      const dwrSyms=new Set(samplePanelState.dwr.map(speciesEntryKey));
-
-      // Optional: site species
-      let siteSeen=[];
-      let siteFreq={};
-      if(showSiteSpecies) {
-        const siteSamples=await getSiteSamplesCached();
-        siteFreq=buildSpeciesFreqMapByMethods(siteSamples,USDA_SPECIES_METHOD_KEYS);
-        const siteAll=speciesAlphaSort
-          ? collectSeenSpeciesUnified(siteSamples).sort(compareSpeciesDisplay)
-          :collectSeenSpeciesByFreqUnified(siteSamples);
-        siteSeen=siteAll;
-      }
-
-      function dwrChipHTML(sp,freq) {
-        const selected=dwrSyms.has(speciesEntryKey(sp));
-        const inv=sp.native==='N';
-        const cls=['seen-chip',inv? 'invasive-sp':'',selected? 'selected':''].filter(Boolean).join(' ');
-        const freqBadge=freq? `<span class="seen-freq-badge">${freq}</span>`:'';
-        return `<button class="${cls}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>${freqBadge}
-        </button>`;
-      }
-
       function currentPickHTML(sp) {
         const inv=sp.native==='N';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
@@ -7240,19 +7216,8 @@
       let html='';
 
       if(unifiedCurrent.length) {
-        html+=`<div class="seen-section-hdr"><span>From Current Event</span></div>`;
+        html+=`<div class="seen-section-hdr"><span>Species List</span></div>`;
         html+=`<div class="seen-chips" id="seen-dwr-current-chips">${unifiedCurrent.map(sp => currentPickHTML(sp)).join('')}</div>`;
-      }
-      if(showSiteSpecies&&siteSeen.length) {
-        const siteSubLbl=speciesAlphaSort? 'a→z':'by Most Seen First';
-        html+=`<div class="seen-section-hdr"><span>Seen at Site (${siteSubLbl})</span>
-          <button class="seen-toggle-btn active" data-role="site-species-toggle">■ Hide site species</button>
-        </div>`;
-        html+=`<div class="seen-chips" id="seen-dwr-site-chips">${siteSeen.map(sp => dwrChipHTML(sp,siteFreq[speciesEntryKey(sp)])).join('')}</div>`;
-      } else if(!showSiteSpecies) {
-        html+=`<div class="seen-section-hdr" style="margin-top:6px;"><span></span>
-          <button class="seen-toggle-btn" data-role="site-species-toggle">▶ Show site species</button>
-        </div>`;
       }
 
       sec.innerHTML=html;
@@ -7266,9 +7231,6 @@
         btn.addEventListener('click',() => addDwrFromButton(btn));
       });
 
-      sec.querySelectorAll('[data-role="site-species-toggle"]').forEach(btn => {
-        btn.addEventListener('click',toggleSiteSpeciesVisibility);
-      });
     }
 
     document.getElementById('species-abc-btn').addEventListener('click',() => {
@@ -7358,7 +7320,7 @@
     }
 
     // ── Species Drawer ────────────────────────────────────
-    let drawerShowSiteSpecies=false;
+    let drawerShowSiteSpecies=true;
     let speciesDrawerCollapsed=localStorage.getItem('ep_species_drawer_collapsed')!=='0';
 
     function applySpeciesDrawerCollapsedState() {
@@ -7376,8 +7338,11 @@
       applySpeciesDrawerCollapsedState();
     }
 
-    function getDrawerSpeciesUnified() {
-      return [...getEventSpeciesPool()];
+    async function getDrawerSpeciesUnified() {
+      if(!activeEventId) return [...getEventSpeciesPool()];
+      const evSamples=await getEventSamplesIncludingCurrentPanel();
+      const currentEventSpecies=collectEventSpeciesUnified(evSamples);
+      return mergeWithEventSpeciesPool(currentEventSpecies);
     }
 
     async function renderSpeciesDrawer() {
@@ -7385,7 +7350,7 @@
       if(!drawerList||!activeSiteId) return;
 
       let html='';
-      const drawerSpecies=getDrawerSpeciesUnified();
+      const drawerSpecies=(await getDrawerSpeciesUnified()).sort(compareSpeciesDisplay);
 
       if(drawerSpecies.length===0) {
         html='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">No species added yet</div>';
@@ -7428,7 +7393,7 @@
       // Wire tap-to-assign for current event species
       drawerList.querySelectorAll('.drawer-species-item:not([data-site-species])').forEach(item => {
         item.addEventListener('click',() => {
-          toast('Species list updated. Use From Current Event chips to assign to methods','ok');
+          toast('Species list updated. Use Species List chips to assign to methods','ok');
         });
       });
 
@@ -7610,6 +7575,10 @@
 
     function renderHitLog() {
       const el=document.getElementById('hit-log');
+      if(!samplePanelState.coverHits.length) {
+        el.innerHTML='<span style="font-size:.72rem;color:var(--muted);">No cover hits added yet</span>';
+        return;
+      }
       el.innerHTML=samplePanelState.coverHits.map((h,i) => `
           <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
       el.querySelectorAll('button').forEach(btn => {
