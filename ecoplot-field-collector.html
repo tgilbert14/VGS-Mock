@@ -2005,14 +2005,12 @@
     #panel-freq-card .species-search-controls,
     #species-search-note,
     #species-two-code-picks,
-    #species-custom-list-picks,
     #species-search-count,
     #species-dropdown,
     #dwr-search-wrap,
     #panel-dwr-card .species-search-controls,
     #dwr-search-note,
     #dwr-two-code-picks,
-    #dwr-custom-list-picks,
     #dwr-search-count,
     #dwr-dropdown {
       display: none !important;
@@ -2143,26 +2141,26 @@
                 title="Cancel">✕</button>
             </div>
             <div class="field">
-              <label>Site Name *</label>
+              <label for="new-site-name">Site Name *</label>
               <input type="text" id="new-site-name" placeholder="e.g. Meadow Ridge A">
             </div>
             <div class="field">
-              <label>Description</label>
+              <label for="new-site-desc">Description</label>
               <input type="text" id="new-site-desc" placeholder="e.g. North slope, riparian buffer">
             </div>
             <div class="field">
-              <label>Default Protocol</label>
+              <label for="new-site-protocol">Default Protocol</label>
               <select id="new-site-protocol">
                 <option value="">— None —</option>
               </select>
             </div>
             <div class="row2">
               <div class="field">
-                <label>Latitude</label>
+                <label for="new-site-lat">Latitude</label>
                 <input type="number" id="new-site-lat" placeholder="e.g. 36.7783" step="any">
               </div>
               <div class="field">
-                <label>Longitude</label>
+                <label for="new-site-lng">Longitude</label>
                 <input type="number" id="new-site-lng" placeholder="e.g. -119.4179" step="any">
               </div>
             </div>
@@ -2170,21 +2168,21 @@
               Use My GPS Location</button>
             <div class="row3">
               <div class="field">
-                <label>Elevation (ft)</label>
+                <label for="new-site-elev">Elevation (ft)</label>
                 <input type="number" id="new-site-elev" placeholder="e.g. 7200" min="0">
               </div>
               <div class="field">
-                <label>Slope (%)</label>
+                <label for="new-site-slope">Slope (%)</label>
                 <input type="number" id="new-site-slope" placeholder="e.g. 12" min="0" max="100">
               </div>
               <div class="field">
-                <label>Aspect (°)</label>
+                <label for="new-site-aspect">Aspect (°)</label>
                 <input type="number" id="new-site-aspect" placeholder="e.g. 180" min="0" max="360">
               </div>
             </div>
             <div class="row2">
               <div class="field">
-                <label>Site Type</label>
+                <label for="new-site-type">Site Type</label>
                 <select id="new-site-type">
                   <option value="None">None</option>
                   <option value="Key Area">Key Area</option>
@@ -2198,7 +2196,7 @@
                 </select>
               </div>
               <div class="field">
-                <label>Status</label>
+                <label for="new-site-status">Status</label>
                 <select id="new-site-status">
                   <option value="Active">Active</option>
                   <option value="None">None</option>
@@ -2237,7 +2235,7 @@
                   title="Cancel">✕</button>
               </div>
               <div class="field">
-                <label>Protocol
+                <label for="new-event-protocol">Protocol
                   <button type="button" class="info-icon-btn" data-info-key="event-protocol"
                     title="Protocol help">i</button>
                 </label>
@@ -2246,48 +2244,48 @@
                 </select>
               </div>
               <div class="field">
-                <label>Event Name</label>
+                <label for="new-event-name">Event Name</label>
                 <input type="text" id="new-event-name" placeholder="e.g. Spring 2026 Survey">
               </div>
               <div class="field">
-                <label>Date</label>
+                <label for="new-event-date">Date</label>
                 <input type="date" id="new-event-date">
               </div>
               <div class="row2">
                 <div class="field">
-                  <label>Transects</label>
+                  <label for="new-event-transects">Transects</label>
                   <input type="number" id="new-event-transects" value="4" min="1" max="20">
                 </div>
                 <div class="field">
-                  <label>Samples / Transect</label>
+                  <label for="new-event-samples">Samples / Transect</label>
                   <input type="number" id="new-event-samples" value="50" min="1" max="200">
                 </div>
               </div>
               <div class="row3">
                 <div class="field">
-                  <label>Transect Length</label>
+                  <label for="new-event-length">Transect Length</label>
                   <input type="number" id="new-event-length" value="100" min="1">
                 </div>
                 <div class="field">
-                  <label>Unit</label>
+                  <label for="new-event-unit">Unit</label>
                   <select id="new-event-unit">
                     <option value="m">m</option>
                     <option value="ft">ft</option>
                   </select>
                 </div>
                 <div class="field">
-                  <label>Cover Pts/Sample</label>
+                  <label for="new-event-coverpts">Cover Pts/Sample</label>
                   <input type="number" id="new-event-coverpts" value="2" min="1" max="10">
                 </div>
               </div>
               <div class="row2">
                 <div class="field">
-                  <label>Frame Width (cm)</label>
+                  <label for="new-event-fw">Frame Width (cm)</label>
                   <input type="number" id="new-event-fw" value="40" min="1">
                 </div>
                 <div class="field">
-                  <label>Frame Height (cm)</label>
-                  <input type="number" id="new-event-fh" value="40" min="1">
+                  <label for="new-event-fh">Frame Height (cm)</label>
+                  <input type="number" id="new-event-fh" value="40" min="1">>
                 </div>
               </div>
               <div class="field">
@@ -2482,7 +2480,7 @@
           <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync
             automatically after connectivity returns.</div>
           <div class="field" style="margin-top:10px;">
-            <label>USDA Species Display</label>
+            <label for="cfg-species-display">USDA Species Display</label>
             <select id="cfg-species-display">
               <option value="species">Species name (default)</option>
               <option value="common">Common name</option>
@@ -2496,11 +2494,11 @@
           <div class="card-title">Azure Connection <button type="button" class="info-icon-btn"
               data-info-key="setup-azure" title="Azure connection help">i</button></div>
           <div class="field">
-            <label>Azure Function URL</label>
+            <label for="cfg-url">Azure Function URL</label>
             <input type="url" id="cfg-url" placeholder="https://yourapp.azurewebsites.net/api/ecoplot">
           </div>
           <div class="field">
-            <label>API Key (x-functions-key)</label>
+            <label for="cfg-key">API Key (x-functions-key)</label>
             <input type="password" id="cfg-key" placeholder="optional">
           </div>
         </div>
@@ -2768,6 +2766,8 @@
       <div class="modal-title">Replace Species In Event</div>
       <div id="bulk-replace-old" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">—</div>
       <div id="bulk-replace-counts" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">—</div>
+      <div id="bulk-replace-selected" style="font-size:.74rem;color:var(--muted);margin-bottom:10px;">No replacement
+        selected</div>
 
       <div id="bulk-replace-methods"
         style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;"></div>
@@ -2780,10 +2780,9 @@
           style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;color:var(--muted);cursor:pointer;">✕</button>
       </div>
       <div id="bulk-replace-dropdown"
-        style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--s2);display:none;margin-bottom:10px;">
+        style="height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--s2);margin-bottom:10px;">
+        <div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>
       </div>
-      <div id="bulk-replace-selected" style="font-size:.74rem;color:var(--muted);margin-bottom:14px;">No replacement
-        selected</div>
 
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="bulk-replace-cancel-btn">Cancel</button>
@@ -2799,7 +2798,7 @@
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Use qualifiers to distinguish grouped or
         unknown entries like 2FORB so you can identify and replace them later.</div>
       <div class="field" style="margin-bottom:12px;">
-        <label>Qualifier</label>
+        <label for="species-qualifier-input">Qualifier</label>
         <input type="text" id="species-qualifier-input" maxlength="20" placeholder="e.g. yellow flower, basal rosette"
           autocomplete="off">
       </div>
@@ -2839,24 +2838,24 @@
       <div class="modal-title">Edit Site</div>
       <input type="hidden" id="edit-site-id">
       <div class="field">
-        <label>Site Name *</label>
+        <label for="edit-site-name">Site Name *</label>
         <input type="text" id="edit-site-name" placeholder="e.g. Meadow Ridge A">
       </div>
       <div class="field">
-        <label>Description</label>
+        <label for="edit-site-desc">Description</label>
         <input type="text" id="edit-site-desc" placeholder="e.g. North slope, riparian buffer">
       </div>
       <div class="field">
-        <label>Default Protocol</label>
+        <label for="edit-site-protocol">Default Protocol</label>
         <select id="edit-site-protocol"></select>
       </div>
       <div class="row2">
         <div class="field">
-          <label>Latitude</label>
+          <label for="edit-site-lat">Latitude</label>
           <input type="number" id="edit-site-lat" placeholder="e.g. 36.7783" step="any">
         </div>
         <div class="field">
-          <label>Longitude</label>
+          <label for="edit-site-lng">Longitude</label>
           <input type="number" id="edit-site-lng" placeholder="e.g. -119.4179" step="any">
         </div>
       </div>
@@ -2864,21 +2863,21 @@
         Use My GPS Location</button>
       <div class="row3">
         <div class="field">
-          <label>Elevation (ft)</label>
+          <label for="edit-site-elev">Elevation (ft)</label>
           <input type="number" id="edit-site-elev" placeholder="e.g. 7200" min="0">
         </div>
         <div class="field">
-          <label>Slope (%)</label>
+          <label for="edit-site-slope">Slope (%)</label>
           <input type="number" id="edit-site-slope" placeholder="e.g. 12" min="0" max="100">
         </div>
         <div class="field">
-          <label>Aspect (°)</label>
+          <label for="edit-site-aspect">Aspect (°)</label>
           <input type="number" id="edit-site-aspect" placeholder="e.g. 180" min="0" max="360">
         </div>
       </div>
       <div class="row2">
         <div class="field">
-          <label>Site Type</label>
+          <label for="edit-site-type">Site Type</label>
           <select id="edit-site-type">
             <option value="None">None</option>
             <option value="Key Area">Key Area</option>
@@ -2892,7 +2891,7 @@
           </select>
         </div>
         <div class="field">
-          <label>Status</label>
+          <label for="edit-site-status">Status</label>
           <select id="edit-site-status">
             <option value="Active">Active</option>
             <option value="None">None</option>
@@ -2962,14 +2961,24 @@
         <input type="text" id="drawer-search-input" placeholder="Search by symbol, common, or scientific name…"
           autocomplete="off" autocorrect="off" spellcheck="false">
       </div>
-      <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;">
-        <label style="display:flex;gap:4px;align-items:center;">
-          <input type="checkbox" id="drawer-search-by-code" checked>
-          <span>By code</span>
+      <div style="display:flex;gap:14px;font-size:.7rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap;">
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;">
+          <input type="radio" name="drawer-search-by" id="drawer-search-by-code" value="code" checked>
+          <span>Code</span>
+        </label>
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;">
+          <input type="radio" name="drawer-search-by" id="drawer-search-by-sci" value="sci">
+          <span>Scientific name</span>
+        </label>
+        <label style="display:flex;gap:4px;align-items:center;cursor:pointer;">
+          <input type="radio" name="drawer-search-by" id="drawer-search-by-common" value="common">
+          <span>Common name</span>
         </label>
       </div>
+      <div id="drawer-search-status" style="font-size:.7rem;color:var(--muted);margin-bottom:8px;min-height:1.1em;">Type
+        to search</div>
       <div id="drawer-search-results"
-        style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);margin-bottom:12px;font-size:.75rem;">
+        style="height:300px;overflow-y:scroll;border:1px solid var(--border);border-radius:6px;background:var(--s1);margin-bottom:12px;font-size:.75rem;">
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="drawer-search-cancel-btn">Cancel</button>
@@ -2984,7 +2993,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-20';
-    const APP_BUILD_REV=19;
+    const APP_BUILD_REV=30;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
@@ -3282,6 +3291,7 @@
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
     let speciesSearchField=localStorage.getItem('ep_species_search_field')||'symbol';
     let speciesSearchMatchMode=localStorage.getItem('ep_species_search_match')||'starts';
+    let searchSpeciesCache={rows: null,bySymbol: null,sourceRef: null};
     let customPlantLists=JSON.parse(localStorage.getItem('ep_custom_lists')||'[]');
     let activeCustomListIds=JSON.parse(localStorage.getItem('ep_active_custom_lists')||'[]');
     let editingCustomListId=null;
@@ -3347,6 +3357,8 @@
     }
 
     function getSearchSpeciesDB() {
+      const sourceRef=speciesAllRecords.length? speciesAllRecords:speciesDB;
+      if(searchSpeciesCache.rows&&searchSpeciesCache.sourceRef===sourceRef) return searchSpeciesCache.rows;
       const twoCodes=ALWAYS_AVAILABLE_TWO_CODE_SPECIES;
       const sourceRows=speciesAllRecords.length
         ? speciesAllRecords
@@ -3386,7 +3398,14 @@
         String(r.growthHabit||''),
       ]);
 
-      return [...allRows,...twoCodes];
+      const rows=[...allRows,...twoCodes];
+      const bySymbolLookup=new Map();
+      rows.forEach(row => {
+        const symbol=String(row?.[0]||'').trim().toUpperCase();
+        if(symbol&&!bySymbolLookup.has(symbol)) bySymbolLookup.set(symbol,row);
+      });
+      searchSpeciesCache={rows,bySymbol: bySymbolLookup,sourceRef};
+      return rows;
     }
 
     function hasSearchSpeciesDB() {
@@ -3449,7 +3468,9 @@
 
     function getSpeciesSearchRecord(symbol) {
       const target=String(symbol||'').trim().toUpperCase();
-      return getSearchSpeciesDB().find(row => String(row?.[0]||'').trim().toUpperCase()===target)||null;
+      if(!target) return null;
+      getSearchSpeciesDB();
+      return searchSpeciesCache.bySymbol?.get(target)||null;
     }
 
     function speciesEntryFromSymbol(symbol) {
@@ -3579,8 +3600,25 @@
     }
 
     function applyActiveCustomListIds(nextIds) {
+      const wasActive=activeCustomListIds.length>0;
       activeCustomListIds=[...new Set((nextIds||[]).map(id => String(id||'').trim()).filter(Boolean))];
+      const isActive=activeCustomListIds.length>0;
       localStorage.setItem('ep_active_custom_lists',JSON.stringify(activeCustomListIds));
+
+      // Handle transition between custom list mode and normal mode
+      if(!wasActive&&isActive) {
+        // Activating custom lists: bypass species list selector
+        selectedSpeciesListKey='all';
+        localStorage.setItem('ep_species_list_key','all');
+      } else if(wasActive&&!isActive) {
+        // Deactivating custom lists: restore species list selector if needed
+        if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
+          selectedSpeciesListKey='all';
+          localStorage.setItem('ep_species_list_key','all');
+        }
+      }
+
+      rebuildActiveSpeciesDB();
       renderEventCustomListToggles();
       renderCustomListPicks();
       renderSpeciesMethodScopeLabels();
@@ -3692,7 +3730,6 @@
         {methodKey: 'species',elId: 'species-custom-list-picks'},
         {methodKey: 'dwr',elId: 'dwr-custom-list-picks'},
       ];
-      renderEventCustomListToggles();
       const activeLists=getActiveCustomLists();
       panels.forEach(({methodKey,elId}) => {
         const el=document.getElementById(elId);
@@ -3703,19 +3740,22 @@
           return;
         }
         const list=getMethodEntryList(methodKey);
+        const activeSymbols=new Set((list||[]).map(item => String(item?.symbol||'').trim().toUpperCase()).filter(Boolean));
         const disabledByNone=methodKey==='species'&&samplePanelState.freqNone;
         const atLimit=methodKey==='dwr'&&!methodAllowsMoreEntries(methodKey,list);
         // Collect all species from active lists
-        const allSpecies=[];
+        const allSpeciesBySymbol=new Map();
         activeLists.forEach(clist => {
           clist.symbols.forEach(sym => {
             const row=getSpeciesSearchRecord(sym);
             if(row) {
-              const sp=createSpeciesEntry({symbol: row[0],common: row[1],sci: row[2],native: row[3]});
-              if(!allSpecies.some(s => s.symbol===sp.symbol)) allSpecies.push(sp);
+              const symbol=String(row?.[0]||'').trim().toUpperCase();
+              if(!symbol||allSpeciesBySymbol.has(symbol)) return;
+              allSpeciesBySymbol.set(symbol,createSpeciesEntry({symbol: row[0],common: row[1],sci: row[2],native: row[3]}));
             }
           });
         });
+        const allSpecies=[...allSpeciesBySymbol.values()];
         if(!allSpecies.length) {
           el.hidden=true;
           el.innerHTML='';
@@ -3731,7 +3771,7 @@
         </div>
         <div class="two-code-picks-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
           ${allSpecies.map(sp => {
-          const active=list.some(item => String(item?.symbol||'').trim().toUpperCase()===sp.symbol);
+          const active=activeSymbols.has(sp.symbol);
           const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
           return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
               <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
@@ -3985,7 +4025,7 @@
     }
 
     async function checkForAppUpdate() {
-      if(!('serviceWorker' in navigator)) {
+      if(!('serviceWorker' in navigator)||location.protocol==='file:') {
         setServiceWorkerStatus('Service worker updates are not available in this browser.',{updateReady: false});
         return;
       }
@@ -4374,7 +4414,12 @@
     let samplePanelOpen=false;
     let eventSamplesCache={eventId: null,samples: null};
     let siteSamplesCache={siteId: null,samples: null};
+    let siteListCache={folders: null,sites: null,samples: null};
     let seenRefreshTimer=null;
+
+    function invalidateSiteListCache() {
+      siteListCache={folders: null,sites: null,samples: null};
+    }
 
     function invalidateSeenSpeciesCaches({event=false,site=false}={}) {
       if(event) eventSamplesCache={eventId: null,samples: null};
@@ -4449,10 +4494,50 @@
       return true;
     }
 
+    async function applyQualifierAcrossAllEventSamples(beforeEntry,afterEntry) {
+      if(!activeEvent||!activeEventId) return false;
+      const targetSymbol=String(beforeEntry?.symbol||'').trim().toUpperCase();
+      if(!targetSymbol) return false;
+
+      const allSamples=await getEventSamplesIncludingCurrentPanel();
+      let updated=false;
+
+      for(const sample of allSamples) {
+        let changed=false;
+
+        ['species','dwr'].forEach(methodKey => {
+          const list=sample[methodKey]||[];
+          list.forEach((entry,idx) => {
+            const entrySymbol=String(entry?.symbol||'').trim().toUpperCase();
+            if(entrySymbol===targetSymbol&&speciesEntryKey(entry)!==speciesEntryKey(afterEntry)) {
+              const newEntry=createSpeciesEntry({...entry,qualifier: afterEntry.qualifier});
+              list[idx]=normalizeSpeciesEntryForStorage(newEntry);
+              changed=true;
+            }
+          });
+        });
+
+        if(changed) {
+          await dbPut('samples',sample);
+          updated=true;
+        }
+      }
+
+      if(updated) {
+        eventSamplesCache={};
+        if(samplePanelOpen&&activeSiteId===samplePanelState.siteId) {
+          refreshSpeciesMethodViews();
+        }
+      }
+      return updated;
+    }
+
     function mergeWithEventSpeciesPool(speciesList) {
       const merged=[];
       const seen=new Set();
-      [...(speciesList||[]),...getEventSpeciesPool()].forEach(sp => {
+      const pool=getEventSpeciesPool();
+      // Prioritize pool entries (which have updated qualifiers) over current samples
+      [...pool,...(speciesList||[])].forEach(sp => {
         const key=speciesEntryKey(sp);
         if(!key||seen.has(key)) return;
         seen.add(key);
@@ -4480,6 +4565,7 @@
         tab.classList.add('active');
         document.getElementById('page-'+tab.dataset.page).classList.add('active');
         if(tab.dataset.page==='collect') renderCollect();
+        if(tab.dataset.page==='sites') renderSiteList({invalidate: true});
         if(tab.dataset.page==='summary') renderSummary();
         if(tab.dataset.page==='sync') renderSync();
         if(tab.dataset.page==='map') renderMap();
@@ -4676,7 +4762,7 @@
         document.getElementById('new-site-status').value='Active';
         closeNewSiteForm();
         toast('Site created','ok');
-        renderSiteList();
+        renderSiteList({invalidate: true});
         selectSite(site.id);
       } catch(err) {
         toast('Storage error: '+err.message,'err');
@@ -4766,7 +4852,7 @@
         toast('Site updated','ok');
         // refresh activeSite if it's the one being edited
         if(activeSiteId===id) {activeSite=site; renderCollect();}
-        renderSiteList();
+        renderSiteList({invalidate: true});
       } catch(err) {
         toast('Save error: '+err.message,'err');
       }
@@ -4894,10 +4980,16 @@
       return directSites+childFolders.reduce((sum,f) => sum+countSitesInFolder(f.id,allFolders,allSites),0);
     }
 
-    async function renderSiteList() {
-      const folders=await dbGetAll('folders');
-      const allSites=await dbGetAll('sites');
-      const allSamples=await dbGetAll('samples');
+    async function renderSiteList({invalidate=false}={}) {
+      if(invalidate||!siteListCache.folders) {
+        const [folders,allSites,allSamples]=await Promise.all([
+          dbGetAll('folders'),
+          dbGetAll('sites'),
+          dbGetAll('samples'),
+        ]);
+        siteListCache={folders,sites: allSites,samples: allSamples};
+      }
+      const {folders,sites: allSites,samples: allSamples}=siteListCache;
       const el=document.getElementById('site-list');
 
       // ── Breadcrumb ──
@@ -4917,7 +5009,7 @@
         btn.addEventListener('click',() => {
           currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
           updateCreateLocationHint(folders);
-          renderSiteList();
+          requestAnimationFrame(() => renderSiteList());
         });
       });
 
@@ -5039,7 +5131,8 @@
           if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
           currentFolderId=item.dataset.folderId;
           updateCreateLocationHint(folders);
-          renderSiteList();
+          // Defer re-render past the current frame so tap is painted immediately
+          requestAnimationFrame(() => renderSiteList());
         });
       });
 
@@ -5057,7 +5150,7 @@
       });
 
       const togBtn=document.getElementById('toggle-archived-btn');
-      if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList();});
+      if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList({invalidate: true});});
     }
 
     async function updateCreateLocationHint(folders,path) {
@@ -5082,7 +5175,7 @@
       await dbPut('folders',{id: 'folder_'+Date.now(),name,parentId: currentFolderId,createdAt: Date.now()});
       document.getElementById('new-folder-row').style.display='none';
       document.getElementById('new-folder-input').value='';
-      renderSiteList();
+      renderSiteList({invalidate: true});
     }
     document.getElementById('new-folder-confirm').addEventListener('click',confirmNewFolder);
     document.getElementById('new-folder-input').addEventListener('keydown',e => {
@@ -5107,7 +5200,7 @@
           await dbPut('folders',folder);
           toast('Folder renamed','ok');
         }
-        renderSiteList();
+        renderSiteList({invalidate: true});
       };
       inp.addEventListener('blur',save);
       inp.addEventListener('keydown',e => {if(e.key==='Enter') inp.blur(); if(e.key==='Escape') {inp.value=old; inp.blur();} });
@@ -5121,7 +5214,7 @@
       }
       await dbDelete('folders',folderId);
       toast('Folder deleted');
-      renderSiteList();
+      renderSiteList({invalidate: true});
     }
 
     function promptDelete(siteId) {
@@ -5132,7 +5225,7 @@
         if(activeSiteId===siteId) {activeSiteId=null; activeSite=null; updateCrumb(); renderCollect();}
         document.getElementById('del-modal').classList.remove('open');
         toast('Site archived','ok');
-        renderSiteList();
+        renderSiteList({invalidate: true});
       };
     }
     document.getElementById('del-cancel-btn').onclick=() => document.getElementById('del-modal').classList.remove('open');
@@ -5146,7 +5239,7 @@
       await dbPut('sites',site);
       toast('Site restored','ok');
       showArchived=false;
-      renderSiteList();
+      renderSiteList({invalidate: true});
     }
 
     async function selectSite(id) {
@@ -5155,7 +5248,7 @@
       activeEventId=null;
       activeEvent=null;
       updateCrumb();
-      renderSiteList();
+      renderSiteList({invalidate: true});
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelector('[data-page="collect"]').classList.add('active');
@@ -5309,7 +5402,8 @@
                 if(!sampleMap[sampleId(activeSiteId,eid,t,s)]?.hasData) {startT=t; startS=s; break outer;}
               }
             }
-            openSamplePanel(startT,startS);
+            // Defer panel open to next frame so row tap-highlight paints first
+            requestAnimationFrame(() => openSamplePanel(startT,startS));
           });
         });
 
@@ -6105,16 +6199,20 @@
     function openNewEventForm() {
       const form=document.getElementById('new-event-form');
       if(form.style.display==='block') return;
+      // Show form immediately so the button-tap paints before any heavy work
       form.style.display='block';
       document.getElementById('new-event-toggle-btn').style.display='none';
-      syncNewEventMethodOptions();
-      renderProtocolSelect(document.getElementById('new-event-protocol')).then(async () => {
-        const siteProtocolId=activeSite?.protocolId||'';
-        const selectEl=document.getElementById('new-event-protocol');
-        if(siteProtocolId&&[...selectEl.options].some(opt => opt.value===siteProtocolId)) {
-          selectEl.value=siteProtocolId;
-          await applyProtocolToForm(siteProtocolId);
-        }
+      // Defer DOM-intensive setup to the next frame
+      requestAnimationFrame(() => {
+        syncNewEventMethodOptions();
+        renderProtocolSelect(document.getElementById('new-event-protocol')).then(async () => {
+          const siteProtocolId=activeSite?.protocolId||'';
+          const selectEl=document.getElementById('new-event-protocol');
+          if(siteProtocolId&&[...selectEl.options].some(opt => opt.value===siteProtocolId)) {
+            selectEl.value=siteProtocolId;
+            await applyProtocolToForm(siteProtocolId);
+          }
+        });
       });
     }
 
@@ -6183,9 +6281,10 @@
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
       applySpeciesDrawerCollapsedState();
-      await loadSampleIntoPanel(tIdx,sIdx);
+      // Open panel immediately so the slide-in transition starts before heavy loading
       document.getElementById('sample-panel').classList.add('open');
       samplePanelOpen=true;
+      await loadSampleIntoPanel(tIdx,sIdx);
     }
 
     async function loadSampleIntoPanel(tIdx,sIdx) {
@@ -6360,6 +6459,7 @@
         hasData,savedAt: Date.now(),syncStatus: 'pending'
       });
       invalidateSeenSpeciesCaches({event: true,site: true});
+      invalidateSiteListCache();
     }
 
     document.getElementById('sample-save-btn').addEventListener('click',async () => {
@@ -6748,8 +6848,14 @@
     }
 
     function openSpeciesQualifierModal(methodKey,entryIndex) {
-      const list=getMethodEntryList(methodKey);
-      const sp=list?.[entryIndex];
+      let sp;
+      if(methodKey==='pool') {
+        const pool=getEventSpeciesPool();
+        sp=pool?.[entryIndex];
+      } else {
+        const list=getMethodEntryList(methodKey);
+        sp=list?.[entryIndex];
+      }
       if(!sp) return;
       speciesQualifierState={methodKey,entryIndex};
       speciesQualifierTarget.textContent=`${speciesDisplayPrimary(sp)} [${sp.symbol}]`;
@@ -6761,6 +6867,23 @@
 
     async function applySpeciesQualifier() {
       const {methodKey,entryIndex}=speciesQualifierState;
+
+      if(methodKey==='pool') {
+        const pool=[...getEventSpeciesPool()];
+        const current=pool?.[entryIndex];
+        if(!current) return;
+        const updated=createSpeciesEntry({...current,qualifier: speciesQualifierInput.value});
+        pool[entryIndex]=normalizeSpeciesEntryForStorage(updated);
+        activeEvent.speciesPool=pool;
+        await dbPut('events',activeEvent);
+        await applyQualifierAcrossAllEventSamples(current,updated);
+        closeSpeciesQualifierModal();
+        renderSpeciesDrawer();
+        scheduleSeenRefresh(0);
+        toast('Qualifier updated across all samples','ok');
+        return;
+      }
+
       const list=[...getMethodEntryList(methodKey)];
       const current=list?.[entryIndex];
       if(!current) return;
@@ -6772,6 +6895,7 @@
       list[entryIndex]=updated;
       setMethodEntryList(methodKey,list);
       await syncEventSpeciesPoolEntryForQualifierEdit(current,updated);
+      await applyQualifierAcrossAllEventSamples(current,updated);
       closeSpeciesQualifierModal();
       refreshSpeciesMethodViews();
     }
@@ -6781,8 +6905,7 @@
       bulkReplaceState={oldSpecies: null,replacement: null};
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
-      bulkReplaceDrop.style.display='none';
-      bulkReplaceDrop.innerHTML='';
+      bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceSelected.textContent='No replacement selected';
     }
 
@@ -6828,8 +6951,7 @@
 
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
-      bulkReplaceDrop.style.display='none';
-      bulkReplaceDrop.innerHTML='';
+      bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceSelected.textContent='No replacement selected';
       bulkReplaceModal.classList.add('open');
     }
@@ -6924,26 +7046,22 @@
       const q=bulkReplaceInput.value.trim().toLowerCase();
       bulkReplaceClear.style.display=q? '':'none';
       if(!shouldSearchSpeciesQuery(q)) {
-        bulkReplaceDrop.style.display='none';
-        bulkReplaceDrop.innerHTML='';
+        bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Type to search replacement species</div>';
         return;
       }
       const results=getSearchSpeciesDB().filter(p => speciesSearchMatchesRow(p,q)).slice(0,30);
       if(!results.length) {
-        bulkReplaceDrop.style.display='none';
-        bulkReplaceDrop.innerHTML='';
+        bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">No matching species</div>';
         return;
       }
       bulkReplaceDrop.innerHTML=results.map(p => renderSpeciesSearchOption(p,{compact: true})).join('');
-      bulkReplaceDrop.style.display='block';
 
       bulkReplaceDrop.querySelectorAll('.species-opt').forEach(opt => {
         opt.addEventListener('click',() => {
           bulkReplaceState.replacement=speciesFromDataset(opt);
           bulkReplaceInput.value=`${opt.dataset.common} [${opt.dataset.sym}]`;
           bulkReplaceClear.style.display='';
-          bulkReplaceDrop.style.display='none';
-          bulkReplaceDrop.innerHTML='';
+          bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Replacement chosen. Update search to choose a different species.</div>';
           bulkReplaceSelected.textContent=
             `Replacement selected: ${speciesDisplayPrimary({symbol: opt.dataset.sym,common: opt.dataset.common,sci: opt.dataset.sci})} [${opt.dataset.sym}]`;
         });
@@ -6953,8 +7071,7 @@
     bulkReplaceClear.addEventListener('click',() => {
       bulkReplaceInput.value='';
       bulkReplaceClear.style.display='none';
-      bulkReplaceDrop.style.display='none';
-      bulkReplaceDrop.innerHTML='';
+      bulkReplaceDrop.innerHTML='<div style="padding:12px;color:var(--muted);font-size:.72rem;">Search to choose a replacement species</div>';
       bulkReplaceState.replacement=null;
       bulkReplaceSelected.textContent='No replacement selected';
     });
@@ -7355,14 +7472,19 @@
       if(drawerSpecies.length===0) {
         html='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">No species added yet</div>';
       } else {
-        html=drawerSpecies.map(sp => {
-          return `<div class="drawer-species-item" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}">
+        html=drawerSpecies.map((sp,idx) => {
+          const qualifier=speciesQualifierText(sp);
+          return `<div class="drawer-species-item" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
             <div class="species-name">
               <span class="species-code">${esc(sp.symbol)}</span>
               <span class="species-common">${esc(sp.common||'')}</span>
+              ${qualifier? `<span class="qualifier-badge" style="font-size:.65rem;color:var(--muted);margin-left:4px;">${esc(qualifier)}</span>`:''}
             </div>
-            <span class="method-badge">List</span>
-            <button class="drawer-remove-btn" data-role="remove-event-species" title="Remove from event list">✕</button>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <button class="drawer-edit-qualifier-btn" data-role="edit-qualifier" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;">✎</button>
+              <span class="method-badge">List</span>
+              <button class="drawer-remove-btn" data-role="remove-event-species" title="Remove from event list">✕</button>
+            </div>
           </div>`;
         }).join('');
       }
@@ -7406,6 +7528,16 @@
         });
       });
 
+      drawerList.querySelectorAll('.drawer-edit-qualifier-btn[data-role="edit-qualifier"]').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const row=btn.closest('.drawer-species-item');
+          if(!row) return;
+          const idx=+row.dataset.idx;
+          openSpeciesQualifierModal('pool',idx);
+        });
+      });
+
       // Wire add-from-site for site species
       drawerList.querySelectorAll('.drawer-species-item[data-site-species]').forEach(item => {
         item.addEventListener('click',() => {
@@ -7437,10 +7569,15 @@
       const modal=document.getElementById('drawer-search-modal');
       const searchInput=document.getElementById('drawer-search-input');
       const resultsDiv=document.getElementById('drawer-search-results');
+      const statusEl=document.getElementById('drawer-search-status');
 
       drawerSearchState={};
       modal.classList.add('open');
       searchInput.value='';
+      // Reset search mode to Code each time the modal opens
+      const codeRadio=document.getElementById('drawer-search-by-code');
+      if(codeRadio) codeRadio.checked=true;
+      if(statusEl) statusEl.textContent='Type to search';
       resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.72rem;">Start typing to search species</div>';
       searchInput.focus();
 
@@ -7459,15 +7596,18 @@
     function updateDrawerSearchResults(e) {
       const query=(e.target.value||'').trim().toLowerCase();
       const resultsDiv=document.getElementById('drawer-search-results');
-      const codeOnly=document.getElementById('drawer-search-by-code')?.checked;
+      const statusEl=document.getElementById('drawer-search-status');
+      const searchBy=document.querySelector('input[name="drawer-search-by"]:checked')?.value||'code';
 
       if(!query||query.length<1) {
+        if(statusEl) statusEl.textContent='Type to search';
         resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.7rem;">Enter search term</div>';
         return;
       }
 
       const rows=getSearchSpeciesDB();
       if(!rows.length) {
+        if(statusEl) statusEl.textContent='No species database loaded';
         resultsDiv.innerHTML='<div style="padding:12px;color:var(--danger);">No species database loaded</div>';
         return;
       }
@@ -7476,14 +7616,23 @@
         const symbol=String(row?.[0]||'').toLowerCase();
         const common=String(row?.[1]||'').toLowerCase();
         const sci=String(row?.[2]||'').toLowerCase();
-        if(codeOnly) return symbol.startsWith(query);
+        if(searchBy==='code') return symbol.startsWith(query);
+        if(searchBy==='sci') return sci.includes(query);
+        if(searchBy==='common') return common.includes(query);
         return symbol.includes(query)||common.includes(query)||sci.includes(query);
       });
       const results=matches.slice(0,50);
 
       if(results.length===0) {
+        if(statusEl) statusEl.textContent='No matches';
         resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.7rem;">No species found</div>';
         return;
+      }
+
+      if(statusEl) {
+        statusEl.textContent=matches.length>results.length
+          ? `Showing ${results.length.toLocaleString()} of ${matches.length.toLocaleString()} matches`
+          :`${matches.length.toLocaleString()} match${matches.length===1? '':'es'}`;
       }
 
       resultsDiv.innerHTML=results.map((row,idx) => {
@@ -7521,9 +7670,11 @@
 
     // Wire modal close buttons
     document.getElementById('drawer-search-cancel-btn').addEventListener('click',closeDrawerSearchModal);
-    document.getElementById('drawer-search-by-code').addEventListener('change',() => {
-      const input=document.getElementById('drawer-search-input');
-      if(input&&input.value.trim()) updateDrawerSearchResults({target: input});
+    document.querySelectorAll('input[name="drawer-search-by"]').forEach(radio => {
+      radio.addEventListener('change',() => {
+        const input=document.getElementById('drawer-search-input');
+        if(input&&input.value.trim()) updateDrawerSearchResults({target: input});
+      });
     });
 
     // ── Cover grid ────────────────────────────────────────
@@ -8369,7 +8520,7 @@
       }
       // Reset in-memory state
       activeSiteId=null; activeSite=null; activeEventId=null; activeEvent=null;
-      renderSiteList();
+      renderSiteList({invalidate: true});
       renderCollect();
       renderSync();
       refreshNewEventProtocolSelect();
@@ -8630,13 +8781,15 @@
       loadSpeciesDB();
       renderCustomListsSetup();
       renderCustomListPicks();
-      renderSiteList();
+      renderSiteList({invalidate: true});
       document.getElementById('collect-no-site').style.display='';
     }
     init();
 
     // ── Service Worker registration ──
-    if('serviceWorker' in navigator) {
+    // SW + manifest require a real HTTP origin — skip silently when opened as a local file
+    const _swSupported='serviceWorker' in navigator&&location.protocol!=='file:';
+    if(_swSupported) {
       navigator.serviceWorker.addEventListener('controllerchange',() => {
         setServiceWorkerStatus('New build activated. Reload to finish switching this tab.',{updateReady: true});
       });
@@ -8652,8 +8805,11 @@
             console.warn('SW registration failed:',err);
           });
       });
-    } else {
+    } else if(!('serviceWorker' in navigator)) {
       setServiceWorkerStatus('Service worker updates are unavailable in this browser.',{updateReady: false});
+    } else {
+      // file:// — offline caching not available; app still works fully online
+      setServiceWorkerStatus('Offline cache unavailable when opened as a local file. Serve via http:// to enable.',{updateReady: false});
     }
 
     // ── Theme toggle ──
