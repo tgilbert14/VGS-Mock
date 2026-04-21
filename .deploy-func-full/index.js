@@ -68,7 +68,7 @@ app.http('observations',{
   handler: async (request,context) => {
 
     // Handle CORS preflight
-    if(request.method==='OPTIONS') {
+        if((request.method||'').toUpperCase()==='OPTIONS') {
       return {status: 204,headers: CORS_HEADERS,body: ''};
     }
 
