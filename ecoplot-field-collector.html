@@ -220,12 +220,15 @@
     #install-banner p {
       flex: 1;
       font-size: .7rem;
-      color: var(--text);
+      color: var(--muted);
       line-height: 1.4;
+      cursor: default;
     }
 
     #install-banner strong {
-      color: var(--accent);
+      color: var(--text);
+      font-weight: 600;
+      cursor: default;
     }
 
     #install-dismiss {
@@ -3274,7 +3277,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=49;
+    const APP_BUILD_REV=50;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
