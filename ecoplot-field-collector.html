@@ -3,8 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="EcoPlotMobile">
@@ -220,15 +219,12 @@
     #install-banner p {
       flex: 1;
       font-size: .7rem;
-      color: var(--muted);
+      color: var(--text);
       line-height: 1.4;
-      cursor: default;
     }
 
     #install-banner strong {
-      color: var(--text);
-      font-weight: 600;
-      cursor: default;
+      color: var(--accent);
     }
 
     #install-dismiss {
@@ -454,19 +450,6 @@
     textarea {
       resize: none;
       line-height: 1.5;
-    }
-
-    /* iOS Safari: keep text-entry controls at 16px to avoid forced zoom/focus glitches. */
-    @supports (-webkit-touch-callout: none) {
-
-      input[type=text],
-      input[type=number],
-      input[type=url],
-      input[type=password],
-      select,
-      textarea {
-        font-size: 16px;
-      }
     }
 
     .row2 {
@@ -1041,37 +1024,6 @@
       color: var(--text);
     }
 
-    .species-code-badge {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 6px;
-      padding: 1px 7px;
-      border-radius: 999px;
-      border: 1px solid color-mix(in srgb, var(--accent2) 60%, var(--border));
-      background: color-mix(in srgb, var(--accent) 14%, var(--s2));
-      color: var(--accent);
-      font-size: .62rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-      font-style: normal;
-      white-space: nowrap;
-      vertical-align: middle;
-    }
-
-    .species-qualifier-chip {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 6px;
-      padding: 1px 7px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--s2);
-      color: var(--muted);
-      font-size: .58rem;
-      white-space: nowrap;
-      vertical-align: middle;
-    }
-
     .species-sci {
       font-size: .62rem;
       color: var(--muted);
@@ -1442,7 +1394,6 @@
       font-family: var(--font-mono);
       line-height: 1.2;
       text-align: left;
-      touch-action: manipulation;
     }
 
     .cover-btn:active {
@@ -1513,7 +1464,6 @@
       cursor: pointer;
       font-size: .7rem;
       padding: 0;
-      touch-action: manipulation;
     }
 
     /* ── Progress bar ── */
@@ -1668,65 +1618,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
     }
 
     .sync-status-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .sync-status-row.sync-local {
-      background: color-mix(in srgb, #f5d77a 16%, var(--s1));
-      border-color: color-mix(in srgb, #d4a843 55%, var(--border));
-    }
-
-    .sync-status-row.sync-cloud {
-      background: color-mix(in srgb, var(--info) 14%, var(--s1));
-      border-color: color-mix(in srgb, var(--info) 48%, var(--border));
-    }
-
-    .sync-site-tag {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 8px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: .58rem;
-      font-weight: 700;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      vertical-align: middle;
-    }
-
-    .sync-site-tag-local {
-      background: rgba(212, 168, 67, .18);
-      border: 1px solid rgba(212, 168, 67, .5);
-      color: #8f6610;
-    }
-
-    .sync-site-tag-cloud {
-      background: rgba(91, 170, 212, .16);
-      border: 1px solid rgba(91, 170, 212, .45);
-      color: color-mix(in srgb, var(--info) 85%, var(--text));
-    }
-
-    .sync-spinner {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, .28);
-      border-top-color: currentColor;
-      animation: sync-spin .8s linear infinite;
-    }
-
-    @keyframes sync-spin {
-      to {
-        transform: rotate(360deg);
-      }
+      border-bottom: none;
     }
 
     .status-dot {
@@ -2084,7 +1981,6 @@
       line-height: 1;
       padding: 0;
       flex-shrink: 0;
-      touch-action: manipulation;
     }
 
     #sample-panel.species-drawer-collapsed .drawer-header {
@@ -2173,24 +2069,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    .drawer-species-item .species-primary-line {
-      font-size: .66rem;
-      color: var(--text);
-      line-height: 1.25;
-      margin-top: 1px;
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
-
-    .drawer-species-item .species-secondary-line {
-      font-size: .62rem;
-      color: var(--muted);
-      line-height: 1.2;
-      margin-top: 1px;
-      white-space: normal;
-      overflow-wrap: anywhere;
     }
 
     .drawer-species-item .method-badge {
@@ -2341,7 +2219,7 @@
         <span class="tab-icon">🗺</span>Map
       </div>
       <div class="nav-tab" data-page="sync">
-        <span class="tab-icon">⚙️</span>Setup
+        <span class="tab-icon">🧰</span>Setup
       </div>
     </div>
 
@@ -2577,32 +2455,6 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">Account</div>
-          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in…</div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="auth-login-btn" type="button">Sign In</button>
-            <button class="btn btn-ghost btn-sm" id="auth-logout-btn" type="button" style="display:none;">Sign
-              Out</button>
-            <button class="btn btn-ghost btn-sm" id="auth-refresh-admin-btn" type="button" disabled>Refresh Admin
-              Access</button>
-          </div>
-        </div>
-        <div class="card" id="approvals-card" style="display:none;">
-          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
-            Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
-          <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
-            to review pending users.</div>
-          <label
-            style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
-            <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
-            Show pending only
-            <span id="approvals-pending-count-badge" class="badge" style="margin-left:auto;">0 pending</span>
-          </label>
-          <div id="approvals-list"></div>
-          <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
-            Approvals</button>
-        </div>
-        <div class="card">
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Species Database <button
                 type="button" class="info-icon-btn" data-info-key="setup-species"
                 title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in
@@ -2622,17 +2474,6 @@
             <div style="margin-top:6px;opacity:.9;">Example header: <span
                 style="font-family:var(--font-mono);font-size:.68rem;">Symbol,Scientific Name,Common Name,State</span>
             </div>
-          </div>
-          <div class="field" style="margin-top:12px;">
-            <label for="cfg-species-display">USDA Species Display</label>
-            <select id="cfg-species-display">
-              <option value="species">Species name (default)</option>
-              <option value="common">Common name</option>
-            </select>
-            <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Controls how USDA species are shown
-              throughout collection and summary views.</div>
-            <button class="btn btn-outline btn-sm" style="margin-top:10px;" id="save-species-display-btn">Save Display
-              Preference</button>
           </div>
           <div id="species-list-wrap" style="margin-top:12px;display:none;">
             <div
@@ -2749,6 +2590,15 @@
           </label>
           <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync
             automatically after connectivity returns.</div>
+          <div class="field" style="margin-top:10px;">
+            <label for="cfg-species-display">USDA Species Display</label>
+            <select id="cfg-species-display">
+              <option value="species">Species name (default)</option>
+              <option value="common">Common name</option>
+            </select>
+            <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Controls how USDA species are shown
+              throughout collection and summary views.</div>
+          </div>
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
         </div>
         <div class="card" id="azure-connection-card" style="display:none;">
@@ -2764,6 +2614,30 @@
           </div>
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-azure-cfg-btn">Save Azure
             Connection</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Account</div>
+          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in…</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="auth-login-btn" type="button">Sign In</button>
+            <button class="btn btn-ghost btn-sm" id="auth-logout-btn" type="button" style="display:none;">Sign
+              Out</button>
+          </div>
+        </div>
+        <div class="card" id="approvals-card" style="display:none;">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
+            Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
+          <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
+            to review pending users.</div>
+          <label
+            style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
+            <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
+            Show pending only
+            <span id="approvals-pending-count-badge" class="badge" style="margin-left:auto;">0 pending</span>
+          </label>
+          <div id="approvals-list"></div>
+          <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
+            Approvals</button>
         </div>
         <div class="card">
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
@@ -3280,7 +3154,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=54;
+    const APP_BUILD_REV=55;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -3300,38 +3174,6 @@
         "api://025d2544-3267-47a5-a97d-261ae4e741fd/ecoPlot-scope"
       ]
     };
-
-    function isIOSFamilyDevice() {
-      const ua=navigator.userAgent||'';
-      return /iphone|ipad|ipod/i.test(ua)
-        ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    }
-
-    function isTextEntryField(el) {
-      if(!el) return false;
-      if(el.tagName==='TEXTAREA') return !el.disabled&&!el.readOnly;
-      if(el.tagName!=='INPUT') return false;
-      const type=String(el.type||'text').toLowerCase();
-      if(['button','checkbox','radio','range','file','submit','reset','image','color','hidden'].includes(type)) {
-        return false;
-      }
-      return !el.disabled&&!el.readOnly;
-    }
-
-    function focusTextField(el,{select=false}={}) {
-      if(!el||typeof el.focus!=='function') return;
-      const applyFocus=() => {
-        try {el.focus({preventScroll: true});} catch {try {el.focus();} catch {} }
-        if(select&&typeof el.select==='function') {
-          try {el.select();} catch {}
-        }
-      };
-      applyFocus();
-      if(isIOSFamilyDevice()) {
-        requestAnimationFrame(applyFocus);
-        setTimeout(applyFocus,120);
-      }
-    }
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
       ['2CYAN','Cyanobacteria','Cyanobacteria','?','',''],
@@ -3621,7 +3463,6 @@
     // Empty until user imports a CSV via the Setup tab
     let speciesDB=[];
     let speciesAllRecords=[];
-    let speciesDBLoadPromise=null;
     let speciesListOptions=[{key: 'all',label: 'All'}];
     let speciesImportStats={sourceRows: 0,storedRows: 0};
     let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
@@ -3779,10 +3620,10 @@
       const base=createSpeciesEntry(entry);
       if(speciesDisplayMode==='common') {
         const preferred=base.common||base.sci||base.symbol;
-        return createSpeciesEntry({...base,common: preferred});
+        return createSpeciesEntry({...base,common: preferred,sci: ''});
       }
       const preferred=base.sci||base.common||base.symbol;
-      return createSpeciesEntry({...base,sci: preferred});
+      return createSpeciesEntry({...base,sci: preferred,common: ''});
     }
 
     function hasSpeciesEntry(list,entry,excludeIndex=-1) {
@@ -4115,8 +3956,8 @@
           const active=activeSymbols.has(sp.symbol);
           const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
           return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
-              <span class="two-code-pick-symbol">[${esc(sp.symbol)}]</span>
-              <span>${esc(speciesDisplayPrimary(sp))}</span>
+              <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
+              <span>${esc(sp.common||sp.sci||sp.symbol)}</span>
             </button>`;
         }).join('')}
         </div>`;
@@ -4385,33 +4226,18 @@
       }
     }
 
-    function speciesResolvedNames(sp) {
-      const symbol=String(sp?.symbol||'').trim().toUpperCase();
-      const row=symbol? getSpeciesSearchRecord(symbol):null;
-      const sci=String(sp?.sci||row?.[2]||'').trim();
-      const common=String(sp?.common||row?.[1]||'').trim();
-      return {sci,common,symbol};
-    }
-
     function speciesDisplayPrimary(sp) {
-      const {sci,common,symbol}=speciesResolvedNames(sp);
+      const sci=(sp?.sci||'').trim();
+      const common=(sp?.common||'').trim();
+      const symbol=(sp?.symbol||'').trim();
       if(speciesDisplayMode==='common') return common||sci||symbol;
       return sci||common||symbol;
     }
 
     function speciesDisplaySecondary(sp) {
-      const {sci,common}=speciesResolvedNames(sp);
+      const sci=(sp?.sci||'').trim();
+      const common=(sp?.common||'').trim();
       if(speciesDisplayMode==='common') return sci;
-      return common;
-    }
-
-    function speciesScientificName(sp) {
-      const {sci,common,symbol}=speciesResolvedNames(sp);
-      return sci||common||symbol;
-    }
-
-    function speciesCommonName(sp) {
-      const {common}=speciesResolvedNames(sp);
       return common;
     }
 
@@ -4577,7 +4403,7 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${renderSpeciesCodeBadgeHTML(sp,{includeQualifier: false})} ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
@@ -4620,63 +4446,41 @@
       return fields;
     }
 
-    function scheduleSpeciesDBWarmup() {
-      if(speciesAllRecords.length||speciesDBLoadPromise) return;
-      const run=() => {
-        loadSpeciesDB().catch(err => console.warn('Species DB warmup failed:',err));
-      };
-      if(typeof window.requestIdleCallback==='function') {
-        window.requestIdleCallback(run,{timeout: 3000});
-      } else {
-        setTimeout(run,1500);
-      }
-    }
-
     async function loadSpeciesDB() {
-      if(speciesAllRecords.length) return speciesAllRecords;
-      if(speciesDBLoadPromise) return speciesDBLoadPromise;
-      speciesDBLoadPromise=(async () => {
-        const all=await dbGetAll('species');
-        speciesAllRecords=all.map(r => {
-          const symbol=String(r.symbol||'').trim().toUpperCase();
-          const statesRaw=Array.isArray(r.states)? r.states:[String(r.state||'').trim()].filter(Boolean);
-          const listKeysRaw=Array.isArray(r.listKeys)
-            ? r.listKeys
-            :[String(r.listKey||normalizeSpeciesListKey(r.state)||'all').trim()].filter(Boolean);
-          const state=statesRaw[0]||String(r.state||'').trim();
-          const listKey=listKeysRaw[0]||String(r.listKey||normalizeSpeciesListKey(state)||'all');
-          return {
-            ...r,
-            symbol,
-            sci: String(r.sci||'').trim(),
-            common: String(r.common||'').trim(),
-            state,
-            listKey,
-            states: statesRaw,
-            listKeys: listKeysRaw,
-            sourceRowCount: Math.max(1,parseInt(r.sourceRowCount,10)||statesRaw.length||1),
-          };
-        }).filter(r => !!r.symbol);
-        speciesImportStats={
-          sourceRows: speciesAllRecords.reduce((sum,r) => sum+(parseInt(r.sourceRowCount,10)||1),0),
-          storedRows: speciesAllRecords.length,
+      const all=await dbGetAll('species');
+      speciesAllRecords=all.map(r => {
+        const symbol=String(r.symbol||'').trim().toUpperCase();
+        const statesRaw=Array.isArray(r.states)? r.states:[String(r.state||'').trim()].filter(Boolean);
+        const listKeysRaw=Array.isArray(r.listKeys)
+          ? r.listKeys
+          :[String(r.listKey||normalizeSpeciesListKey(r.state)||'all').trim()].filter(Boolean);
+        const state=statesRaw[0]||String(r.state||'').trim();
+        const listKey=listKeysRaw[0]||String(r.listKey||normalizeSpeciesListKey(state)||'all');
+        return {
+          ...r,
+          symbol,
+          sci: String(r.sci||'').trim(),
+          common: String(r.common||'').trim(),
+          state,
+          listKey,
+          states: statesRaw,
+          listKeys: listKeysRaw,
+          sourceRowCount: Math.max(1,parseInt(r.sourceRowCount,10)||statesRaw.length||1),
         };
-        speciesListOptions=getSpeciesListOptions(speciesAllRecords);
-        if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
-          selectedSpeciesListKey='all';
-          localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
-        }
-        rebuildActiveSpeciesDB();
-        updateSpeciesDBUI(speciesAllRecords.length);
-        renderSpeciesListSelector();
-        renderCustomListPicks();
-        return speciesAllRecords;
-      })();
-      try {
-        return await speciesDBLoadPromise;
-      } finally {
-        speciesDBLoadPromise=null;
+      }).filter(r => !!r.symbol);
+      speciesImportStats={
+        sourceRows: speciesAllRecords.reduce((sum,r) => sum+(parseInt(r.sourceRowCount,10)||1),0),
+        storedRows: speciesAllRecords.length,
+      };
+      speciesListOptions=getSpeciesListOptions(speciesAllRecords);
+      if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
+        selectedSpeciesListKey='all';
+        localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
       }
+      rebuildActiveSpeciesDB();
+      updateSpeciesDBUI(speciesAllRecords.length);
+      renderSpeciesListSelector();
+      renderCustomListPicks();
     }
 
     function updateSpeciesDBUI(count) {
@@ -4812,8 +4616,6 @@
     let eventSamplesCache={eventId: null,samples: null};
     let siteSamplesCache={siteId: null,samples: null};
     let siteListCache={folders: null,sites: null,samples: null};
-    let _siteListRendering=false;   // in-flight guard
-    let _siteListDirty=false;       // queued re-render request
     let seenRefreshTimer=null;
     let drawerNewestSpeciesKey='';
     let drawerNewestNeedsFocus=false;
@@ -4966,43 +4768,18 @@
     // ══════════════════════════════════════════════════════
     //  NAVIGATION
     // ══════════════════════════════════════════════════════
-    let _activePage=document.querySelector('.nav-tab.active')?.dataset.page||'collect';
-    let _navRenderToken=0;
-    let _sitesPagePrimed=false;
-
-    function runPageRender(page) {
-      if(page==='collect') renderCollect();
-      if(page==='sites') {
-        renderSiteList({invalidate: !_sitesPagePrimed});
-        _sitesPagePrimed=true;
-      }
-      if(page==='setup') scheduleSpeciesDBWarmup();
-      if(page==='summary') renderSummary();
-      if(page==='sync') renderSync();
-      if(page==='map') renderMap();
-    }
-
-    function navigateToPage(page,{forceRender=false}={}) {
-      if(!page) return;
-      const samePage=_activePage===page;
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active',t.dataset.page===page));
-      document.querySelectorAll('.page').forEach(p => p.classList.toggle('active',p.id===('page-'+page)));
-
-      if(samePage&&!forceRender) return;
-      _activePage=page;
-      const token=++_navRenderToken;
-
-      // Let visual tab switch paint first; render heavy content immediately after.
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if(token!==_navRenderToken) return;
-          runPageRender(page);
-        },0);
-      });
-    }
-
     document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click',() => navigateToPage(tab.dataset.page));
+      tab.addEventListener('click',() => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('page-'+tab.dataset.page).classList.add('active');
+        if(tab.dataset.page==='collect') renderCollect();
+        if(tab.dataset.page==='sites') renderSiteList({invalidate: true});
+        if(tab.dataset.page==='summary') renderSummary();
+        if(tab.dataset.page==='sync') renderSync();
+        if(tab.dataset.page==='map') renderMap();
+      });
     });
 
     // ══════════════════════════════════════════════════════
@@ -5130,7 +4907,7 @@
       document.getElementById('new-site-form').style.display='';
       document.getElementById('new-site-toggle-btn').style.display='none';
       renderSiteProtocolSelect(document.getElementById('new-site-protocol'));
-      focusTextField(document.getElementById('new-site-name'));
+      document.getElementById('new-site-name').focus();
     }
     function closeNewSiteForm() {
       document.getElementById('new-site-form').style.display='none';
@@ -5414,69 +5191,60 @@
     }
 
     async function renderSiteList({invalidate=false}={}) {
-      if(_siteListRendering) {
-        // Another render is already in-flight — just mark dirty so it re-runs when done.
-        if(invalidate) siteListCache={folders: null,sites: null,samples: null};
-        _siteListDirty=true;
-        return;
+      if(invalidate||!siteListCache.folders) {
+        const [folders,allSites,allSamples]=await Promise.all([
+          dbGetAll('folders'),
+          dbGetAll('sites'),
+          dbGetAll('samples'),
+        ]);
+        siteListCache={folders,sites: allSites,samples: allSamples};
       }
-      _siteListRendering=true;
-      _siteListDirty=false;
-      try {
-        if(invalidate||!siteListCache.folders) {
-          const [folders,allSites,allSamples]=await Promise.all([
-            dbGetAll('folders'),
-            dbGetAll('sites'),
-            dbGetAll('samples'),
-          ]);
-          siteListCache={folders,sites: allSites,samples: allSamples};
+      const {folders,sites: allSites,samples: allSamples}=siteListCache;
+      const el=document.getElementById('site-list');
+
+      // ── Breadcrumb ──
+      const path=await buildFolderPath(currentFolderId,folders);
+      const bcEl=document.getElementById('folder-breadcrumb');
+      let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
+      path.forEach((f,i) => {
+        bcHTML+=`<span class="crumb-sep">›</span>`;
+        if(i===path.length-1) {
+          bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
+        } else {
+          bcHTML+=`<button class="crumb-btn" data-crumb="${f.id}">${esc(f.name)}</button>`;
         }
-        const {folders,sites: allSites,samples: allSamples}=siteListCache;
-        const el=document.getElementById('site-list');
-
-        // ── Breadcrumb ──
-        const path=await buildFolderPath(currentFolderId,folders);
-        const bcEl=document.getElementById('folder-breadcrumb');
-        let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
-        path.forEach((f,i) => {
-          bcHTML+=`<span class="crumb-sep">›</span>`;
-          if(i===path.length-1) {
-            bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
-          } else {
-            bcHTML+=`<button class="crumb-btn" data-crumb="${f.id}">${esc(f.name)}</button>`;
-          }
+      });
+      bcEl.innerHTML=bcHTML;
+      bcEl.querySelectorAll('[data-crumb]').forEach(btn => {
+        btn.addEventListener('click',() => {
+          currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
+          updateCreateLocationHint(folders);
+          requestAnimationFrame(() => renderSiteList());
         });
-        bcEl.innerHTML=bcHTML;
-        bcEl.querySelectorAll('[data-crumb]').forEach(btn => {
-          btn.addEventListener('click',() => {
-            currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
-            updateCreateLocationHint(folders);
-            requestAnimationFrame(() => renderSiteList());
-          });
-        });
+      });
 
-        // ── Location hint on create form ──
-        updateCreateLocationHint(folders,path);
+      // ── Location hint on create form ──
+      updateCreateLocationHint(folders,path);
 
-        // ── Sub-folders at current level ──
-        const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
-        const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
-        const localFolders=allSubFolders.filter(f => f.localOnly);
-        let html='';
+      // ── Sub-folders at current level ──
+      const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
+      const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
+      const localFolders=allSubFolders.filter(f => f.localOnly);
+      let html='';
 
-        subFolders.forEach(f => {
-          const subCount=folders.filter(sf => sf.parentId===f.id).length;
-          const siteCount=countSitesInFolder(f.id,folders,allSites);
-          const isLocal=f.localOnly===true;
-          const icon='📁';
-          const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
-          const actions=isLocal
-            ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
-            :`<div class="folder-actions">
+      subFolders.forEach(f => {
+        const subCount=folders.filter(sf => sf.parentId===f.id).length;
+        const siteCount=countSitesInFolder(f.id,folders,allSites);
+        const isLocal=f.localOnly===true;
+        const icon='📁';
+        const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
+        const actions=isLocal
+          ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
+          :`<div class="folder-actions">
               <button class="f-action" data-rename-folder="${f.id}" title="Rename">✏️</button>
               <button class="f-action del" data-del-folder="${f.id}" title="Delete">✕</button>
              </div>`;
-          html+=`<div class="folder-item" data-folder-id="${f.id}">
+        html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
@@ -5485,35 +5253,35 @@
           ${actions}
         <span class="site-arrow" style="margin-left:4px;">›</span>
         </div>`;
-        });
+      });
 
-        // ── Sites at current level ──
-        const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
-        const active=levelSites.filter(s => !s.archived);
-        const archived=levelSites.filter(s => s.archived);
-        const visible=showArchived? archived:active;
+      // ── Sites at current level ──
+      const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
+      const active=levelSites.filter(s => !s.archived);
+      const archived=levelSites.filter(s => s.archived);
+      const visible=showArchived? archived:active;
 
-        if(!visible.length&&!subFolders.length&&!localFolders.length) {
-          if(!allSites.length&&!folders.length) {
-            html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
-          } else {
-            html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
-          }
+      if(!visible.length&&!subFolders.length&&!localFolders.length) {
+        if(!allSites.length&&!folders.length) {
+          html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
+        } else {
+          html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
         }
+      }
 
-        visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
-          const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
-          const isSel=activeSiteId===s.id;
-          const meta=[];
-          if(s.siteType&&s.siteType!=='None') meta.push(s.siteType);
-          if(s.status&&s.status!=='None') meta.push(s.status);
-          if(s.desc) meta.push(esc(s.desc));
-          if(s.elev) meta.push(`${s.elev} ft`);
-          if(s.aspect) meta.push(s.aspect);
-          if(done) meta.push(`${done} collected`);
-          const subStr=meta.join(' · ')||'No data yet';
-          if(s.archived) {
-            html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
+      visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
+        const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
+        const isSel=activeSiteId===s.id;
+        const meta=[];
+        if(s.siteType&&s.siteType!=='None') meta.push(s.siteType);
+        if(s.status&&s.status!=='None') meta.push(s.status);
+        if(s.desc) meta.push(esc(s.desc));
+        if(s.elev) meta.push(`${s.elev} ft`);
+        if(s.aspect) meta.push(s.aspect);
+        if(done) meta.push(`${done} collected`);
+        const subStr=meta.join(' · ')||'No data yet';
+        if(s.archived) {
+          html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
             <div class="site-icon">📦</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
@@ -5521,8 +5289,8 @@
             </div>
             <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
           </div>`;
-          } else {
-            html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
+        } else {
+          html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
             <div class="site-icon">🌿</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
@@ -5532,17 +5300,17 @@
             <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
             <span class="site-arrow">›</span>
           </div>`;
-          }
-        });
+        }
+      });
 
-        // ── Local-only folders at the very bottom, after sites ──
-        localFolders.forEach(f => {
-          const subCount=folders.filter(sf => sf.parentId===f.id).length;
-          const siteCount=countSitesInFolder(f.id,folders,allSites);
-          const icon='📁';
-          const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
-          const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
-          html+=`<div class="folder-item" data-folder-id="${f.id}">
+      // ── Local-only folders at the very bottom, after sites ──
+      localFolders.forEach(f => {
+        const subCount=folders.filter(sf => sf.parentId===f.id).length;
+        const siteCount=countSitesInFolder(f.id,folders,allSites);
+        const icon='📁';
+        const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
+        const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
+        html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
@@ -5551,54 +5319,48 @@
           ${actions}
         <span class="site-arrow" style="margin-left:4px;">›</span>
         </div>`;
-        });
+      });
 
-        // Archive toggle footer
-        if(archived.length||showArchived) {
-          html+=`<div style="text-align:center;margin-top:12px;">
+      // Archive toggle footer
+      if(archived.length||showArchived) {
+        html+=`<div style="text-align:center;margin-top:12px;">
           <button id="toggle-archived-btn" class="btn btn-ghost" style="font-size:.72rem;padding:6px 14px;">
             ${showArchived? '← Back to active sites':`Show ${archived.length} archived site${archived.length!==1? 's':''}`}
           </button>
         </div>`;
-        }
-
-        el.innerHTML=html;
-
-        // ── Wire folder clicks ──
-        el.querySelectorAll('[data-folder-id]').forEach(item => {
-          item.addEventListener('click',e => {
-            const renBtn=e.target.closest('[data-rename-folder]');
-            const delBtn=e.target.closest('[data-del-folder]');
-            if(renBtn) {e.stopPropagation(); promptRenameFolder(renBtn.dataset.renameFolder,folders); return;}
-            if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
-            currentFolderId=item.dataset.folderId;
-            updateCreateLocationHint(folders);
-            // Defer re-render past the current frame so tap is painted immediately
-            requestAnimationFrame(() => renderSiteList());
-          });
-        });
-
-        // ── Wire site clicks ──
-        el.querySelectorAll('.site-item').forEach(item => {
-          item.addEventListener('click',e => {
-            const editBtn=e.target.closest('[data-edit]');
-            if(editBtn) {e.stopPropagation(); openEditSiteModal(editBtn.dataset.edit); return;}
-            const delBtn=e.target.closest('[data-del]');
-            if(delBtn) {promptDelete(delBtn.dataset.del); return;}
-            const restoreBtn=e.target.closest('[data-restore]');
-            if(restoreBtn) {restoreSite(restoreBtn.dataset.restore); return;}
-            if(!item.querySelector('[data-restore]')) selectSite(item.dataset.id);
-          });
-        });
-
-        const togBtn=document.getElementById('toggle-archived-btn');
-        if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList({invalidate: true});});
-      } catch(err) {
-        console.warn('renderSiteList error:',err);
-      } finally {
-        _siteListRendering=false;
-        if(_siteListDirty) renderSiteList();
       }
+
+      el.innerHTML=html;
+
+      // ── Wire folder clicks ──
+      el.querySelectorAll('[data-folder-id]').forEach(item => {
+        item.addEventListener('click',e => {
+          const renBtn=e.target.closest('[data-rename-folder]');
+          const delBtn=e.target.closest('[data-del-folder]');
+          if(renBtn) {e.stopPropagation(); promptRenameFolder(renBtn.dataset.renameFolder,folders); return;}
+          if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
+          currentFolderId=item.dataset.folderId;
+          updateCreateLocationHint(folders);
+          // Defer re-render past the current frame so tap is painted immediately
+          requestAnimationFrame(() => renderSiteList());
+        });
+      });
+
+      // ── Wire site clicks ──
+      el.querySelectorAll('.site-item').forEach(item => {
+        item.addEventListener('click',e => {
+          const editBtn=e.target.closest('[data-edit]');
+          if(editBtn) {e.stopPropagation(); openEditSiteModal(editBtn.dataset.edit); return;}
+          const delBtn=e.target.closest('[data-del]');
+          if(delBtn) {promptDelete(delBtn.dataset.del); return;}
+          const restoreBtn=e.target.closest('[data-restore]');
+          if(restoreBtn) {restoreSite(restoreBtn.dataset.restore); return;}
+          if(!item.querySelector('[data-restore]')) selectSite(item.dataset.id);
+        });
+      });
+
+      const togBtn=document.getElementById('toggle-archived-btn');
+      if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList({invalidate: true});});
     }
 
     async function updateCreateLocationHint(folders,path) {
@@ -5611,7 +5373,7 @@
     // ── New folder wiring ──
     document.getElementById('new-folder-btn').addEventListener('click',() => {
       document.getElementById('new-folder-row').style.display='flex';
-      focusTextField(document.getElementById('new-folder-input'));
+      document.getElementById('new-folder-input').focus();
     });
     document.getElementById('new-folder-cancel').addEventListener('click',() => {
       document.getElementById('new-folder-row').style.display='none';
@@ -5640,7 +5402,7 @@
       const old=folder.name;
       nameEl.innerHTML=`<input type="text" id="rename-folder-input" value="${esc(old)}" style="background:var(--s3);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;color:var(--text);font-family:var(--font-ui);font-weight:700;font-size:.88rem;width:100%;">`;
       const inp=document.getElementById('rename-folder-input');
-      focusTextField(inp,{select: true});
+      inp.focus(); inp.select();
       const save=async () => {
         const newName=inp.value.trim();
         if(newName&&newName!==old) {
@@ -6813,29 +6575,16 @@
       body.classList.add('loading');
       body.scrollTop=0;
 
-      const panelRenderToken=++_samplePanelRenderToken;
       renderSpeciesChips();
+      renderSeenSpecies();
+      renderDWRSeenSpecies();
       renderCoverGrid();
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(ev);
-
-      const drawerList=document.getElementById('drawer-species-list');
-      if(drawerList&&activeSiteId) {
-        drawerList.innerHTML='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">Loading species…</div>';
-      }
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if(panelRenderToken!==_samplePanelRenderToken) return;
-          renderSeenSpecies();
-          renderDWRSeenSpecies();
-          renderSpeciesDrawer();
-        },0);
-      });
+      renderSpeciesDrawer();
     }
 
-    let _samplePanelRenderToken=0;
     let _sampleJumpBusy=false;
     function renderPanelSampleNav(tIdx,sIdx,ev) {
       const navEl=document.getElementById('panel-sample-nav');
@@ -7121,15 +6870,15 @@
       const sci=String(p?.[2]||'').trim();
       const nCls=p[3]==='Y'? 'native-yes':p[3]==='N'? 'native-no':'native-unk';
       const nLbl=p[3]==='Y'? 'Native':p[3]==='N'? 'Non-Native':'?';
-      const primaryLine=(speciesDisplayMode==='common'? common:sci)||(speciesDisplayMode==='common'? sci:common)||symbol||'Species name not provided';
-      const secondaryLine=(speciesDisplayMode==='common'? sci:common)||(speciesDisplayMode==='common'? common:sci)||'';
+      const scientificLine=sci||'Scientific name not provided';
+      const commonLine=common||'Common name not provided';
       const optStyle=compact? ' style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;"':'';
       const secondaryStyle=compact? ' style="font-size:.72rem;color:var(--muted);line-height:1.25;"':'';
       const nativeStyle=compact? ' style="font-size:.75rem;"':'';
       return `<div class="species-opt" data-sym="${symbol}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${p[3]}"${optStyle}>
         <div>
-          <div class="species-common">${esc(primaryLine)} ${renderSpeciesCodeBadgeHTML({symbol},{includeQualifier: false})}</div>
-          <div class="species-sci"${secondaryStyle}>${esc(secondaryLine)}</div>
+          <div class="species-common"><span style="font-style:normal;color:var(--dim);">[${esc(symbol)}]</span> ${esc(scientificLine)}</div>
+          <div class="species-sci"${secondaryStyle}>${esc(commonLine)}</div>
         </div>
         <span class="species-native ${nCls}"${nativeStyle}>${nLbl}</span>
       </div>`;
@@ -7174,7 +6923,7 @@
     function openTwoCodeSearch(methodKey) {
       const input=methodKey==='dwr'? dwrInput:speciesInput;
       input.value='2';
-      focusTextField(input);
+      input.focus();
       input.dispatchEvent(new Event('input'));
     }
 
@@ -7311,13 +7060,6 @@
       const qualifier=speciesQualifierText(sp);
       return qualifier? `<div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Qualifier: ${esc(qualifier)}</div>`:'';
     }
-    function renderSpeciesCodeBadgeHTML(sp,{includeQualifier=true}={}) {
-      const symbol=String(sp?.symbol||'').trim().toUpperCase()||'—';
-      const qualifier=speciesQualifierText(sp);
-      const badge=`<span class="species-code-badge">[${esc(symbol)}]</span>`;
-      if(!includeQualifier||!qualifier) return badge;
-      return `${badge}<span class="species-qualifier-chip">${esc(qualifier)}</span>`;
-    }
 
     function formatSpeciesKeyBadge(sp) {
       const qualifier=speciesQualifierText(sp);
@@ -7344,7 +7086,8 @@
       speciesQualifierTarget.textContent=`${speciesDisplayPrimary(sp)} [${sp.symbol}]`;
       speciesQualifierInput.value=speciesQualifierText(sp);
       speciesQualifierModal.classList.add('open');
-      focusTextField(speciesQualifierInput,{select: true});
+      speciesQualifierInput.focus();
+      speciesQualifierInput.select();
     }
 
     async function applySpeciesQualifier() {
@@ -7832,7 +7575,7 @@
           <span style="font-weight:600;min-width:20px;">${idx+1}.</span>
           <div style="flex:1;">
             <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">⚠️</span>':''}</div>
-            <div style="font-size:.7rem;color:var(--muted);">${renderSpeciesCodeBadgeHTML(sp)}</div>
+            <div style="font-size:.7rem;color:var(--muted);">${esc(formatSpeciesKeyBadge(sp))}</div>
             ${repeatBadge}
             ${speciesSecondaryLine(sp)}
           </div>
@@ -7941,7 +7684,7 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${renderSpeciesCodeBadgeHTML(sp,{includeQualifier: false})} ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
@@ -8020,7 +7763,7 @@
       el.innerHTML=display.map(sp => {
         const invasive=sp.native==='N';
         return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${esc(speciesDisplayPrimary(sp))} ${renderSpeciesCodeBadgeHTML(sp)}
+          ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(sp))}</span>
       ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
         ${speciesSecondaryLine(sp)}
         <button class="chip-qualifier" data-key="${esc(speciesEntryKey(sp))}" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.82rem;padding:0 2px;">✎</button>
@@ -8090,17 +7833,13 @@
       } else {
         html=drawerSpecies.map((sp,idx) => {
           const qualifier=speciesQualifierText(sp);
-          const scientific=speciesScientificName(sp);
-          const common=speciesCommonName(sp);
-          const showCommon=!!common&&common.toLowerCase()!==scientific.toLowerCase();
-          const codeLine=qualifier? `${sp.symbol} - ${qualifier}`:sp.symbol;
           const key=speciesEntryKey(sp);
           const newestClass=key===drawerNewestSpeciesKey? ' newly-added':'';
-          return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(common)}" data-sci="${esc(scientific)}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
+          return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
             <div class="species-name">
-              <span class="species-code">${esc(codeLine)}</span>
-              <span class="species-primary-line">${esc(scientific||'Species name unavailable')}</span>
-              ${showCommon? `<span class="species-secondary-line">${esc(common)}</span>`:''}
+              <span class="species-code">${esc(sp.symbol)}</span>
+              <span class="species-common">${esc(sp.common||'')}</span>
+              ${qualifier? `<span class="qualifier-badge" style="font-size:.65rem;color:var(--muted);margin-left:4px;">${esc(qualifier)}</span>`:''}
             </div>
             <div style="display:flex;gap:4px;align-items:center;">
               <button class="drawer-edit-qualifier-btn" data-role="edit-qualifier" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;">✎</button>
@@ -8121,14 +7860,10 @@
         if(siteOnly.length>0) {
           html+=`<div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-size:.65rem;color:var(--muted);font-weight:600;padding:6px 8px;text-align:center;">Seen at Site</div>`;
           html+=siteOnly.map(sp => {
-            const scientific=speciesScientificName(sp);
-            const common=speciesCommonName(sp);
-            const showCommon=!!common&&common.toLowerCase()!==scientific.toLowerCase();
-            return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(common)}" data-sci="${esc(scientific)}" data-native="${esc(sp.native||'?')}" data-site-species="true">
+            return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-site-species="true">
               <div class="species-name">
                 <span class="species-code">${esc(sp.symbol)}</span>
-                <span class="species-primary-line">${esc(scientific||'Species name unavailable')}</span>
-                ${showCommon? `<span class="species-secondary-line">${esc(common)}</span>`:''}
+                <span class="species-common">${esc(sp.common||'')}</span>
               </div>
               <span class="method-badge">+Add</span>
             </div>`;
@@ -8210,53 +7945,21 @@
 
     let drawerSearchState={};
 
-    function getDrawerSearchMode() {
-      return localStorage.getItem('ep_drawer_search_by')||'code';
-    }
-
-    function setDrawerSearchMode(mode) {
-      const next=(mode==='common'||mode==='sci'||mode==='code')? mode:'code';
-      localStorage.setItem('ep_drawer_search_by',next);
-    }
-
-    function setDrawerSearchEmptyState() {
-      const resultsDiv=document.getElementById('drawer-search-results');
-      const statusEl=document.getElementById('drawer-search-status');
-      if(!resultsDiv) return;
-      const rows=getSearchSpeciesDB();
-      if(!rows.length) {
-        if(statusEl) statusEl.textContent='Species database required';
-        resultsDiv.innerHTML='<div style="padding:12px;color:var(--danger);line-height:1.45;">Please import a species database list in Setup first before adding species to this event.</div>';
-        return;
-      }
-      if(statusEl) statusEl.textContent='Type to search';
-      resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.72rem;">Start typing to search species</div>';
-    }
-
     function openDrawerSpeciesSearchModal() {
       const modal=document.getElementById('drawer-search-modal');
       const searchInput=document.getElementById('drawer-search-input');
+      const resultsDiv=document.getElementById('drawer-search-results');
       const statusEl=document.getElementById('drawer-search-status');
 
       drawerSearchState={token: 0};
       modal.classList.add('open');
       searchInput.value='';
-      const preferredMode=getDrawerSearchMode();
-      const activeRadio=document.querySelector(`input[name="drawer-search-by"][value="${preferredMode}"]`)||document.getElementById('drawer-search-by-code');
-      if(activeRadio) activeRadio.checked=true;
-      setDrawerSearchEmptyState();
-      focusTextField(searchInput);
-
-      if(!speciesAllRecords.length) {
-        if(statusEl) statusEl.textContent='Loading species database…';
-        loadSpeciesDB().then(() => {
-          if(!modal.classList.contains('open')) return;
-          setDrawerSearchEmptyState();
-        }).catch(err => {
-          if(statusEl) statusEl.textContent='Species database unavailable';
-          console.warn('Species DB load failed:',err);
-        });
-      }
+      // Reset search mode to Code each time the modal opens
+      const codeRadio=document.getElementById('drawer-search-by-code');
+      if(codeRadio) codeRadio.checked=true;
+      if(statusEl) statusEl.textContent='Type to search';
+      resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.72rem;">Start typing to search species</div>';
+      searchInput.focus();
 
       // Wire up search input
       searchInput.addEventListener('input',updateDrawerSearchResults);
@@ -8284,16 +7987,16 @@
         const common=String(row?.[1]||'').trim();
         const sci=String(row?.[2]||'').trim();
         const native=String(row?.[3]||'?').trim()||'?';
-        const primaryLine=(speciesDisplayMode==='common'? common:sci)||(speciesDisplayMode==='common'? sci:common)||symbol||'Species name not provided';
-        const secondaryLine=(speciesDisplayMode==='common'? sci:common)||(speciesDisplayMode==='common'? common:sci)||'';
         return `<div class="drawer-search-result" data-sym="${esc(symbol)}" data-common="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}" style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;">
-          <div class="species-common">${esc(primaryLine)} ${renderSpeciesCodeBadgeHTML({symbol},{includeQualifier: false})}</div>
-          <div style="font-size:.65rem;color:var(--muted);font-style:italic;">${esc(secondaryLine)}</div>
+          <div style="font-weight:600;font-size:.8rem;">${esc(symbol)}</div>
+          <div style="font-size:.7rem;color:var(--muted);">${esc(common||'')}</div>
+          <div style="font-size:.65rem;color:var(--muted);font-style:italic;">${esc(sci||'')}</div>
         </div>`;
       };
 
       const first=results.slice(0,FIRST_CHUNK);
       resultsDiv.innerHTML=first.map(renderRow).join('');
+
       let idx=FIRST_CHUNK;
       const appendNext=() => {
         if(token!==drawerSearchState.token) return;
@@ -8315,18 +8018,16 @@
       drawerSearchState.token=(drawerSearchState.token||0)+1;
       const token=drawerSearchState.token;
 
-      setDrawerSearchMode(searchBy);
-
-      const rows=getSearchSpeciesDB();
-      if(!rows.length) {
-        if(statusEl) statusEl.textContent='Species database required';
-        resultsDiv.innerHTML='<div style="padding:12px;color:var(--danger);line-height:1.45;">Please import a species database list in Setup first before adding species to this event.</div>';
-        return;
-      }
-
       if(!query||query.length<1) {
         if(statusEl) statusEl.textContent='Type to search';
         resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:.7rem;">Enter search term</div>';
+        return;
+      }
+
+      const rows=getSearchSpeciesDB();
+      if(!rows.length) {
+        if(statusEl) statusEl.textContent='No species database loaded';
+        resultsDiv.innerHTML='<div style="padding:12px;color:var(--danger);">No species database loaded</div>';
         return;
       }
 
@@ -8382,19 +8083,13 @@
     document.getElementById('drawer-search-cancel-btn').addEventListener('click',closeDrawerSearchModal);
     document.querySelectorAll('input[name="drawer-search-by"]').forEach(radio => {
       radio.addEventListener('change',() => {
-        setDrawerSearchMode(radio.value);
         const input=document.getElementById('drawer-search-input');
-        if(input) updateDrawerSearchResults({target: input});
+        if(input&&input.value.trim()) updateDrawerSearchResults({target: input});
       });
     });
 
     // ── Cover grid ────────────────────────────────────────
-    let _coverGridDelegatesBound=false;
-    let _hitLogDelegatesBound=false;
-    let _coverGridSignature='';
-    let _coverProgressNodes=null;
-
-    function getCoverGridState() {
+    function renderCoverGrid() {
       const maxHits=activeEvent? (activeEvent.coverPts||2):(activeSite?.coverPts||2);
       const coverCats=getCoverCatsForEvent(activeEvent);
       const hitCount={};
@@ -8404,129 +8099,43 @@
       });
       const totalHits=samplePanelState.coverHits.length;
       const pct=maxHits? Math.round(totalHits/maxHits*100):0;
-      return {maxHits,coverCats,hitCount,totalHits,pct};
-    }
 
-    function addCoverHitByCategory(catId) {
-      const {maxHits,coverCats}=getCoverGridState();
-      if(samplePanelState.coverHits.length>=maxHits) {
-        toast(`Max ${maxHits} hits per sample`,'err');
-        return;
-      }
-      const cat=coverCats.find(c => c.id===catId);
-      if(!cat) return;
-      samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
-      renderCoverGrid();
-      renderHitLog();
-    }
-
-    function bindCoverGridDelegates() {
-      if(_coverGridDelegatesBound) return;
-      const grid=document.getElementById('cover-grid');
-      if(!grid) return;
-      _coverGridDelegatesBound=true;
-
-      grid.addEventListener('click',e => {
-        const btn=e.target.closest('.cover-btn[data-cid]');
-        if(!btn||!grid.contains(btn)) return;
-        addCoverHitByCategory(btn.dataset.cid);
-      });
-
-      grid.addEventListener('keydown',e => {
-        if(e.key!=='Enter'&&e.key!==' ') return;
-        const btn=e.target.closest('.cover-btn[data-cid]');
-        if(!btn||!grid.contains(btn)) return;
-        e.preventDefault();
-        addCoverHitByCategory(btn.dataset.cid);
-      });
-    }
-
-    function bindHitLogDelegates() {
-      if(_hitLogDelegatesBound) return;
-      const el=document.getElementById('hit-log');
-      if(!el) return;
-      _hitLogDelegatesBound=true;
-
-      el.addEventListener('click',e => {
-        const btn=e.target.closest('button[data-hi]');
-        if(!btn||!el.contains(btn)) return;
-        const idx=+btn.dataset.hi;
-        if(!Number.isInteger(idx)||idx<0) return;
-        samplePanelState.coverHits.splice(idx,1);
-        renderCoverGrid();
-        renderHitLog();
-      });
-    }
-
-    function getCoverCategorySignature(coverCats) {
-      return coverCats.map(c => `${c.id}:${c.label}`).join('|');
-    }
-
-    function ensureCoverProgressNodes() {
-      const host=document.getElementById('cover-hit-progress');
-      if(!host) return null;
-      if(_coverProgressNodes&&host.contains(_coverProgressNodes.stats)) return _coverProgressNodes;
-
-      host.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:6px;">
-      <span data-role="cover-hit-stats"></span>
-      <span data-role="cover-hit-pct"></span>
+      document.getElementById('cover-hit-progress').innerHTML=
+        `<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:6px;">
+      <span>Hits recorded: ${totalHits} / ${maxHits}</span>
+      <span style="color:${totalHits>=maxHits? 'var(--accent)':'var(--muted)'}">${pct}%</span>
     </div>
           <div class="prog-bar-wrap" style="margin-bottom:10px;">
-            <div data-role="cover-hit-bar" class="prog-bar"></div>
+            <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
           </div>`;
 
-      _coverProgressNodes={
-        stats: host.querySelector('[data-role="cover-hit-stats"]'),
-        pct: host.querySelector('[data-role="cover-hit-pct"]'),
-        bar: host.querySelector('[data-role="cover-hit-bar"]')
-      };
-      return _coverProgressNodes;
-    }
-
-    function ensureCoverGridMarkup(coverCats,hitCount) {
-      const grid=document.getElementById('cover-grid');
-      if(!grid) return null;
-      const sig=getCoverCategorySignature(coverCats);
-      if(sig!==_coverGridSignature||grid.children.length!==coverCats.length) {
-        grid.innerHTML=coverCats.map(c => `
+      document.getElementById('cover-grid').innerHTML=coverCats.map(c => `
             <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}" role="button" tabindex="0" aria-label="Add ${esc(c.label)} cover hit">
               <span class="cover-label">${esc(c.label)}</span>
               <span class="cover-count">${hitCount[c.id]||''}</span>
             </div>`).join('');
-        _coverGridSignature=sig;
-      }
-      return grid;
-    }
 
-    function renderCoverGrid() {
-      bindCoverGridDelegates();
-      const {maxHits,coverCats,hitCount,totalHits,pct}=getCoverGridState();
-
-      const progress=ensureCoverProgressNodes();
-      if(progress) {
-        progress.stats.textContent=`Hits recorded: ${totalHits} / ${maxHits}`;
-        progress.pct.textContent=`${pct}%`;
-        progress.pct.style.color=totalHits>=maxHits? 'var(--accent)':'var(--muted)';
-        progress.bar.style.width=`${Math.min(pct,100)}%`;
-        progress.bar.style.background=totalHits>=maxHits? 'var(--accent)':'var(--gold)';
-      }
-
-      const grid=ensureCoverGridMarkup(coverCats,hitCount);
-      if(!grid) return;
-      const byId=new Map();
-      grid.querySelectorAll('.cover-btn[data-cid]').forEach(btn => byId.set(btn.dataset.cid,btn));
-      coverCats.forEach(c => {
-        const btn=byId.get(String(c.id));
-        if(!btn) return;
-        const cnt=hitCount[c.id]||0;
-        btn.classList.toggle('selected',cnt>0);
-        const countEl=btn.querySelector('.cover-count');
-        if(countEl) countEl.textContent=cnt? String(cnt):'';
+      document.querySelectorAll('.cover-btn').forEach(btn => {
+        const addHit=() => {
+          if(samplePanelState.coverHits.length>=maxHits) {
+            toast(`Max ${maxHits} hits per sample`,'err'); return;
+          }
+          const cat=coverCats.find(c => c.id===btn.dataset.cid);
+          samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
+          renderCoverGrid();
+          renderHitLog();
+        };
+        btn.addEventListener('click',addHit);
+        btn.addEventListener('keydown',e => {
+          if(e.key==='Enter'||e.key===' ') {
+            e.preventDefault();
+            addHit();
+          }
+        });
       });
     }
 
     function renderHitLog() {
-      bindHitLogDelegates();
       const el=document.getElementById('hit-log');
       if(!samplePanelState.coverHits.length) {
         el.innerHTML='<span style="font-size:.72rem;color:var(--muted);">No cover hits added yet</span>';
@@ -8534,6 +8143,13 @@
       }
       el.innerHTML=samplePanelState.coverHits.map((h,i) => `
           <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
+      el.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click',() => {
+          samplePanelState.coverHits.splice(+btn.dataset.hi,1);
+          renderCoverGrid();
+          renderHitLog();
+        });
+      });
     }
 
 
@@ -8659,7 +8275,7 @@
         const pct=allFilled.length? Math.round(count/allFilled.length*100):0;
         const invasive=meta.native==='N';
         return `<tr>
-          <td><div style="font-size:.78rem;">${esc(speciesDisplayPrimary(meta))} ${renderSpeciesCodeBadgeHTML(meta,{includeQualifier: false})}</div><div style="font-size:.6rem;color:var(--muted);font-style:italic;">${esc(speciesDisplaySecondary(meta)||'')}</div></td>
+          <td><div style="font-size:.78rem;">${esc(speciesDisplayPrimary(meta))} <span style="opacity:.6;font-size:.6rem">[${sym}]</span></div><div style="font-size:.6rem;color:var(--muted);font-style:italic;">${esc(speciesDisplaySecondary(meta)||'')}</div></td>
           <td style="text-align:right;"><span style="font-family:var(--font-ui);font-weight:700;color:${invasive? 'var(--danger)':'var(--accent)'};">${pct}%</span><div class="pct-bar"><div class="pct-fill${invasive? ' invasive':''}" style="width:${pct}%"></div></div></td>
           <td style="text-align:center;"><span class="species-native ${meta.native==='Y'? 'native-yes':meta.native==='N'? 'native-no':'native-unk'}" style="font-size:.55rem;padding:2px 5px;">${meta.native==='Y'? 'Native':meta.native==='N'? 'Invasive':'?'}</span></td>
         </tr>`;
@@ -8864,7 +8480,7 @@
           }));
           const richness=Object.keys(tSpFreq).length;
           const topEntry=Object.entries(tSpFreq).sort((a,b) => b[1]-a[1])[0];
-          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} ${renderSpeciesCodeBadgeHTML(tSpMeta[topEntry[0]])}`:'—';
+          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(tSpMeta[topEntry[0]]))}</span>`:'—';
           return `<tr>
             <td style="font-weight:700;font-family:var(--font-ui);">T${t+1}</td>
             <td style="text-align:center;">${tSamples.length}</td>
@@ -8963,17 +8579,12 @@
       const statusEl=document.getElementById('auth-status');
       const loginBtn=document.getElementById('auth-login-btn');
       const logoutBtn=document.getElementById('auth-logout-btn');
-      const refreshAdminBtn=document.getElementById('auth-refresh-admin-btn');
       const account=getAuthAccount();
 
       if(!authLibraryReady()) {
         if(statusEl) statusEl.textContent='Sign-in library did not load. Hard refresh the page (Ctrl+F5) and try again.';
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='none';
-        if(refreshAdminBtn) {
-          refreshAdminBtn.disabled=true;
-          refreshAdminBtn.title='Sign-in unavailable';
-        }
         return;
       }
 
@@ -8982,10 +8593,6 @@
         if(statusEl) statusEl.textContent=`Signed in as ${user}`;
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='';
-        if(refreshAdminBtn) {
-          refreshAdminBtn.disabled=false;
-          refreshAdminBtn.title='Re-check admin access and approvals';
-        }
       } else {
         if(statusEl) {
           statusEl.textContent=authInitError
@@ -8994,32 +8601,7 @@
         }
         if(loginBtn) loginBtn.style.display='';
         if(logoutBtn) logoutBtn.style.display='none';
-        if(refreshAdminBtn) {
-          refreshAdminBtn.disabled=true;
-          refreshAdminBtn.title='Sign in first';
-        }
       }
-    }
-
-    async function refreshAdminAccess({notify=true}={}) {
-      const account=getAuthAccount();
-      if(!account) {
-        if(notify) toast('Sign in first','warn');
-        updateAuthUI();
-        return;
-      }
-      approvalsLoadedOnce=false;
-      approvalsUsersCache=[];
-      approvalsCallerIsAdmin=false;
-      setApprovalsCardVisibility(false);
-      setApprovalsAdminBadge(false);
-      try {
-        await loadApprovals({silent: !notify,force: true});
-        if(notify) toast('Admin access refreshed','ok');
-      } catch(err) {
-        if(notify) toast(`Could not refresh admin access: ${err?.message||'unknown error'}`,'err');
-      }
-      renderSync();
     }
 
     async function initAuth() {
@@ -9136,17 +8718,10 @@
         const sPend=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='pending').length;
         const sFail=samples.filter(x => x.siteId===site.id&&x.hasData&&x.syncStatus==='failed').length;
         const sSynced=samples.filter(x => x.siteId===site.id&&x.syncStatus==='synced').length;
-        const rowClass=isLocal? 'sync-local':'sync-cloud';
-        const rowTag=isLocal
-          ? '<span class="sync-site-tag sync-site-tag-local">Local only</span>'
-          :'<span class="sync-site-tag sync-site-tag-cloud">Syncable</span>';
-        const rowSummary=isLocal
-          ? `${sDone}/${sTotal} collected · stays on this device only`
-          :`${sDone}/${sTotal} collected · ${sPend} pending · ${sFail} failed · ${sSynced} synced`;
-        return `<div class="sync-status-row ${rowClass}">
+        return `<div class="sync-status-row">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${rowTag}</div>
-        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${rowSummary}</div>
+        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${isLocal? ' <span style="font-size:.6rem;color:var(--gold);">🧪 local only</span>':''}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' · not synced':` · ${sPend} pending · ${sFail} failed · ${sSynced} synced`}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
         ${!isLocal&&sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
@@ -9331,10 +8906,10 @@
 
       try {
         const detail=JSON.parse(raw);
-        const tone=detail.type==='ok'? 'var(--accent)':detail.type==='err'? 'var(--danger)':detail.type==='info'? 'var(--info)':'var(--muted)';
-        const borderTone=detail.type==='ok'? 'rgba(46,125,79,.45)':detail.type==='err'? 'rgba(198,40,40,.55)':detail.type==='info'? 'rgba(91,170,212,.5)':'var(--line)';
-        const backgroundTone=detail.type==='ok'? 'rgba(46,125,79,.08)':detail.type==='err'? 'rgba(198,40,40,.1)':detail.type==='info'? 'rgba(91,170,212,.1)':'rgba(255,255,255,.03)';
-        const bodyTone=detail.type==='err'? 'var(--danger)':detail.type==='ok'||detail.type==='info'? 'var(--text)':'var(--muted)';
+        const tone=detail.type==='ok'? 'var(--accent)':detail.type==='err'? 'var(--danger)':'var(--muted)';
+        const borderTone=detail.type==='ok'? 'rgba(46,125,79,.45)':detail.type==='err'? 'rgba(198,40,40,.55)':'var(--line)';
+        const backgroundTone=detail.type==='ok'? 'rgba(46,125,79,.08)':detail.type==='err'? 'rgba(198,40,40,.1)':'rgba(255,255,255,.03)';
+        const bodyTone=detail.type==='err'? 'var(--danger)':detail.type==='ok'? 'var(--text)':'var(--muted)';
         const statusLine=detail.status? `<div style="font-weight:600;color:${tone};margin-bottom:4px;">Last sync: ${esc(detail.status)}</div>`:'';
         const messageLine=detail.message? `<div style="color:${tone};margin-bottom:${detail.body? '6px':'0'};">${esc(detail.message)}</div>`:'';
         const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:${bodyTone};font-weight:${detail.type==='err'? '600':'400'};">${esc(detail.body)}</div>`:'';
@@ -9582,7 +9157,6 @@
     }
 
     document.getElementById('save-cfg-btn').addEventListener('click',saveSettings);
-    document.getElementById('save-species-display-btn').addEventListener('click',saveSettings);
     document.getElementById('save-azure-cfg-btn').addEventListener('click',saveSettings);
 
     // ── Export / Backup ──
@@ -9751,7 +9325,7 @@
       if(pw!=='1699') {
         document.getElementById('wipe-db-err').style.display='';
         document.getElementById('wipe-db-pw').value='';
-        focusTextField(document.getElementById('wipe-db-pw'));
+        document.getElementById('wipe-db-pw').focus();
         return;
       }
       setDeveloperUnlocked(true);
@@ -9839,15 +9413,7 @@
 
       const btn=document.getElementById('sync-btn');
       isSyncInProgress=true;
-      btn.disabled=true;
-      btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center;"><span class="sync-spinner" aria-hidden="true"></span><span>Syncing to cloud…</span></span>';
-      saveSyncDetail({
-        type: 'info',
-        status: 'Sync in progress',
-        message: `Uploading ${unsynced.length} unsynced sample${unsynced.length===1? '':'s'}`,
-        body: 'Please keep this page open until syncing finishes.'
-      });
-      renderSyncDetail();
+      btn.disabled=true; btn.textContent='Syncing…';
 
       let ok=0,fail=0;
       let lastFailure=null;
@@ -9935,9 +9501,6 @@
     });
     document.getElementById('auth-login-btn').addEventListener('click',authSignIn);
     document.getElementById('auth-logout-btn').addEventListener('click',authSignOut);
-    document.getElementById('auth-refresh-admin-btn').addEventListener('click',async () => {
-      await refreshAdminAccess({notify: true});
-    });
     document.getElementById('approvals-refresh-btn').addEventListener('click',async () => {
       approvalsLoadedOnce=false;
       await loadApprovals({silent: false,force: true});
@@ -10045,7 +9608,13 @@
     // Called from popup button — select site and jump to Collect tab
     window.mapSelectSite=function(siteId) {
       activeSiteId=siteId;
-      navigateToPage('collect',{forceRender: true});
+      // Switch to collect tab
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const collectTab=document.querySelector('.nav-tab[data-page="collect"]');
+      if(collectTab) collectTab.classList.add('active');
+      document.getElementById('page-collect').classList.add('active');
+      renderCollect();
     };
 
     function mapLocateUser() {
@@ -10099,19 +9668,8 @@
       if(dwrDropEl) {dwrDropEl.style.display='none'; dwrDropEl.innerHTML='';}
     });
     document.getElementById('app-check-update-btn').addEventListener('click',checkForAppUpdate);
-    (function() {
-      let reloading=false;
-      function doReload(btn) {
-        if(reloading) return;
-        reloading=true;
-        if(btn) {btn.disabled=true; btn.textContent='Reloading…';}
-        window.location.reload();
-      }
-      const appUpdateBtn=document.getElementById('app-update-btn');
-      const updateReloadBtn=document.getElementById('update-reload-btn');
-      if(appUpdateBtn) appUpdateBtn.addEventListener('click',() => doReload(appUpdateBtn));
-      if(updateReloadBtn) updateReloadBtn.addEventListener('click',() => doReload(updateReloadBtn));
-    })();
+    document.getElementById('app-update-btn').addEventListener('click',() => window.location.reload());
+    document.getElementById('update-reload-btn').addEventListener('click',() => window.location.reload());
     document.getElementById('update-later-btn').addEventListener('click',() => {
       const banner=document.getElementById('update-banner');
       if(banner) banner.classList.remove('visible');
@@ -10143,11 +9701,11 @@
         if(p.builtIn) await dbDelete('protocols',p.id);
       }
 
-      scheduleSpeciesDBWarmup();
+      loadSpeciesDB();
       renderCustomListsSetup();
       renderCustomListPicks();
       renderEventCustomListToggles();
-      // Defer heavy sites list render until user opens the Sites tab.
+      renderSiteList({invalidate: true});
       document.getElementById('collect-no-site').style.display='';
     }
     init();
@@ -10206,14 +9764,12 @@
       const isStandalone=window.navigator.standalone===true
         ||window.matchMedia('(display-mode: standalone)').matches;
       const dismissed=localStorage.getItem('ecoplot-install-dismissed');
-      const isIOS=isIOSFamilyDevice();
+      const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
       const isSafari=/safari/i.test(navigator.userAgent)&&!/chrome|crios|fxios/i.test(navigator.userAgent);
       if(!isStandalone&&!dismissed&&isIOS&&isSafari) {
         document.getElementById('install-banner').classList.add('visible');
       }
     })();
-
-    // Global touchend refocus fallback removed: it was causing pointer/keyboard timing conflicts.
 
     document.getElementById('install-dismiss').addEventListener('click',() => {
       document.getElementById('install-banner').classList.remove('visible');
