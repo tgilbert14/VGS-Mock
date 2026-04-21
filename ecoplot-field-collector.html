@@ -3274,7 +3274,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=47;
+    const APP_BUILD_REV=48;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -9925,8 +9925,19 @@
       if(dwrDropEl) {dwrDropEl.style.display='none'; dwrDropEl.innerHTML='';}
     });
     document.getElementById('app-check-update-btn').addEventListener('click',checkForAppUpdate);
-    document.getElementById('app-update-btn').addEventListener('click',() => window.location.reload());
-    document.getElementById('update-reload-btn').addEventListener('click',() => window.location.reload());
+    (function(){
+      let reloading=false;
+      function doReload(btn){
+        if(reloading) return;
+        reloading=true;
+        if(btn){ btn.disabled=true; btn.textContent='Reloading…'; }
+        window.location.reload();
+      }
+      const appUpdateBtn=document.getElementById('app-update-btn');
+      const updateReloadBtn=document.getElementById('update-reload-btn');
+      if(appUpdateBtn) appUpdateBtn.addEventListener('click',() => doReload(appUpdateBtn));
+      if(updateReloadBtn) updateReloadBtn.addEventListener('click',() => doReload(updateReloadBtn));
+    })();
     document.getElementById('update-later-btn').addEventListener('click',() => {
       const banner=document.getElementById('update-banner');
       if(banner) banner.classList.remove('visible');
