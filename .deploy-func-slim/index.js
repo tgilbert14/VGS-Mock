@@ -20,12 +20,13 @@ const AUTH_TENANT_ID=process.env.AUTH_TENANT_ID||'48daa81b-c1eb-4526-9ea1-66b603
 const AUTH_CLIENT_ID=process.env.AUTH_CLIENT_ID||'025d2544-3267-47a5-a97d-261ae4e741fd';
 const AUTH_AUTHORITY_HOST=process.env.AUTH_AUTHORITY_HOST||'ecoplot.ciamlogin.com';
 const REQUIRE_USER_APPROVAL=['1','true','yes'].includes(String(process.env.REQUIRE_USER_APPROVAL||'').toLowerCase());
+const ADMIN_USER_OIDS=new Set(String(process.env.ADMIN_USER_OIDS||'').split(',').map(v => v.trim()).filter(Boolean));
 const JWKS=createRemoteJWKSet(new URL(`https://${AUTH_AUTHORITY_HOST}/${AUTH_TENANT_ID}/discovery/v2.0/keys`));
 const VALID_AUDIENCES=[AUTH_CLIENT_ID,`api://${AUTH_CLIENT_ID}`];
 
 const CORS_HEADERS={
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-functions-key'
 };
 
@@ -152,11 +153,26 @@ CREATE TABLE approved_users (
   email         NVARCHAR(255)  NULL,
   display_name  NVARCHAR(255)  NULL,
   is_approved   BIT            NOT NULL DEFAULT 0,
+  is_admin      BIT            NOT NULL DEFAULT 0,
   requested_at  DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME(),
   approved_at   DATETIME2      NULL,
   last_seen_at  DATETIME2      NOT NULL DEFAULT SYSUTCDATETIME()
 );
 `;
+
+const ENSURE_APPROVED_USERS_COLUMNS_SQL=`
+IF COL_LENGTH('approved_users','is_admin') IS NULL
+  ALTER TABLE approved_users ADD is_admin BIT NOT NULL DEFAULT 0;
+`;
+
+async function ensureApprovalTables(db) {
+  await db.request().query(CREATE_APPROVED_USERS_SQL);
+  await db.request().query(ENSURE_APPROVED_USERS_COLUMNS_SQL);
+}
+
+function isConfiguredAdmin(user) {
+  return ADMIN_USER_OIDS.has(String(user?.oid||''));
+}
 
 async function upsertApprovalRequest(db,user) {
   const countResult=await db.request().query(`
@@ -165,19 +181,28 @@ async function upsertApprovalRequest(db,user) {
     WHERE is_approved = 1
   `);
   const autoApproveFirstUser=(countResult.recordset[0]?.approved_count||0)===0;
+  const adminCountResult=await db.request().query(`
+    SELECT COUNT(*) AS admin_count
+    FROM approved_users
+    WHERE is_admin = 1
+  `);
+  const autoAdminFirstUser=(adminCountResult.recordset[0]?.admin_count||0)===0;
+  const configuredAdmin=isConfiguredAdmin(user);
 
   const result=await db.request()
     .input('user_oid',sql.NVarChar(100),user.oid)
     .input('email',sql.NVarChar(255),user.email??null)
     .input('display_name',sql.NVarChar(255),user.displayName??null)
     .input('auto_approve',sql.Bit,autoApproveFirstUser)
+    .input('auto_admin',sql.Bit,autoAdminFirstUser||configuredAdmin)
     .query(`
       MERGE approved_users AS target
       USING (
         SELECT @user_oid AS user_oid,
                @email AS email,
                @display_name AS display_name,
-               @auto_approve AS auto_approve
+               @auto_approve AS auto_approve,
+               @auto_admin AS auto_admin
       ) AS source
       ON target.user_oid = source.user_oid
       WHEN MATCHED THEN
@@ -189,29 +214,46 @@ async function upsertApprovalRequest(db,user) {
             WHEN target.is_approved = 1 OR source.auto_approve = 1 THEN 1
             ELSE 0
           END,
+          is_admin = CASE
+            WHEN target.is_admin = 1 OR source.auto_admin = 1 THEN 1
+            ELSE 0
+          END,
           approved_at = CASE
             WHEN target.approved_at IS NOT NULL THEN target.approved_at
             WHEN source.auto_approve = 1 THEN SYSUTCDATETIME()
             ELSE NULL
           END
       WHEN NOT MATCHED THEN
-        INSERT (user_oid,email,display_name,is_approved,requested_at,approved_at,last_seen_at)
+        INSERT (user_oid,email,display_name,is_approved,is_admin,requested_at,approved_at,last_seen_at)
         VALUES (
           source.user_oid,
           source.email,
           source.display_name,
           CASE WHEN source.auto_approve = 1 THEN 1 ELSE 0 END,
+          CASE WHEN source.auto_admin = 1 THEN 1 ELSE 0 END,
           SYSUTCDATETIME(),
           CASE WHEN source.auto_approve = 1 THEN SYSUTCDATETIME() ELSE NULL END,
           SYSUTCDATETIME()
         );
 
-      SELECT TOP 1 user_oid,email,display_name,is_approved,requested_at,approved_at,last_seen_at
+      SELECT TOP 1 user_oid,email,display_name,is_approved,is_admin,requested_at,approved_at,last_seen_at
       FROM approved_users
       WHERE user_oid = @user_oid;
     `);
 
   return result.recordset[0]||null;
+}
+
+async function isAdminUser(db,user) {
+  if(isConfiguredAdmin(user)) return true;
+  const result=await db.request()
+    .input('user_oid',sql.NVarChar(100),user.oid)
+    .query(`
+      SELECT TOP 1 is_admin
+      FROM approved_users
+      WHERE user_oid = @user_oid
+    `);
+  return !!result.recordset[0]?.is_admin;
 }
 
 // ── Function handler ───────────────────────────────────────────────────────────
@@ -253,10 +295,10 @@ app.http('observations',{
 
       await db.request().query(CREATE_TABLE_SQL);
       await db.request().query(ENSURE_OBSERVATION_COLUMNS_SQL);
-      await db.request().query(CREATE_APPROVED_USERS_SQL);
+      await ensureApprovalTables(db);
 
       const approval=await upsertApprovalRequest(db,tokenResult.user);
-      if(REQUIRE_USER_APPROVAL&&!approval?.is_approved) {
+      if(REQUIRE_USER_APPROVAL&&!approval?.is_approved&&!isConfiguredAdmin(tokenResult.user)) {
         return jsonResponse(403,{
           error: 'Approval required',
           detail: 'Your account is pending approval for sync access.',
@@ -309,11 +351,100 @@ app.http('observations',{
         success: true,
         id,
         approvedUser: !!approval?.is_approved,
+        adminUser: !!approval?.is_admin,
         submittedBy: tokenResult.user.email||tokenResult.user.oid
       });
 
     } catch(err) {
       context.log.error('DB error:',err.message);
+      return jsonResponse(500,{error: 'Database error',detail: err.message});
+    }
+  }
+});
+
+app.http('approvals',{
+  methods: ['GET','POST','OPTIONS'],
+  authLevel: 'function',
+  handler: async (request) => {
+    if((request.method||'').toUpperCase()==='OPTIONS') {
+      return {status: 204,headers: CORS_HEADERS,body: ''};
+    }
+
+    const tokenResult=await verifyAccessToken(request);
+    if(!tokenResult.ok) {
+      return jsonResponse(tokenResult.status,{error: tokenResult.error,detail: tokenResult.detail||null});
+    }
+
+    try {
+      const db=await getPool();
+      await ensureApprovalTables(db);
+      await upsertApprovalRequest(db,tokenResult.user);
+
+      const callerIsAdmin=await isAdminUser(db,tokenResult.user);
+      if(!callerIsAdmin) {
+        return jsonResponse(403,{error: 'Admin required',detail: 'Only admins can review approvals.'});
+      }
+
+      if((request.method||'').toUpperCase()==='GET') {
+        const usersResult=await db.request().query(`
+          SELECT TOP 200
+            user_oid AS userOid,
+            email,
+            display_name AS displayName,
+            is_approved AS isApproved,
+            is_admin AS isAdmin,
+            requested_at AS requestedAt,
+            approved_at AS approvedAt,
+            last_seen_at AS lastSeenAt
+          FROM approved_users
+          ORDER BY is_approved ASC, requested_at DESC
+        `);
+        return jsonResponse(200,{success: true,users: usersResult.recordset||[]});
+      }
+
+      let body;
+      try {
+        body=await request.json();
+      } catch {
+        return jsonResponse(400,{error: 'Invalid JSON'});
+      }
+
+      const userOid=String(body?.userOid||'').trim();
+      const approve=!!body?.approve;
+      if(!userOid) {
+        return jsonResponse(400,{error: 'Missing required field: userOid'});
+      }
+
+      const updatedResult=await db.request()
+        .input('user_oid',sql.NVarChar(100),userOid)
+        .input('approve',sql.Bit,approve)
+        .query(`
+          UPDATE approved_users
+          SET
+            is_approved = @approve,
+            approved_at = CASE WHEN @approve = 1 THEN SYSUTCDATETIME() ELSE NULL END
+          WHERE user_oid = @user_oid;
+
+          SELECT TOP 1
+            user_oid AS userOid,
+            email,
+            display_name AS displayName,
+            is_approved AS isApproved,
+            is_admin AS isAdmin,
+            requested_at AS requestedAt,
+            approved_at AS approvedAt,
+            last_seen_at AS lastSeenAt
+          FROM approved_users
+          WHERE user_oid = @user_oid;
+        `);
+
+      const updated=updatedResult.recordset[0]||null;
+      if(!updated) {
+        return jsonResponse(404,{error: 'User not found in approvals table'});
+      }
+
+      return jsonResponse(200,{success: true,user: updated});
+    } catch(err) {
       return jsonResponse(500,{error: 'Database error',detail: err.message});
     }
   }

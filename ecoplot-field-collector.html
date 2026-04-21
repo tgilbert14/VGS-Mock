@@ -2625,6 +2625,14 @@
           </div>
         </div>
         <div class="card">
+          <div class="card-title">User Approvals</div>
+          <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
+            to review pending users.</div>
+          <div id="approvals-list"></div>
+          <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
+            Approvals</button>
+        </div>
+        <div class="card">
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
                 type="button" class="info-icon-btn" data-info-key="setup-sync"
                 title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
@@ -8623,6 +8631,7 @@
         const response=await msalClient.loginPopup(loginRequest);
         authAccount=response?.account||getAuthAccount();
         if(authAccount) msalClient.setActiveAccount?.(authAccount);
+        approvalsLoadedOnce=false;
         updateAuthUI();
         renderSync();
         toast('Signed in','ok');
@@ -8643,6 +8652,7 @@
         console.warn('Sign-out warning:',err);
       }
       authAccount=null;
+      approvalsLoadedOnce=false;
       updateAuthUI();
       renderSync();
     }
@@ -8712,6 +8722,12 @@
       const syncBtn=document.getElementById('sync-btn');
       syncBtn.disabled=syncDisabled;
       syncBtn.title=signedIn? '':'Sign in to sync';
+      if(signedIn) {
+        loadApprovals({silent: true});
+      } else {
+        setApprovalsStatus('Sign in as an admin to review users.');
+        renderApprovalsList([]);
+      }
       // load Collection Settings
       const iwVal=localStorage.getItem('ep_incomplete_warn');
       const autoSyncVal=localStorage.getItem('ep_auto_sync');
@@ -8877,6 +8893,141 @@
       } catch {
         el.style.display='none';
         el.innerHTML='';
+      }
+    }
+
+    let approvalsLoadedOnce=false;
+
+    function getApprovalsUrl(syncUrl) {
+      try {
+        const parsed=new URL(syncUrl);
+        const nextPath=parsed.pathname.replace(/observations\/?$/,'approvals');
+        if(nextPath===parsed.pathname) return '';
+        parsed.pathname=nextPath;
+        return parsed.toString();
+      } catch {
+        return '';
+      }
+    }
+
+    function setApprovalsStatus(message,type='') {
+      const el=document.getElementById('approvals-status');
+      if(!el) return;
+      el.textContent=message;
+      el.style.color=type==='ok'? 'var(--accent)':type==='err'? 'var(--danger)':'var(--muted)';
+    }
+
+    function renderApprovalsList(users=[]) {
+      const listEl=document.getElementById('approvals-list');
+      if(!listEl) return;
+      if(!users.length) {
+        listEl.innerHTML='<div style="font-size:.68rem;color:var(--muted);">No users found.</div>';
+        return;
+      }
+
+      listEl.innerHTML=users.map(u => {
+        const label=u.email||u.displayName||u.userOid;
+        const approved=!!u.isApproved;
+        const approvedBadge=approved
+          ? '<span class="badge" style="margin-left:6px;background:rgba(46,125,79,.2);color:var(--accent);">approved</span>'
+          :'<span class="badge" style="margin-left:6px;background:rgba(198,40,40,.2);color:var(--danger);">pending</span>';
+        const when=u.requestedAt? new Date(u.requestedAt).toLocaleString():'unknown time';
+        return `<div class="sync-status-row" style="align-items:flex-start;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.78rem;font-weight:600;line-height:1.25;">${esc(label)}${approvedBadge}</div>
+            <div style="font-size:.64rem;color:var(--muted);margin-top:4px;word-break:break-word;">${esc(u.userOid||'')}</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">requested ${esc(when)}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-left:8px;">
+            <button class="btn btn-outline btn-sm" data-approval-action="approve" data-user-oid="${esc(u.userOid||'')}" ${approved? 'disabled':''}>Approve</button>
+            <button class="btn btn-ghost btn-sm" data-approval-action="reject" data-user-oid="${esc(u.userOid||'')}" ${approved? '':'disabled'}>Reject</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadApprovals({silent=true,force=false}={}) {
+      if(approvalsLoadedOnce&&!force) return;
+      const {url,key}=getSettings();
+      if(!url) {
+        setApprovalsStatus('Set Azure URL to manage approvals.');
+        renderApprovalsList([]);
+        return;
+      }
+
+      const token=await getSyncAccessToken({interactive: !silent});
+      if(!token) {
+        setApprovalsStatus('Sign in as an admin to review users.');
+        renderApprovalsList([]);
+        return;
+      }
+
+      const approvalsUrl=getApprovalsUrl(url);
+      if(!approvalsUrl) {
+        setApprovalsStatus('Azure URL must end with /api/observations to derive approvals endpoint.','err');
+        renderApprovalsList([]);
+        return;
+      }
+
+      try {
+        const headers={Authorization: `Bearer ${token}`};
+        if(key) headers['x-functions-key']=key;
+        const res=await fetch(approvalsUrl,{method: 'GET',headers});
+        const raw=await res.text();
+        let data={};
+        try {data=raw? JSON.parse(raw):{};} catch {}
+        if(!res.ok) {
+          setApprovalsStatus(data?.detail||data?.error||`Approval request failed (HTTP ${res.status}).`,'err');
+          renderApprovalsList([]);
+          return;
+        }
+
+        const users=Array.isArray(data?.users)? data.users:[];
+        const pending=users.filter(u => !u.isApproved).length;
+        setApprovalsStatus(`Loaded ${users.length} user${users.length!==1? 's':''}. ${pending} pending.`,pending? '':'ok');
+        renderApprovalsList(users);
+        approvalsLoadedOnce=true;
+      } catch(err) {
+        setApprovalsStatus(err?.message||'Could not load approvals.','err');
+        renderApprovalsList([]);
+      }
+    }
+
+    async function updateApproval(userOid,approve) {
+      const {url,key}=getSettings();
+      const token=await getSyncAccessToken({interactive: true});
+      if(!url||!token) {
+        setApprovalsStatus('Sign in and set Azure URL before updating approvals.','err');
+        return;
+      }
+
+      const approvalsUrl=getApprovalsUrl(url);
+      if(!approvalsUrl) {
+        setApprovalsStatus('Could not derive approvals endpoint from Azure URL.','err');
+        return;
+      }
+
+      try {
+        const headers={'Content-Type': 'application/json',Authorization: `Bearer ${token}`};
+        if(key) headers['x-functions-key']=key;
+        const res=await fetch(approvalsUrl,{
+          method: 'POST',
+          headers,
+          body: JSON.stringify({userOid,approve})
+        });
+        const raw=await res.text();
+        let data={};
+        try {data=raw? JSON.parse(raw):{};} catch {}
+        if(!res.ok) {
+          setApprovalsStatus(data?.detail||data?.error||`Update failed (HTTP ${res.status}).`,'err');
+          return;
+        }
+
+        setApprovalsStatus(approve? 'User approved.':'User set to pending.','ok');
+        approvalsLoadedOnce=false;
+        await loadApprovals({silent: true,force: true});
+      } catch(err) {
+        setApprovalsStatus(err?.message||'Could not update approval status.','err');
       }
     }
 
@@ -9252,6 +9403,19 @@
     });
     document.getElementById('auth-login-btn').addEventListener('click',authSignIn);
     document.getElementById('auth-logout-btn').addEventListener('click',authSignOut);
+    document.getElementById('approvals-refresh-btn').addEventListener('click',async () => {
+      approvalsLoadedOnce=false;
+      await loadApprovals({silent: false,force: true});
+    });
+    document.getElementById('approvals-list').addEventListener('click',async e => {
+      const btn=e.target.closest('button[data-approval-action]');
+      if(!btn) return;
+      const userOid=btn.getAttribute('data-user-oid')||'';
+      const action=btn.getAttribute('data-approval-action')||'';
+      if(!userOid||!action) return;
+      const approve=action==='approve';
+      await updateApproval(userOid,approve);
+    });
 
     // ══════════════════════════════════════════════════════
     //  MAP
