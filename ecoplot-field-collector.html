@@ -3274,7 +3274,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=44;
+    const APP_BUILD_REV=45;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -9137,6 +9137,69 @@
       localStorage.setItem('ep_last_sync_detail',JSON.stringify({...detail,at: new Date().toISOString()}));
     }
 
+    function trimSyncDetailText(text,maxLen=1800) {
+      const s=String(text||'').trim();
+      if(!s) return '';
+      return s.length>maxLen? `${s.slice(0,maxLen)}…`:s;
+    }
+
+    function extractSyncServerMessage(rawBody) {
+      const rawText=String(rawBody||'').trim();
+      if(!rawText) return '';
+
+      let parsed;
+      try {
+        parsed=JSON.parse(rawText);
+      } catch {
+        // Non-JSON responses (HTML/text) still contain useful diagnostics.
+        return trimSyncDetailText(rawText);
+      }
+
+      const preferred=[];
+
+      const pushText=value => {
+        const txt=String(value||'').trim();
+        if(!txt) return;
+        if(!preferred.includes(txt)) preferred.push(txt);
+      };
+
+      const walk=(value,depth=0) => {
+        if(depth>5||value==null) return;
+        if(typeof value==='string'||typeof value==='number'||typeof value==='boolean') {
+          pushText(value);
+          return;
+        }
+        if(Array.isArray(value)) {
+          value.forEach(item => walk(item,depth+1));
+          return;
+        }
+        if(typeof value==='object') {
+          ['detail','error','message','title','description','reason'].forEach(k => {
+            if(k in value) walk(value[k],depth+1);
+          });
+
+          const errors=value.errors;
+          if(errors&&typeof errors==='object') {
+            Object.entries(errors).forEach(([k,v]) => {
+              if(Array.isArray(v)) {
+                v.forEach(item => pushText(`${k}: ${String(item||'').trim()}`));
+              } else {
+                pushText(`${k}: ${String(v||'').trim()}`);
+              }
+            });
+          }
+
+          Object.keys(value).forEach(k => {
+            if(['detail','error','message','title','description','reason','errors'].includes(k)) return;
+            walk(value[k],depth+1);
+          });
+        }
+      };
+
+      walk(parsed);
+      return trimSyncDetailText(preferred.join('\n').trim()||rawText);
+    }
+
     function renderSyncDetail() {
       const el=document.getElementById('sync-detail');
       if(!el) return;
@@ -9159,7 +9222,8 @@
         const messageLine=detail.message? `<div style="color:${tone};margin-bottom:${detail.body? '6px':'0'};">${esc(detail.message)}</div>`:'';
         const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:${bodyTone};font-weight:${detail.type==='err'? '600':'400'};">${esc(detail.body)}</div>`:'';
         const timeLine=detail.at? `<div style="margin-top:6px;color:var(--muted);font-size:.65rem;">${esc(new Date(detail.at).toLocaleString())}</div>`:'';
-        el.innerHTML=`${statusLine}${messageLine}${bodyLine}${timeLine}`;
+        const copyBtn=`<button type="button" id="sync-copy-detail-btn" class="btn btn-ghost btn-sm" style="margin-top:8px;">Copy error details</button>`;
+        el.innerHTML=`${statusLine}${messageLine}${bodyLine}${timeLine}${copyBtn}`;
         el.style.borderColor=borderTone;
         el.style.background=backgroundTone;
         el.style.display='block';
@@ -9168,6 +9232,57 @@
         el.style.borderColor='var(--line)';
         el.style.background='rgba(255,255,255,.03)';
         el.innerHTML='';
+      }
+    }
+
+    function buildSyncDetailClipboardText() {
+      const raw=localStorage.getItem('ep_last_sync_detail');
+      if(!raw) return '';
+      try {
+        const detail=JSON.parse(raw);
+        const lines=[];
+        if(detail.status) lines.push(`Status: ${detail.status}`);
+        if(detail.message) lines.push(`Message: ${detail.message}`);
+        if(detail.body) lines.push(`Body:\n${detail.body}`);
+        if(detail.at) lines.push(`Time: ${new Date(detail.at).toISOString()}`);
+        return lines.join('\n\n').trim();
+      } catch {
+        return '';
+      }
+    }
+
+    async function copySyncDetailToClipboard() {
+      const text=buildSyncDetailClipboardText();
+      if(!text) {
+        toast('No sync detail to copy','warn');
+        return;
+      }
+
+      if(navigator.clipboard&&window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          toast('Sync details copied','ok');
+          return;
+        } catch {
+          // Fall through to textarea-based copy.
+        }
+      }
+
+      const ta=document.createElement('textarea');
+      ta.value=text;
+      ta.setAttribute('readonly','');
+      ta.style.position='fixed';
+      ta.style.left='-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0,ta.value.length);
+      try {
+        const copied=document.execCommand('copy');
+        toast(copied? 'Sync details copied':'Copy failed',copied? 'ok':'err');
+      } catch {
+        toast('Copy failed','err');
+      } finally {
+        document.body.removeChild(ta);
       }
     }
 
@@ -9696,30 +9811,33 @@
               })
             });
             const raw=await res.text();
-            let detail=raw;
-            try {
-              const parsed=raw? JSON.parse(raw):null;
-              detail=parsed?.detail||parsed?.error||raw;
-            } catch {}
+            const detail=extractSyncServerMessage(raw);
+            const requestId=res.headers.get('x-ms-request-id')||res.headers.get('request-id')||res.headers.get('x-request-id')||'';
+            const statusText=res.statusText? ` ${res.statusText}`:'';
+            const sampleLabel=samp.sampleIdx!=null? `Sample ${samp.sampleIdx+1}`:`Sample ${samp.id}`;
+            const siteLabel=site?.name? `${site.name} · `:'';
             samp.syncStatus=res.ok? 'synced':'failed';
             if(res.ok) {
               ok++;
             } else {
               fail++;
+              const requestLine=requestId? `\nrequest-id: ${requestId}`:'';
               lastFailure={
                 type: 'err',
-                status: `HTTP ${res.status}`,
-                message: `Sample ${samp.sampleIdx!=null? samp.sampleIdx+1:samp.id} failed to sync.`,
-                body: detail||'No response body returned.'
+                status: `HTTP ${res.status}${statusText}`,
+                message: `${siteLabel}${sampleLabel} failed to sync.`,
+                body: `${detail||'No response body returned.'}${requestLine}`
               };
             }
           } catch(err) {
             samp.syncStatus='failed';
             fail++;
+            const sampleLabel=samp.sampleIdx!=null? `Sample ${samp.sampleIdx+1}`:`Sample ${samp.id}`;
+            const siteLabel=site?.name? `${site.name} · `:'';
             lastFailure={
               type: 'err',
               status: 'Network error',
-              message: `Sample ${samp.sampleIdx!=null? samp.sampleIdx+1:samp.id} failed to sync.`,
+              message: `${siteLabel}${sampleLabel} failed to sync.`,
               body: err?.message||'Request failed before a response was returned.'
             };
           }
@@ -9752,6 +9870,11 @@
 
     document.getElementById('sync-btn').addEventListener('click',async () => {
       syncPendingSamples({silent: false,source: 'manual'});
+    });
+    document.getElementById('sync-detail').addEventListener('click',async e => {
+      const btn=e.target.closest('#sync-copy-detail-btn');
+      if(!btn) return;
+      await copySyncDetailToClipboard();
     });
     document.getElementById('auth-login-btn').addEventListener('click',authSignIn);
     document.getElementById('auth-logout-btn').addEventListener('click',authSignOut);
