@@ -35,8 +35,16 @@ https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-create-exte
 create them here:
 https://entra.microsoft.com/#home
 
-xx? >register app: https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app
-xx? -use my created tenate
+>register app: https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app
+-use my created tenate
 
 https://yourtenant.ciamlogin.com/your-tenant-id-or-name/your-user-flow
+
+-got config and added to app
+
+-created function app with subscription account
+
+-get functions app name...
+az functionapp list --query "[].{name:name,resourceGroup:resourceGroup,location:location,state:state}" -o table
+
 
