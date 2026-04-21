@@ -2601,7 +2601,7 @@
           </div>
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
         </div>
-        <div class="card">
+        <div class="card" id="azure-connection-card" style="display:none;">
           <div class="card-title">Azure Connection <button type="button" class="info-icon-btn"
               data-info-key="setup-azure" title="Azure connection help">i</button></div>
           <div class="field">
@@ -8733,6 +8733,7 @@
 
       document.getElementById('sync-site-list').innerHTML=rows;
       const signedIn=!!getAuthAccount();
+      updateAzureConnectionVisibility();
       const syncDisabled=unsyncedCount===0||!navigator.onLine||!signedIn;
       const syncBtn=document.getElementById('sync-btn');
       syncBtn.disabled=syncDisabled;
@@ -8742,6 +8743,7 @@
       } else {
         approvalsUsersCache=[];
         approvalsCallerIsAdmin=false;
+        updateAzureConnectionVisibility();
         setApprovalsCardVisibility(false);
         setApprovalsAdminBadge(false);
         setApprovalsStatus('Sign in as an admin to review users.');
@@ -8896,6 +8898,8 @@
       const raw=localStorage.getItem('ep_last_sync_detail');
       if(!raw) {
         el.style.display='none';
+        el.style.borderColor='var(--line)';
+        el.style.background='rgba(255,255,255,.03)';
         el.innerHTML='';
         return;
       }
@@ -8903,14 +8907,21 @@
       try {
         const detail=JSON.parse(raw);
         const tone=detail.type==='ok'? 'var(--accent)':detail.type==='err'? 'var(--danger)':'var(--muted)';
+        const borderTone=detail.type==='ok'? 'rgba(46,125,79,.45)':detail.type==='err'? 'rgba(198,40,40,.55)':'var(--line)';
+        const backgroundTone=detail.type==='ok'? 'rgba(46,125,79,.08)':detail.type==='err'? 'rgba(198,40,40,.1)':'rgba(255,255,255,.03)';
+        const bodyTone=detail.type==='err'? 'var(--danger)':detail.type==='ok'? 'var(--text)':'var(--muted)';
         const statusLine=detail.status? `<div style="font-weight:600;color:${tone};margin-bottom:4px;">Last sync: ${esc(detail.status)}</div>`:'';
         const messageLine=detail.message? `<div style="color:${tone};margin-bottom:${detail.body? '6px':'0'};">${esc(detail.message)}</div>`:'';
-        const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:var(--muted);">${esc(detail.body)}</div>`:'';
+        const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:${bodyTone};font-weight:${detail.type==='err'? '600':'400'};">${esc(detail.body)}</div>`:'';
         const timeLine=detail.at? `<div style="margin-top:6px;color:var(--muted);font-size:.65rem;">${esc(new Date(detail.at).toLocaleString())}</div>`:'';
         el.innerHTML=`${statusLine}${messageLine}${bodyLine}${timeLine}`;
+        el.style.borderColor=borderTone;
+        el.style.background=backgroundTone;
         el.style.display='block';
       } catch {
         el.style.display='none';
+        el.style.borderColor='var(--line)';
+        el.style.background='rgba(255,255,255,.03)';
         el.innerHTML='';
       }
     }
@@ -8919,6 +8930,22 @@
     let approvalsUsersCache=[];
     let approvalsPendingOnly=true;
     let approvalsCallerIsAdmin=false;
+
+    function isDeveloperUnlocked() {
+      return sessionStorage.getItem('ep_dev_unlocked')==='1';
+    }
+
+    function setDeveloperUnlocked(isUnlocked) {
+      if(isUnlocked) sessionStorage.setItem('ep_dev_unlocked','1');
+      else sessionStorage.removeItem('ep_dev_unlocked');
+      updateAzureConnectionVisibility();
+    }
+
+    function updateAzureConnectionVisibility() {
+      const card=document.getElementById('azure-connection-card');
+      if(!card) return;
+      card.style.display=(approvalsCallerIsAdmin||isDeveloperUnlocked())? '':'none';
+    }
 
     function getApprovalsUrl(syncUrl) {
       try {
@@ -8948,6 +8975,8 @@
     function setApprovalsAdminBadge(isAdmin) {
       const badge=document.getElementById('approvals-admin-badge');
       if(!badge) return;
+      approvalsCallerIsAdmin=!!isAdmin;
+      updateAzureConnectionVisibility();
       setApprovalsCardVisibility(!!isAdmin);
       if(isAdmin) {
         badge.style.display='inline-flex';
@@ -9299,6 +9328,7 @@
         document.getElementById('wipe-db-pw').focus();
         return;
       }
+      setDeveloperUnlocked(true);
       document.getElementById('wipe-db-modal').classList.remove('open');
       // Clear all data stores
       for(const store of ['sites','events','samples','folders']) {

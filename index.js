@@ -181,14 +181,13 @@ async function upsertApprovalRequest(db,user) {
     WHERE is_approved = 1
   `);
   const autoApproveFirstUser=(countResult.recordset[0]?.approved_count||0)===0;
-  const configuredAdmin=isConfiguredAdmin(user);
 
   const result=await db.request()
     .input('user_oid',sql.NVarChar(100),user.oid)
     .input('email',sql.NVarChar(255),user.email??null)
     .input('display_name',sql.NVarChar(255),user.displayName??null)
     .input('auto_approve',sql.Bit,autoApproveFirstUser)
-    .input('auto_admin',sql.Bit,configuredAdmin)
+    .input('auto_admin',sql.Bit,false)
     .query(`
       MERGE approved_users AS target
       USING (
@@ -239,8 +238,6 @@ async function upsertApprovalRequest(db,user) {
 }
 
 async function isAdminUser(db,user) {
-  if(ADMIN_USER_OIDS.size>0) return isConfiguredAdmin(user);
-  if(isConfiguredAdmin(user)) return true;
   const result=await db.request()
     .input('user_oid',sql.NVarChar(100),user.oid)
     .query(`
@@ -293,7 +290,7 @@ app.http('observations',{
       await ensureApprovalTables(db);
 
       const approval=await upsertApprovalRequest(db,tokenResult.user);
-      if(REQUIRE_USER_APPROVAL&&!approval?.is_approved&&!isConfiguredAdmin(tokenResult.user)) {
+      if(REQUIRE_USER_APPROVAL&&!approval?.is_approved) {
         return jsonResponse(403,{
           error: 'Approval required',
           detail: 'Your account is pending approval for sync access.',
