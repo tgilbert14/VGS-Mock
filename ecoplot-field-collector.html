@@ -2629,6 +2629,9 @@
                 type="button" class="info-icon-btn" data-info-key="setup-sync"
                 title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
           <div id="sync-site-list"></div>
+          <div id="sync-detail"
+            style="display:none;font-size:.7rem;line-height:1.45;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:rgba(255,255,255,.03);">
+          </div>
           <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Unsynced</button>
         </div>
         <div class="card">
@@ -3136,7 +3139,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-20';
-    const APP_BUILD_REV=41;
+    const APP_BUILD_REV=42;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -8668,6 +8671,7 @@
       document.getElementById('cfg-url').value=s.url;
       document.getElementById('cfg-key').value=s.key;
       updateAuthUI();
+      renderSyncDetail();
 
       const sites=await dbGetAll('sites');
       const samples=await dbGetAll('samples');
@@ -8845,6 +8849,35 @@
         speciesDisplay: localStorage.getItem('ep_species_display_mode')||'species',
         autoSync: localStorage.getItem('ep_auto_sync')==='1',
       };
+    }
+
+    function saveSyncDetail(detail) {
+      localStorage.setItem('ep_last_sync_detail',JSON.stringify({...detail,at: new Date().toISOString()}));
+    }
+
+    function renderSyncDetail() {
+      const el=document.getElementById('sync-detail');
+      if(!el) return;
+      const raw=localStorage.getItem('ep_last_sync_detail');
+      if(!raw) {
+        el.style.display='none';
+        el.innerHTML='';
+        return;
+      }
+
+      try {
+        const detail=JSON.parse(raw);
+        const tone=detail.type==='ok'? 'var(--accent)':detail.type==='err'? 'var(--danger)':'var(--muted)';
+        const statusLine=detail.status? `<div style="font-weight:600;color:${tone};margin-bottom:4px;">Last sync: ${esc(detail.status)}</div>`:'';
+        const messageLine=detail.message? `<div style="color:${tone};margin-bottom:${detail.body? '6px':'0'};">${esc(detail.message)}</div>`:'';
+        const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:var(--muted);">${esc(detail.body)}</div>`:'';
+        const timeLine=detail.at? `<div style="margin-top:6px;color:var(--muted);font-size:.65rem;">${esc(new Date(detail.at).toLocaleString())}</div>`:'';
+        el.innerHTML=`${statusLine}${messageLine}${bodyLine}${timeLine}`;
+        el.style.display='block';
+      } catch {
+        el.style.display='none';
+        el.innerHTML='';
+      }
     }
 
     // Returns a Set of siteIds that live inside localOnly folders (never synced)
@@ -9103,12 +9136,15 @@
       if(isSyncInProgress) return;
       const {url,key}=getSettings();
       if(!url) {
+        saveSyncDetail({type: 'err',status: 'Not configured',message: 'Set Azure URL first'});
         if(!silent) toast('Set Azure URL first','err');
+        renderSync();
         return;
       }
 
       const token=await getSyncAccessToken({interactive: source==='manual'});
       if(!token) {
+        saveSyncDetail({type: 'err',status: 'Not signed in',message: 'Sign in first, then retry sync'});
         if(!silent) toast('Sign in first, then retry sync','err');
         updateAuthUI();
         renderSync();
@@ -9131,6 +9167,7 @@
       btn.disabled=true; btn.textContent='Syncing…';
 
       let ok=0,fail=0;
+      let lastFailure=null;
       try {
         for(const samp of unsynced) {
           const site=sites.find(s => s.id===samp.siteId);
@@ -9155,11 +9192,33 @@
                 frameH: site?.frameH
               })
             });
+            const raw=await res.text();
+            let detail=raw;
+            try {
+              const parsed=raw? JSON.parse(raw):null;
+              detail=parsed?.detail||parsed?.error||raw;
+            } catch {}
             samp.syncStatus=res.ok? 'synced':'failed';
-            if(res.ok) ok++; else fail++;
-          } catch {
+            if(res.ok) {
+              ok++;
+            } else {
+              fail++;
+              lastFailure={
+                type: 'err',
+                status: `HTTP ${res.status}`,
+                message: `Sample ${samp.sampleIdx!=null? samp.sampleIdx+1:samp.id} failed to sync.`,
+                body: detail||'No response body returned.'
+              };
+            }
+          } catch(err) {
             samp.syncStatus='failed';
             fail++;
+            lastFailure={
+              type: 'err',
+              status: 'Network error',
+              message: `Sample ${samp.sampleIdx!=null? samp.sampleIdx+1:samp.id} failed to sync.`,
+              body: err?.message||'Request failed before a response was returned.'
+            };
           }
           await dbPut('samples',samp);
         }
@@ -9169,10 +9228,23 @@
         renderSync();
       }
 
+      if(fail===0) {
+        saveSyncDetail({
+          type: 'ok',
+          status: 'Success',
+          message: `Synced ${ok} sample${ok!==1? 's':''}`,
+          body: 'All unsynced samples were accepted by the server.'
+        });
+      } else if(lastFailure) {
+        saveSyncDetail(lastFailure);
+      }
+
       if(!silent||fail>0) {
         if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''}`,'ok');
         else toast(`${ok} synced, ${fail} failed`,'err');
       }
+
+      renderSync();
     }
 
     document.getElementById('sync-btn').addEventListener('click',async () => {
