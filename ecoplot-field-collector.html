@@ -1442,6 +1442,7 @@
       font-family: var(--font-mono);
       line-height: 1.2;
       text-align: left;
+      touch-action: manipulation;
     }
 
     .cover-btn:active {
@@ -1512,6 +1513,7 @@
       cursor: pointer;
       font-size: .7rem;
       padding: 0;
+      touch-action: manipulation;
     }
 
     /* ── Progress bar ── */
@@ -2082,6 +2084,7 @@
       line-height: 1;
       padding: 0;
       flex-shrink: 0;
+      touch-action: manipulation;
     }
 
     #sample-panel.species-drawer-collapsed .drawer-header {
@@ -3277,7 +3280,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=50;
+    const APP_BUILD_REV=52;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -8313,7 +8316,12 @@
     });
 
     // ── Cover grid ────────────────────────────────────────
-    function renderCoverGrid() {
+    let _coverGridDelegatesBound=false;
+    let _hitLogDelegatesBound=false;
+    let _coverGridSignature='';
+    let _coverProgressNodes=null;
+
+    function getCoverGridState() {
       const maxHits=activeEvent? (activeEvent.coverPts||2):(activeSite?.coverPts||2);
       const coverCats=getCoverCatsForEvent(activeEvent);
       const hitCount={};
@@ -8323,43 +8331,129 @@
       });
       const totalHits=samplePanelState.coverHits.length;
       const pct=maxHits? Math.round(totalHits/maxHits*100):0;
+      return {maxHits,coverCats,hitCount,totalHits,pct};
+    }
 
-      document.getElementById('cover-hit-progress').innerHTML=
-        `<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:6px;">
-      <span>Hits recorded: ${totalHits} / ${maxHits}</span>
-      <span style="color:${totalHits>=maxHits? 'var(--accent)':'var(--muted)'}">${pct}%</span>
+    function addCoverHitByCategory(catId) {
+      const {maxHits,coverCats}=getCoverGridState();
+      if(samplePanelState.coverHits.length>=maxHits) {
+        toast(`Max ${maxHits} hits per sample`,'err');
+        return;
+      }
+      const cat=coverCats.find(c => c.id===catId);
+      if(!cat) return;
+      samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
+      renderCoverGrid();
+      renderHitLog();
+    }
+
+    function bindCoverGridDelegates() {
+      if(_coverGridDelegatesBound) return;
+      const grid=document.getElementById('cover-grid');
+      if(!grid) return;
+      _coverGridDelegatesBound=true;
+
+      grid.addEventListener('click',e => {
+        const btn=e.target.closest('.cover-btn[data-cid]');
+        if(!btn||!grid.contains(btn)) return;
+        addCoverHitByCategory(btn.dataset.cid);
+      });
+
+      grid.addEventListener('keydown',e => {
+        if(e.key!=='Enter'&&e.key!==' ') return;
+        const btn=e.target.closest('.cover-btn[data-cid]');
+        if(!btn||!grid.contains(btn)) return;
+        e.preventDefault();
+        addCoverHitByCategory(btn.dataset.cid);
+      });
+    }
+
+    function bindHitLogDelegates() {
+      if(_hitLogDelegatesBound) return;
+      const el=document.getElementById('hit-log');
+      if(!el) return;
+      _hitLogDelegatesBound=true;
+
+      el.addEventListener('click',e => {
+        const btn=e.target.closest('button[data-hi]');
+        if(!btn||!el.contains(btn)) return;
+        const idx=+btn.dataset.hi;
+        if(!Number.isInteger(idx)||idx<0) return;
+        samplePanelState.coverHits.splice(idx,1);
+        renderCoverGrid();
+        renderHitLog();
+      });
+    }
+
+    function getCoverCategorySignature(coverCats) {
+      return coverCats.map(c => `${c.id}:${c.label}`).join('|');
+    }
+
+    function ensureCoverProgressNodes() {
+      const host=document.getElementById('cover-hit-progress');
+      if(!host) return null;
+      if(_coverProgressNodes&&host.contains(_coverProgressNodes.stats)) return _coverProgressNodes;
+
+      host.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:6px;">
+      <span data-role="cover-hit-stats"></span>
+      <span data-role="cover-hit-pct"></span>
     </div>
           <div class="prog-bar-wrap" style="margin-bottom:10px;">
-            <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${totalHits>=maxHits? 'var(--accent)':'var(--gold)'}"></div>
+            <div data-role="cover-hit-bar" class="prog-bar"></div>
           </div>`;
 
-      document.getElementById('cover-grid').innerHTML=coverCats.map(c => `
+      _coverProgressNodes={
+        stats: host.querySelector('[data-role="cover-hit-stats"]'),
+        pct: host.querySelector('[data-role="cover-hit-pct"]'),
+        bar: host.querySelector('[data-role="cover-hit-bar"]')
+      };
+      return _coverProgressNodes;
+    }
+
+    function ensureCoverGridMarkup(coverCats,hitCount) {
+      const grid=document.getElementById('cover-grid');
+      if(!grid) return null;
+      const sig=getCoverCategorySignature(coverCats);
+      if(sig!==_coverGridSignature||grid.children.length!==coverCats.length) {
+        grid.innerHTML=coverCats.map(c => `
             <div class="cover-btn${hitCount[c.id]>0? ' selected':''}" data-cid="${c.id}" role="button" tabindex="0" aria-label="Add ${esc(c.label)} cover hit">
               <span class="cover-label">${esc(c.label)}</span>
               <span class="cover-count">${hitCount[c.id]||''}</span>
             </div>`).join('');
+        _coverGridSignature=sig;
+      }
+      return grid;
+    }
 
-      document.querySelectorAll('.cover-btn').forEach(btn => {
-        const addHit=() => {
-          if(samplePanelState.coverHits.length>=maxHits) {
-            toast(`Max ${maxHits} hits per sample`,'err'); return;
-          }
-          const cat=coverCats.find(c => c.id===btn.dataset.cid);
-          samplePanelState.coverHits.push({id: cat.id,label: cat.label,ts: Date.now()});
-          renderCoverGrid();
-          renderHitLog();
-        };
-        btn.addEventListener('click',addHit);
-        btn.addEventListener('keydown',e => {
-          if(e.key==='Enter'||e.key===' ') {
-            e.preventDefault();
-            addHit();
-          }
-        });
+    function renderCoverGrid() {
+      bindCoverGridDelegates();
+      const {maxHits,coverCats,hitCount,totalHits,pct}=getCoverGridState();
+
+      const progress=ensureCoverProgressNodes();
+      if(progress) {
+        progress.stats.textContent=`Hits recorded: ${totalHits} / ${maxHits}`;
+        progress.pct.textContent=`${pct}%`;
+        progress.pct.style.color=totalHits>=maxHits? 'var(--accent)':'var(--muted)';
+        progress.bar.style.width=`${Math.min(pct,100)}%`;
+        progress.bar.style.background=totalHits>=maxHits? 'var(--accent)':'var(--gold)';
+      }
+
+      const grid=ensureCoverGridMarkup(coverCats,hitCount);
+      if(!grid) return;
+      const byId=new Map();
+      grid.querySelectorAll('.cover-btn[data-cid]').forEach(btn => byId.set(btn.dataset.cid,btn));
+      coverCats.forEach(c => {
+        const btn=byId.get(String(c.id));
+        if(!btn) return;
+        const cnt=hitCount[c.id]||0;
+        btn.classList.toggle('selected',cnt>0);
+        const countEl=btn.querySelector('.cover-count');
+        if(countEl) countEl.textContent=cnt? String(cnt):'';
       });
     }
 
     function renderHitLog() {
+      bindHitLogDelegates();
       const el=document.getElementById('hit-log');
       if(!samplePanelState.coverHits.length) {
         el.innerHTML='<span style="font-size:.72rem;color:var(--muted);">No cover hits added yet</span>';
@@ -8367,13 +8461,6 @@
       }
       el.innerHTML=samplePanelState.coverHits.map((h,i) => `
           <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
-      el.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click',() => {
-          samplePanelState.coverHits.splice(+btn.dataset.hi,1);
-          renderCoverGrid();
-          renderHitLog();
-        });
-      });
     }
 
 
