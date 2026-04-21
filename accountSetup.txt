@@ -2,9 +2,9 @@ accounts for azure workflow:
 
 Goals
 
-Users sign up/sign in with email + password.
-Only authenticated users can call sync.
-SQL schema stays mostly unchanged for now.
+-Users sign up/sign in with email + password.
+-Only authenticated users can call sync.
+-SQL schema stays mostly unchanged for now.
 
 Step 1: Create Identity Setup (External ID / B2C)
 

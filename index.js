@@ -21,10 +21,6 @@ const AUTH_CLIENT_ID=process.env.AUTH_CLIENT_ID||'025d2544-3267-47a5-a97d-261ae4
 const AUTH_AUTHORITY_HOST=process.env.AUTH_AUTHORITY_HOST||'ecoplot.ciamlogin.com';
 const REQUIRE_USER_APPROVAL=['1','true','yes'].includes(String(process.env.REQUIRE_USER_APPROVAL||'').toLowerCase());
 const JWKS=createRemoteJWKSet(new URL(`https://${AUTH_AUTHORITY_HOST}/${AUTH_TENANT_ID}/discovery/v2.0/keys`));
-const VALID_ISSUERS=[
-  `https://${AUTH_AUTHORITY_HOST}/${AUTH_TENANT_ID}/v2.0`,
-  `https://${AUTH_AUTHORITY_HOST}/${AUTH_TENANT_ID}/v2.0/`
-];
 const VALID_AUDIENCES=[AUTH_CLIENT_ID,`api://${AUTH_CLIENT_ID}`];
 
 const CORS_HEADERS={
@@ -57,7 +53,19 @@ async function verifyAccessToken(request) {
 
   try {
     const token=authHeader.slice('Bearer '.length).trim();
-    const {payload}=await jwtVerify(token,JWKS,{issuer: VALID_ISSUERS,audience: VALID_AUDIENCES});
+    const {payload}=await jwtVerify(token,JWKS,{audience: VALID_AUDIENCES});
+    if(payload.tid!==AUTH_TENANT_ID) {
+      return {ok: false,status: 401,error: 'Unexpected tenant',detail: `Token tid ${payload.tid||'missing'} did not match expected tenant.`};
+    }
+
+    const issuer=String(payload.iss||'');
+    const issuerMatchesAuthority=issuer.startsWith(`https://${AUTH_AUTHORITY_HOST}/`)
+      ||issuer.startsWith('https://login.microsoftonline.com/')
+      ||issuer.startsWith('https://sts.windows.net/');
+    if(!issuerMatchesAuthority) {
+      return {ok: false,status: 401,error: 'Unexpected issuer',detail: `Unexpected token issuer: ${issuer||'missing'}`};
+    }
+
     const userOid=payload.oid||payload.sub||null;
     if(!userOid) {
       return {ok: false,status: 401,error: 'Token missing user identifier'};
