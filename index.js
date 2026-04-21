@@ -181,12 +181,6 @@ async function upsertApprovalRequest(db,user) {
     WHERE is_approved = 1
   `);
   const autoApproveFirstUser=(countResult.recordset[0]?.approved_count||0)===0;
-  const adminCountResult=await db.request().query(`
-    SELECT COUNT(*) AS admin_count
-    FROM approved_users
-    WHERE is_admin = 1
-  `);
-  const autoAdminFirstUser=(adminCountResult.recordset[0]?.admin_count||0)===0;
   const configuredAdmin=isConfiguredAdmin(user);
 
   const result=await db.request()
@@ -194,7 +188,7 @@ async function upsertApprovalRequest(db,user) {
     .input('email',sql.NVarChar(255),user.email??null)
     .input('display_name',sql.NVarChar(255),user.displayName??null)
     .input('auto_approve',sql.Bit,autoApproveFirstUser)
-    .input('auto_admin',sql.Bit,autoAdminFirstUser||configuredAdmin)
+    .input('auto_admin',sql.Bit,configuredAdmin)
     .query(`
       MERGE approved_users AS target
       USING (
@@ -245,6 +239,7 @@ async function upsertApprovalRequest(db,user) {
 }
 
 async function isAdminUser(db,user) {
+  if(ADMIN_USER_OIDS.size>0) return isConfiguredAdmin(user);
   if(isConfiguredAdmin(user)) return true;
   const result=await db.request()
     .input('user_oid',sql.NVarChar(100),user.oid)
@@ -410,19 +405,33 @@ app.http('approvals',{
       }
 
       const userOid=String(body?.userOid||'').trim();
-      const approve=!!body?.approve;
+      const approveProvided=typeof body?.approve==='boolean';
+      const setAdminProvided=typeof body?.setAdmin==='boolean';
+      const approve=approveProvided? !!body.approve:null;
+      const setAdmin=setAdminProvided? !!body.setAdmin:null;
       if(!userOid) {
         return jsonResponse(400,{error: 'Missing required field: userOid'});
+      }
+      if(!approveProvided&&!setAdminProvided) {
+        return jsonResponse(400,{error: 'Missing required action: provide approve and/or setAdmin as boolean'});
       }
 
       const updatedResult=await db.request()
         .input('user_oid',sql.NVarChar(100),userOid)
-        .input('approve',sql.Bit,approve)
+        .input('approve_provided',sql.Bit,approveProvided)
+        .input('approve',sql.Bit,approve??false)
+        .input('set_admin_provided',sql.Bit,setAdminProvided)
+        .input('set_admin',sql.Bit,setAdmin??false)
         .query(`
           UPDATE approved_users
           SET
-            is_approved = @approve,
-            approved_at = CASE WHEN @approve = 1 THEN SYSUTCDATETIME() ELSE NULL END
+            is_approved = CASE WHEN @approve_provided = 1 THEN @approve ELSE is_approved END,
+            approved_at = CASE
+              WHEN @approve_provided = 1 AND @approve = 1 THEN SYSUTCDATETIME()
+              WHEN @approve_provided = 1 AND @approve = 0 THEN NULL
+              ELSE approved_at
+            END,
+            is_admin = CASE WHEN @set_admin_provided = 1 THEN @set_admin ELSE is_admin END
           WHERE user_oid = @user_oid;
 
           SELECT TOP 1

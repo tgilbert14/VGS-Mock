@@ -2633,6 +2633,7 @@
             style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
             <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
             Show pending only
+            <span id="approvals-pending-count-badge" class="badge" style="margin-left:auto;">0 pending</span>
           </label>
           <div id="approvals-list"></div>
           <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
@@ -8947,9 +8948,19 @@
       }
     }
 
+    function setApprovalsPendingCountBadge(users=[]) {
+      const badge=document.getElementById('approvals-pending-count-badge');
+      if(!badge) return;
+      const pending=users.filter(u => !u.isApproved).length;
+      badge.textContent=`${pending} pending`;
+      badge.style.background=pending? 'rgba(198,40,40,.2)':'rgba(46,125,79,.2)';
+      badge.style.color=pending? 'var(--danger)':'var(--accent)';
+    }
+
     function renderApprovalsList(users=[]) {
       const listEl=document.getElementById('approvals-list');
       if(!listEl) return;
+      setApprovalsPendingCountBadge(users);
       const filtered=approvalsPendingOnly? users.filter(u => !u.isApproved):users;
       if(!filtered.length) {
         listEl.innerHTML=`<div style="font-size:.68rem;color:var(--muted);">${users.length? 'No users match current filter.':'No users found.'}</div>`;
