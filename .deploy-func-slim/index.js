@@ -59,9 +59,18 @@ async function verifyAccessToken(request) {
     }
 
     const issuer=String(payload.iss||'');
-    const issuerMatchesAuthority=issuer.startsWith(`https://${AUTH_AUTHORITY_HOST}/`)
-      ||issuer.startsWith('https://login.microsoftonline.com/')
-      ||issuer.startsWith('https://sts.windows.net/');
+    let issuerMatchesAuthority=false;
+    try {
+      const issuerUrl=new URL(issuer);
+      const host=issuerUrl.hostname.toLowerCase();
+      const path=issuerUrl.pathname.toLowerCase();
+      const tenantSegment=`/${AUTH_TENANT_ID.toLowerCase()}/`;
+      const isCiamHost=host===AUTH_AUTHORITY_HOST.toLowerCase()||host.endsWith('.ciamlogin.com');
+      const isMicrosoftHost=host==='login.microsoftonline.com'||host==='sts.windows.net';
+      issuerMatchesAuthority=(isCiamHost||isMicrosoftHost)&&path.includes(tenantSegment);
+    } catch {
+      issuerMatchesAuthority=false;
+    }
     if(!issuerMatchesAuthority) {
       return {ok: false,status: 401,error: 'Unexpected issuer',detail: `Unexpected token issuer: ${issuer||'missing'}`};
     }
