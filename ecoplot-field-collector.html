@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -38,7 +38,7 @@
       --font-mono: 'IBM Plex Mono', monospace;
     }
 
-    /* ── Light mode ── */
+    /* -- Light mode -- */
     html.light {
       --bg: #f2f5f2;
       --s1: #ffffff;
@@ -76,14 +76,14 @@
       font-size: 14px;
     }
 
-    /* ── Shell ── */
+    /* -- Shell -- */
     #app {
       display: flex;
       flex-direction: column;
       height: 100dvh;
     }
 
-    /* ── Header ── */
+    /* -- Header -- */
     #topbar {
       background: var(--s1);
       border-bottom: 1px solid var(--border);
@@ -183,7 +183,7 @@
       color: var(--accent);
     }
 
-    /* ── Theme toggle ── */
+    /* -- Theme toggle -- */
     #theme-toggle {
       background: none;
       border: 1px solid var(--border);
@@ -201,7 +201,7 @@
       border-color: var(--accent2);
     }
 
-    /* ── Install banner ── */
+    /* -- Install banner -- */
     #install-banner {
       display: none;
       background: var(--s2);
@@ -286,7 +286,7 @@
       white-space: nowrap;
     }
 
-    /* ── Nav tabs ── */
+    /* -- Nav tabs -- */
     #nav {
       display: flex;
       background: var(--s1);
@@ -320,7 +320,7 @@
       margin-bottom: 2px;
     }
 
-    /* ── Pages ── */
+    /* -- Pages -- */
     #pages {
       flex: 1;
       overflow: hidden;
@@ -367,7 +367,7 @@
       min-height: 0;
     }
 
-    /* ── Cards ── */
+    /* -- Cards -- */
     .card {
       background: var(--s1);
       border: 1px solid var(--border);
@@ -400,7 +400,7 @@
       letter-spacing: .06em;
     }
 
-    /* ── Form elements ── */
+    /* -- Form elements -- */
     .field {
       margin-bottom: 12px;
     }
@@ -464,7 +464,7 @@
       gap: 8px;
     }
 
-    /* ── Buttons ── */
+    /* -- Buttons -- */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -542,7 +542,7 @@
       transform: none;
     }
 
-    /* ── Folder browser ── */
+    /* -- Folder browser -- */
     #folder-nav-bar {
       display: flex;
       align-items: center;
@@ -708,7 +708,7 @@
       color: var(--accent2);
     }
 
-    /* ── Site list ── */
+    /* -- Site list -- */
     .site-item {
       background: var(--s1);
       border: 1px solid var(--border);
@@ -805,7 +805,7 @@
       font-size: 1.1rem;
     }
 
-    /* ── Transect + sample grid ── */
+    /* -- Transect + sample grid -- */
     .transect-header {
       background: var(--s2);
       border: 1px solid var(--border);
@@ -905,7 +905,7 @@
       display: block;
     }
 
-    /* ── Sample entry panel ── */
+    /* -- Sample entry panel -- */
     #sample-panel {
       position: fixed;
       inset: 0;
@@ -962,7 +962,7 @@
       flex-shrink: 0;
     }
 
-    /* ── Species search ── */
+    /* -- Species search -- */
     #species-search-wrap {
       position: relative;
       margin-bottom: 10px;
@@ -1054,7 +1054,7 @@
       border: 1px solid var(--border);
     }
 
-    /* ── Species chip list ── */
+    /* -- Species chip list -- */
     .species-chips {
       display: flex;
       flex-wrap: wrap;
@@ -1079,7 +1079,7 @@
       margin-bottom: 6px;
     }
 
-    /* ── Seen-species quick-pick ── */
+    /* -- Seen-species quick-pick -- */
     .seen-section-hdr {
       display: flex;
       align-items: center;
@@ -1370,7 +1370,7 @@
       opacity: 1;
     }
 
-    /* ── Ground cover buttons ── */
+    /* -- Ground cover buttons -- */
     .cover-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -1432,7 +1432,7 @@
       flex-shrink: 0;
     }
 
-    /* ── Cover hit log ── */
+    /* -- Cover hit log -- */
     .hit-log {
       display: flex;
       flex-wrap: wrap;
@@ -1466,7 +1466,7 @@
       padding: 0;
     }
 
-    /* ── Progress bar ── */
+    /* -- Progress bar -- */
     .prog-bar-wrap {
       height: 4px;
       background: var(--s3);
@@ -1482,7 +1482,7 @@
       transition: width .4s;
     }
 
-    /* ── Summary stats ── */
+    /* -- Summary stats -- */
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1513,7 +1513,7 @@
       margin-top: 3px;
     }
 
-    /* ── Cover summary table ── */
+    /* -- Cover summary table -- */
     .cover-table {
       width: 100%;
       border-collapse: collapse;
@@ -1558,7 +1558,7 @@
       background: var(--danger);
     }
 
-    /* ── Trend comparison table ── */
+    /* -- Trend comparison table -- */
     .trend-table {
       width: 100%;
       border-collapse: collapse;
@@ -1613,7 +1613,7 @@
       flex-shrink: 0;
     }
 
-    /* ── Sync page ── */
+    /* -- Sync page -- */
     .sync-status-row {
       display: flex;
       align-items: center;
@@ -1645,7 +1645,7 @@
       background: var(--danger);
     }
 
-    /* ── Empty state ── */
+    /* -- Empty state -- */
     .empty {
       text-align: center;
       padding: 48px 16px;
@@ -1664,7 +1664,7 @@
       line-height: 1.8;
     }
 
-    /* ── Toast ── */
+    /* -- Toast -- */
     #toast {
       position: fixed;
       bottom: 80px;
@@ -1698,7 +1698,7 @@
       color: var(--danger);
     }
 
-    /* ── Modal ── */
+    /* -- Modal -- */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1786,7 +1786,7 @@
       margin-bottom: 0;
     }
 
-    /* ── Custom Plant Lists ── */
+    /* -- Custom Plant Lists -- */
     .cl-species-chip {
       display: inline-flex;
       align-items: center;
@@ -1827,7 +1827,7 @@
       background: var(--s3);
     }
 
-    /* ── Panel load flash ── */
+    /* -- Panel load flash -- */
     @keyframes panelFlash {
       from {
         opacity: 0;
@@ -1844,7 +1844,7 @@
       animation: panelFlash .18s ease both;
     }
 
-    /* ── Panel header two-line title ── */
+    /* -- Panel header two-line title -- */
     #sample-panel-title {
       min-width: 0;
     }
@@ -1874,7 +1874,7 @@
       text-overflow: ellipsis;
     }
 
-    /* ── Panel sample navigator ── */
+    /* -- Panel sample navigator -- */
     #panel-sample-nav {
       background: var(--s1);
       border-bottom: 1px solid var(--border);
@@ -1939,7 +1939,7 @@
       }
     }
 
-    /* ── Species Drawer ── */
+    /* -- Species Drawer -- */
     #species-drawer {
       position: absolute;
       top: 116px;
@@ -2187,19 +2187,19 @@
       <div class="signal" id="signal-pill">
         <div class="dot"></div><span id="signal-lbl">OFF</span>
       </div>
-      <button id="theme-toggle" title="Toggle light/dark mode">☀️</button>
+      <button id="theme-toggle" title="Toggle light/dark mode">??</button>
     </div>
 
     <!-- Install banner (shown only in Safari, not in standalone) -->
     <div id="install-banner">
-      <p>📲 <strong>Tip:</strong> Tap Share → <strong>Add to Home Screen</strong> to use EcoPlotMobile offline without a
+      <p>?? <strong>Tip:</strong> Tap Share ? <strong>Add to Home Screen</strong> to use EcoPlotMobile offline without a
         connection.</p>
       <button id="install-dismiss">Got it</button>
     </div>
 
     <!-- Update banner (shown when a new SW build is waiting) -->
     <div id="update-banner">
-      <p>🔄 <strong>Update available.</strong> Reload to get the latest version of EcoPlotMobile.</p>
+      <p>?? <strong>Update available.</strong> Reload to get the latest version of EcoPlotMobile.</p>
       <button id="update-reload-btn">Reload now</button>
       <button id="update-later-btn">Later</button>
     </div>
@@ -2210,46 +2210,46 @@
         <span class="tab-icon">&#x1F33F;</span>Sites
       </div>
       <div class="nav-tab" data-page="collect">
-        <span class="tab-icon">📋</span>Collect
+        <span class="tab-icon">??</span>Collect
       </div>
       <div class="nav-tab" data-page="summary">
-        <span class="tab-icon">📊</span>Summary
+        <span class="tab-icon">??</span>Summary
       </div>
       <div class="nav-tab" data-page="map">
-        <span class="tab-icon">🗺</span>Map
+        <span class="tab-icon">??</span>Map
       </div>
       <div class="nav-tab" data-page="sync">
-        <span class="tab-icon">🧰</span>Setup
+        <span class="tab-icon">??</span>Setup
       </div>
     </div>
 
     <!-- Pages -->
     <div id="pages">
 
-      <!-- ═══ SITES PAGE ═══ -->
+      <!-- --- SITES PAGE --- -->
       <div class="page active" id="page-sites">
 
         <div id="folder-nav-bar">
           <div id="folder-breadcrumb"></div>
-          <button class="btn btn-ghost btn-sm" id="new-folder-btn">📁 ＋ Folder</button>
+          <button class="btn btn-ghost btn-sm" id="new-folder-btn">?? + Folder</button>
         </div>
         <div id="new-folder-row" style="display:none;">
-          <input type="text" id="new-folder-input" placeholder="Folder name…">
+          <input type="text" id="new-folder-input" placeholder="Folder name�">
           <button class="btn btn-outline btn-sm" id="new-folder-confirm">Add</button>
-          <button class="btn btn-ghost btn-sm" id="new-folder-cancel">✕</button>
+          <button class="btn btn-ghost btn-sm" id="new-folder-cancel">?</button>
         </div>
         <div id="site-list"></div>
 
-        <!-- ＋ New Site toggle button -->
-        <button class="btn btn-primary btn-full" id="new-site-toggle-btn" style="margin-top:4px;">＋ New Site</button>
+        <!-- + New Site toggle button -->
+        <button class="btn btn-primary btn-full" id="new-site-toggle-btn" style="margin-top:4px;">+ New Site</button>
 
-        <!-- Create site form — hidden until button pressed -->
+        <!-- Create site form � hidden until button pressed -->
         <div id="new-site-form" style="display:none;margin-top:10px;">
           <div class="card">
             <div class="card-title">New Site
               <button id="new-site-cancel-btn"
                 style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1;"
-                title="Cancel">✕</button>
+                title="Cancel">?</button>
             </div>
             <div class="field">
               <label for="new-site-name">Site Name *</label>
@@ -2262,7 +2262,7 @@
             <div class="field">
               <label for="new-site-protocol">Default Protocol</label>
               <select id="new-site-protocol">
-                <option value="">— None —</option>
+                <option value="">� None �</option>
               </select>
             </div>
             <div class="row2">
@@ -2275,7 +2275,7 @@
                 <input type="number" id="new-site-lng" placeholder="e.g. -119.4179" step="any">
               </div>
             </div>
-            <button class="btn btn-ghost btn-sm btn-full" id="get-gps-btn" style="margin-bottom:10px;" type="button">📍
+            <button class="btn btn-ghost btn-sm btn-full" id="get-gps-btn" style="margin-bottom:10px;" type="button">??
               Use My GPS Location</button>
             <div class="row3">
               <div class="field">
@@ -2287,7 +2287,7 @@
                 <input type="number" id="new-site-slope" placeholder="e.g. 12" min="0" max="100">
               </div>
               <div class="field">
-                <label for="new-site-aspect">Aspect (°)</label>
+                <label for="new-site-aspect">Aspect (�)</label>
                 <input type="number" id="new-site-aspect" placeholder="e.g. 180" min="0" max="360">
               </div>
             </div>
@@ -2317,33 +2317,33 @@
                 </select>
               </div>
             </div>
-            <div id="create-site-location" class="folder-location-hint">📁 Creating in: <strong>Root</strong></div>
-            <button class="btn btn-primary btn-full" id="create-site-btn">＋ Create Site</button>
+            <div id="create-site-location" class="folder-location-hint">?? Creating in: <strong>Root</strong></div>
+            <button class="btn btn-primary btn-full" id="create-site-btn">+ Create Site</button>
           </div>
         </div>
 
       </div>
 
-      <!-- ═══ COLLECT PAGE ═══ -->
+      <!-- --- COLLECT PAGE --- -->
       <div class="page" id="page-collect">
         <div id="collect-no-site" class="empty" style="display:none;">
-          <span class="e-icon">📍</span>
+          <span class="e-icon">??</span>
           <p>Select a site from the Sites tab<br>to start collecting data.</p>
         </div>
         <div id="collect-content" style="display:none;">
           <div id="collect-site-header" class="card" style="margin-bottom:14px;"></div>
 
-          <!-- ＋ New Event toggle button -->
-          <button class="btn btn-primary btn-full" id="new-event-toggle-btn" style="margin-bottom:14px;">＋ New
+          <!-- + New Event toggle button -->
+          <button class="btn btn-primary btn-full" id="new-event-toggle-btn" style="margin-bottom:14px;">+ New
             Event</button>
 
-          <!-- New event form — hidden until button pressed -->
+          <!-- New event form � hidden until button pressed -->
           <div id="new-event-form" style="display:none;margin-bottom:14px;">
             <div class="card">
               <div class="card-title">New Event
                 <button id="new-event-cancel-btn"
                   style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1;"
-                  title="Cancel">✕</button>
+                  title="Cancel">?</button>
               </div>
               <div class="field">
                 <label for="new-event-protocol">Protocol
@@ -2351,7 +2351,7 @@
                     title="Protocol help">i</button>
                 </label>
                 <select id="new-event-protocol">
-                  <option value="">— No Protocol (manual settings) —</option>
+                  <option value="">� No Protocol (manual settings) �</option>
                 </select>
               </div>
               <div class="field">
@@ -2426,30 +2426,30 @@
                   </label>
                 </div>
               </div>
-              <button class="btn btn-primary btn-full" id="create-event-btn">＋ Create Event</button>
+              <button class="btn btn-primary btn-full" id="create-event-btn">+ Create Event</button>
             </div>
           </div>
           <div id="event-list"></div>
         </div>
       </div>
 
-      <!-- ═══ SUMMARY PAGE ═══ -->
+      <!-- --- SUMMARY PAGE --- -->
       <div class="page" id="page-summary">
         <div id="summary-no-site" class="empty">
-          <span class="e-icon">📊</span>
+          <span class="e-icon">??</span>
           <p>Select a site to view summary statistics.</p>
         </div>
         <div id="summary-content" style="display:none;"></div>
       </div>
 
-      <!-- ═══ SYNC PAGE ═══ -->
+      <!-- --- SYNC PAGE --- -->
       <div class="page" id="page-sync">
         <div class="card">
           <div class="card-title">App Build <span class="badge" id="app-build-version-badge">v--</span></div>
           <div id="app-build-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking build
-            status…</div>
+            status�</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="app-update-btn" style="display:none;">↻ Reload Latest
+            <button class="btn btn-outline btn-sm" id="app-update-btn" style="display:none;">? Reload Latest
               Build</button>
             <button class="btn btn-ghost btn-sm" id="app-check-update-btn" type="button">Check for Update</button>
           </div>
@@ -2459,9 +2459,9 @@
                 type="button" class="info-icon-btn" data-info-key="setup-species"
                 title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in
               list</span></div>
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading…</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading�</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="import-species-btn">📂 Import speciesList.csv</button>
+            <button class="btn btn-outline btn-sm" id="import-species-btn">?? Import speciesList.csv</button>
             <button class="btn btn-ghost btn-sm" id="species-import-help-btn" type="button"
               title="Show required CSV columns">What CSV works?</button>
           </div>
@@ -2478,7 +2478,7 @@
           <div id="species-list-wrap" style="margin-top:12px;display:none;">
             <div
               style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--s3);border:1px solid var(--accent2);border-radius:10px;">
-              <span style="font-size:1rem;">🌿</span>
+              <span style="font-size:1rem;">??</span>
               <label for="species-list-select"
                 style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;">Plant
                 List</label>
@@ -2493,15 +2493,15 @@
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;">Create focused species lists for specific
             pastures or area types. Activate one during collection to filter the search to only those plants.</div>
           <div id="custom-lists-container" style="margin-bottom:10px;"></div>
-          <button class="btn btn-outline btn-sm" id="add-custom-list-btn">＋ New Custom List</button>
+          <button class="btn btn-outline btn-sm" id="add-custom-list-btn">+ New Custom List</button>
         </div>
         <div class="card">
           <div class="card-title">Survey Protocols <button type="button" class="info-icon-btn"
               data-info-key="setup-protocols" title="Survey protocols help">i</button></div>
           <div id="protocols-list" style="margin-bottom:10px;"></div>
-          <button class="btn btn-outline btn-sm" id="import-protocol-btn">📂 Import protocol (.vgsp/.xml)</button>
+          <button class="btn btn-outline btn-sm" id="import-protocol-btn">?? Import protocol (.vgsp/.xml)</button>
           <input type="file" id="protocol-file-input" accept=".vgsp,.xml,.txt" style="display:none;">
-          <button class="btn btn-outline btn-sm" id="add-protocol-btn">＋ Add Custom Protocol</button>
+          <button class="btn btn-outline btn-sm" id="add-protocol-btn">+ Add Custom Protocol</button>
           <div id="add-protocol-form" style="display:none;margin-top:12px;">
             <div class="field" style="margin-bottom:8px;">
               <label>Protocol Name</label>
@@ -2617,7 +2617,7 @@
         </div>
         <div class="card">
           <div class="card-title">Account</div>
-          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in…</div>
+          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in�</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" id="auth-login-btn" type="button">Sign In</button>
             <button class="btn btn-ghost btn-sm" id="auth-logout-btn" type="button" style="display:none;">Sign
@@ -2643,38 +2643,41 @@
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
                 type="button" class="info-icon-btn" data-info-key="setup-sync"
                 title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
+          <div id="managed-sync-status"
+            style="display:none;font-size:.68rem;color:var(--muted);margin-bottom:8px;border:1px solid var(--line);border-radius:8px;padding:8px;background:rgba(255,255,255,.02);">
+          </div>
           <div id="sync-site-list"></div>
           <div id="sync-detail"
             style="display:none;font-size:.7rem;line-height:1.45;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:rgba(255,255,255,.03);">
           </div>
-          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">↑ Sync All Unsynced</button>
+          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">? Sync All Unsynced</button>
         </div>
         <div class="card">
           <div class="card-title">Export / Backup</div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Download collected field data (sites,
             events, and samples) as JSON or CSV for inspection or backup.</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="export-json-btn">⬇ Export JSON</button>
-            <button class="btn btn-ghost btn-sm" id="export-csv-btn">⬇ Export CSV (samples)</button>
+            <button class="btn btn-outline btn-sm" id="export-json-btn">? Export JSON</button>
+            <button class="btn btn-ghost btn-sm" id="export-csv-btn">? Export CSV (samples)</button>
           </div>
           <div id="export-status" style="font-size:.67rem;color:var(--muted);margin-top:10px;">No exports yet on this
             device.</div>
         </div>
         <div class="card" style="border-color:var(--danger);">
-          <div class="card-title" style="color:var(--danger);">⚠️ Developer Tools</div>
+          <div class="card-title" style="color:var(--danger);">?? Developer Tools</div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Permanently wipes all sites, events,
             samples, and folders from the local database. Requires dev password. Cannot be undone.</div>
-          <button class="btn btn-danger btn-sm" id="wipe-db-btn">🗑 Wipe Database…</button>
+          <button class="btn btn-danger btn-sm" id="wipe-db-btn">?? Wipe Database�</button>
         </div>
       </div>
 
-      <!-- ═══ MAP PAGE ═══ -->
+      <!-- --- MAP PAGE --- -->
       <div class="page" id="page-map">
         <div id="map-toolbar">
-          <span id="map-site-count">—</span>
+          <span id="map-site-count">�</span>
           <span style="flex:1;"></span>
-          <button class="btn btn-ghost btn-sm" id="map-locate-btn">📍 My Location</button>
-          <button class="btn btn-ghost btn-sm" id="map-fit-btn">⊡ Fit All</button>
+          <button class="btn btn-ghost btn-sm" id="map-locate-btn">?? My Location</button>
+          <button class="btn btn-ghost btn-sm" id="map-fit-btn">? Fit All</button>
         </div>
         <div id="map-container"></div>
       </div>
@@ -2682,12 +2685,12 @@
     </div><!-- /pages -->
   </div><!-- /app -->
 
-  <!-- ══════════════ SAMPLE ENTRY PANEL ══════════════ -->
+  <!-- -------------- SAMPLE ENTRY PANEL -------------- -->
   <div id="sample-panel" class="has-species-drawer species-drawer-collapsed">
     <div id="sample-panel-header">
-      <button class="btn btn-ghost btn-sm" id="sample-close-btn">✕</button>
+      <button class="btn btn-ghost btn-sm" id="sample-close-btn">?</button>
       <div id="sample-panel-title">
-        <div class="spt-main" id="spt-main">—</div>
+        <div class="spt-main" id="spt-main">�</div>
         <div class="spt-sub" id="spt-sub"></div>
         <div class="spt-ctx" id="spt-ctx"></div>
         <div class="spt-ctx" id="spt-scope" style="display:none;"></div>
@@ -2700,10 +2703,10 @@
       <div class="drawer-header">
         <h3 style="margin:0;font-size:.9rem;">Species List</h3>
         <button id="drawer-add-species-btn" class="btn btn-ghost btn-sm" title="Search and add species">+ Add</button>
-        <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Collapse species list">❯</button>
+        <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Collapse species list">?</button>
       </div>
       <div class="drawer-controls">
-        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn active" data-show="true">■ Hide site
+        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn active" data-show="true">� Hide site
           species</button>
       </div>
       <div id="drawer-species-list" class="drawer-species-list"></div>
@@ -2726,7 +2729,7 @@
       <div class="card" id="panel-freq-card">
         <div class="card-title">
           <span style="display:flex;gap:6px;align-items:center;">Frequency Quadrat
-            <span id="quadrat-size-badge" class="badge">40×40 cm</span>
+            <span id="quadrat-size-badge" class="badge">40�40 cm</span>
           </span>
           <span style="display:flex;gap:6px;align-items:center;">
             <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
@@ -2736,9 +2739,9 @@
         </div>
         <div id="species-custom-list-switches" style="display:none;margin:-2px 0 10px 0;"></div>
         <div id="species-search-wrap">
-          <input type="text" id="species-input" placeholder="Search by symbol, common name, scientific name, or 2-code…"
+          <input type="text" id="species-input" placeholder="Search by symbol, common name, scientific name, or 2-code�"
             autocomplete="off" autocorrect="off" spellcheck="false">
-          <button id="species-clear" style="display:none;">✕</button>
+          <button id="species-clear" style="display:none;">?</button>
         </div>
         <div class="species-search-controls"
           style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
@@ -2783,9 +2786,9 @@
         <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Select the top 3 species by estimated dry
           weight in this frame.</div>
         <div id="dwr-search-wrap" style="margin-bottom:10px;">
-          <input type="text" id="dwr-input" placeholder="Search species or 2-codes (max 3)…" autocomplete="off"
+          <input type="text" id="dwr-input" placeholder="Search species or 2-codes (max 3)�" autocomplete="off"
             autocorrect="off" spellcheck="false">
-          <button id="dwr-clear" style="display:none;">✕</button>
+          <button id="dwr-clear" style="display:none;">?</button>
         </div>
         <div class="species-search-controls"
           style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
@@ -2831,7 +2834,7 @@
   <!-- Incomplete sample warning modal -->
   <div class="modal-backdrop" id="incomplete-modal">
     <div class="modal">
-      <div class="modal-title">⚠️ Incomplete Sample</div>
+      <div class="modal-title">?? Incomplete Sample</div>
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:6px;" id="incomplete-modal-msg">This sample has
         incomplete data.</p>
       <p style="font-size:.75rem;color:var(--muted);margin-bottom:16px;">Continue anyway?</p>
@@ -2845,7 +2848,7 @@
   <!-- Wipe database modal -->
   <div class="modal-backdrop" id="wipe-db-modal">
     <div class="modal">
-      <div class="modal-title" style="color:var(--danger);">🗑 Wipe Database</div>
+      <div class="modal-title" style="color:var(--danger);">?? Wipe Database</div>
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">This will permanently delete <strong>all sites,
           events, samples, and folders</strong> from the local database. This cannot be undone.</p>
       <label style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text);margin-bottom:12px;">
@@ -2893,7 +2896,7 @@
     <div class="modal">
       <div class="modal-title">Archive Site?</div>
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px;">The site and all its data will be hidden and
-        removed from the sync queue. Nothing is deleted — you can restore it anytime.</p>
+        removed from the sync queue. Nothing is deleted � you can restore it anytime.</p>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-full" id="del-cancel-btn">Cancel</button>
         <button class="btn btn-danger btn-full" id="del-confirm-btn">Archive</button>
@@ -2904,8 +2907,8 @@
   <div class="modal-backdrop" id="bulk-replace-modal">
     <div class="modal">
       <div class="modal-title">Replace Species In Event</div>
-      <div id="bulk-replace-old" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">—</div>
-      <div id="bulk-replace-counts" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">—</div>
+      <div id="bulk-replace-old" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">�</div>
+      <div id="bulk-replace-counts" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">�</div>
       <div id="bulk-replace-selected" style="font-size:.74rem;color:var(--muted);margin-bottom:10px;">No replacement
         selected</div>
 
@@ -2914,10 +2917,10 @@
 
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:6px;">Replace with</div>
       <div id="bulk-replace-search-wrap" style="position:relative;margin-bottom:8px;">
-        <input type="text" id="bulk-replace-input" placeholder="Search species or 2-code to replace with…"
+        <input type="text" id="bulk-replace-input" placeholder="Search species or 2-code to replace with�"
           autocomplete="off" autocorrect="off" spellcheck="false" style="padding-right:34px;">
         <button id="bulk-replace-clear"
-          style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;color:var(--muted);cursor:pointer;">✕</button>
+          style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;color:var(--muted);cursor:pointer;">?</button>
       </div>
       <div
         style="display:flex;gap:12px;align-items:center;margin-bottom:8px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);">
@@ -2955,7 +2958,7 @@
   <div class="modal-backdrop" id="species-qualifier-modal">
     <div class="modal">
       <div class="modal-title">Edit Species Qualifier</div>
-      <div id="species-qualifier-target" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">—</div>
+      <div id="species-qualifier-target" style="font-size:.82rem;font-weight:700;margin-bottom:6px;">�</div>
       <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Use qualifiers to distinguish grouped or
         unknown entries like 2FORB so you can identify and replace them later.</div>
       <div class="field" style="margin-bottom:12px;">
@@ -3020,7 +3023,7 @@
           <input type="number" id="edit-site-lng" placeholder="e.g. -119.4179" step="any">
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm btn-full" id="edit-get-gps-btn" style="margin-bottom:10px;" type="button">📍
+      <button class="btn btn-ghost btn-sm btn-full" id="edit-get-gps-btn" style="margin-bottom:10px;" type="button">??
         Use My GPS Location</button>
       <div class="row3">
         <div class="field">
@@ -3032,7 +3035,7 @@
           <input type="number" id="edit-site-slope" placeholder="e.g. 12" min="0" max="100">
         </div>
         <div class="field">
-          <label for="edit-site-aspect">Aspect (°)</label>
+          <label for="edit-site-aspect">Aspect (�)</label>
           <input type="number" id="edit-site-aspect" placeholder="e.g. 180" min="0" max="360">
         </div>
       </div>
@@ -3092,7 +3095,7 @@
         <label>Add Species by Code</label>
         <div style="display:flex;gap:6px;align-items:flex-start;">
           <div style="flex:1;position:relative;">
-            <input type="text" id="cl-code-input" placeholder="Type code (e.g. BOGR2)…" autocomplete="off"
+            <input type="text" id="cl-code-input" placeholder="Type code (e.g. BOGR2)�" autocomplete="off"
               autocorrect="off" spellcheck="false">
             <div id="cl-code-dropdown"
               style="display:none;position:absolute;left:0;right:0;top:100%;z-index:200;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);box-shadow:0 4px 12px rgba(0,0,0,.18);">
@@ -3119,7 +3122,7 @@
     <div class="modal" style="max-width:600px;max-height:80vh;display:flex;flex-direction:column;">
       <div class="modal-title">Add Species to Event</div>
       <div class="field" style="margin-bottom:8px;margin-top:8px;">
-        <input type="text" id="drawer-search-input" placeholder="Search by symbol, common, or scientific name…"
+        <input type="text" id="drawer-search-input" placeholder="Search by symbol, common, or scientific name�"
           autocomplete="off" autocorrect="off" spellcheck="false">
       </div>
       <div style="display:flex;gap:14px;font-size:.7rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap;">
@@ -3150,12 +3153,14 @@
   <div id="toast"></div>
 
   <script>
-    // ══════════════════════════════════════════════════════
-    //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
+    //  USDA PLANT DATABASE � removed, import via CSV on the Setup tab
+    // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=56;
+    const APP_BUILD_REV=57;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
+    const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
+    const DEFAULT_SYNC_KEY='';
     const msalConfig={
       auth: {
         clientId: "025d2544-3267-47a5-a97d-261ae4e741fd",
@@ -3230,11 +3235,11 @@
     ];
     const USDA_PLANTS=[];
     const COVER_CATS=[
-      {id: "bare_soil",label: "Bare Soil",icon: "🟤"},
-      {id: "rock",label: "Rock",icon: "⬛"},
-      {id: "herb_litter",label: "Herb Litter",icon: "🍂"},
-      {id: "woody_litter",label: "Woody Litter",icon: "🪵"},
-      {id: "live_basal",label: "Live Basal Veg",icon: "🌿"},
+      {id: "bare_soil",label: "Bare Soil",icon: "??"},
+      {id: "rock",label: "Rock",icon: "?"},
+      {id: "herb_litter",label: "Herb Litter",icon: "??"},
+      {id: "woody_litter",label: "Woody Litter",icon: "??"},
+      {id: "live_basal",label: "Live Basal Veg",icon: "??"},
     ];
     const PROTOCOL_METHOD_LABELS={
       cover: 'Ground Cover',
@@ -3245,13 +3250,13 @@
 
     function coverIconForLabel(label) {
       const s=String(label||'').toLowerCase();
-      if(s.includes('bare')) return '🟤';
-      if(s.includes('rock')) return '⬛';
-      if(s.includes('woody')||s.includes('wood')) return '🪵';
-      if(s.includes('litter')) return '🍂';
-      if(s.includes('veg')||s.includes('vegetation')||s.includes('basal')) return '🌿';
-      if(s.includes('gravel')) return '🪨';
-      return '•';
+      if(s.includes('bare')) return '??';
+      if(s.includes('rock')) return '?';
+      if(s.includes('woody')||s.includes('wood')) return '??';
+      if(s.includes('litter')) return '??';
+      if(s.includes('veg')||s.includes('vegetation')||s.includes('basal')) return '??';
+      if(s.includes('gravel')) return '??';
+      return '�';
     }
 
     function getCoverCatsForEvent(ev) {
@@ -3268,7 +3273,7 @@
     }
 
     function protocolMethodsOrderedText(methods) {
-      return (methods||[]).map((m,i) => `${i+1}. ${protocolMethodLabel(m)}`).join(' · ')||'None';
+      return (methods||[]).map((m,i) => `${i+1}. ${protocolMethodLabel(m)}`).join(' � ')||'None';
     }
 
     function protocolImportedMetadataHTML(p) {
@@ -3291,7 +3296,7 @@
         <details style="margin-top:8px;border:1px solid var(--border);border-radius:8px;background:var(--s1);padding:6px 8px;">
           <summary style="cursor:pointer;font-size:.68rem;color:var(--accent);font-weight:600;">Imported Metadata</summary>
           <div style="font-size:.64rem;color:var(--muted);margin-top:6px;">
-            Form attrs: ${formAttrCount} · Event defs: ${evCount} · Method groups: ${methodCount} · Cover cats: ${coverCatCount} (${p.coverCatsSource||'default'})
+            Form attrs: ${formAttrCount} � Event defs: ${evCount} � Method groups: ${methodCount} � Cover cats: ${coverCatCount} (${p.coverCatsSource||'default'})
           </div>
           <div style="font-size:.64rem;color:var(--muted);margin-top:4px;">DefinitionPK: <span style="color:var(--text);">${esc(definitionPk)}</span></div>
           <pre style="margin-top:6px;max-height:180px;overflow:auto;font-size:.62rem;line-height:1.35;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px;white-space:pre-wrap;">${esc(clipped)}</pre>
@@ -3311,7 +3316,7 @@
           <div><strong>${p.transects}</strong> transects</div>
           <div><strong>${p.samples}</strong> samples / transect</div>
           <div><strong>${p.length}${p.unit}</strong> transect length</div>
-          <div><strong>${p.frameW}×${p.frameH} cm</strong> frame</div>
+          <div><strong>${p.frameW}�${p.frameH} cm</strong> frame</div>
         </div>
         <div style="margin-bottom:4px;">Methods: ${esc(methods)}</div>
         <div style="margin-bottom:4px;">Method order: ${esc(orderedMethods)}</div>
@@ -3319,9 +3324,9 @@
         <div>Cover categories: ${esc(coverCatText)}</div>`;
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  INDEXEDDB
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     const DB_NAME='ecoplot2';
     const DB_VER=6;
 
@@ -3457,9 +3462,9 @@
       });
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SPECIES DATABASE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     // Empty until user imports a CSV via the Setup tab
     let speciesDB=[];
     let speciesAllRecords=[];
@@ -3481,7 +3486,7 @@
     let spTrendState={sortCol: 'overall',sortDir: 'desc',groupBy: ''};  // persists across tab switches
     let swRegistrationRef=null;
     let swUpdateReady=false;
-    let swStatusText='Build loaded. Checking offline cache status…';
+    let swStatusText='Build loaded. Checking offline cache status�';
     let speciesQualifierState={methodKey: '',entryIndex: -1};
     const USDA_SPECIES_METHODS=[
       {key: 'species',badge: 'freq',label: 'Frequency',uniquePerSample: true},
@@ -3770,9 +3775,9 @@
       speciesDB=dedup.map(r => [r.symbol,r.common||'',r.sci||'',r.native||'?',r.duration||'',r.growthHabit||'']);
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  CUSTOM PLANT LISTS
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     function saveCustomLists() {
       localStorage.setItem('ep_custom_lists',JSON.stringify(customPlantLists));
     }
@@ -3852,7 +3857,7 @@
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
             ${lists.map(l => {
           const isActive=activeSet.has(l.id);
-          const btnText=isActive? `✓ ${l.name}`:l.name;
+          const btnText=isActive? `? ${l.name}`:l.name;
           const btnStyle=isActive
             ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;box-shadow:0 0 0 2px var(--accent2);'
             :'opacity:.82;border-style:dashed;';
@@ -3947,7 +3952,7 @@
         const listLabel=activeLists.map(l => l.name).join(', ');
         el.innerHTML=`<div class="two-code-picks-head" style="cursor:default;user-select:none;">
           <span style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:.75rem;">🎯</span>
+            <span style="font-size:.75rem;">??</span>
             <span>Custom: ${esc(listLabel)}</span>
           </span>
         </div>
@@ -3981,7 +3986,7 @@
       const activeIds=new Set(activeCustomListIds);
       container.innerHTML=customPlantLists.map(l => {
         const isActive=activeIds.has(l.id);
-        const preview=l.symbols.slice(0,6).join(', ')+(l.symbols.length>6? '…':'');
+        const preview=l.symbols.slice(0,6).join(', ')+(l.symbols.length>6? '�':'');
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
           <div style="flex:1;min-width:0;">
             <div style="font-size:.82rem;font-weight:600;color:${isActive? 'var(--accent)':'var(--text)'};">${esc(l.name)}${isActive? ' <span style="font-size:.67rem;background:var(--accent2);color:var(--accent);border-radius:8px;padding:1px 6px;font-weight:normal;">active</span>':''}</div>
@@ -4187,9 +4192,9 @@
             setServiceWorkerStatus(`Offline cache ready for v${APP_VERSION}.`,{updateReady: false});
           }
         } else if(worker.state==='installing') {
-          setServiceWorkerStatus('Downloading newer build…',{updateReady: false});
+          setServiceWorkerStatus('Downloading newer build�',{updateReady: false});
         } else if(worker.state==='activating') {
-          setServiceWorkerStatus('Activating newer build…',{updateReady: swUpdateReady});
+          setServiceWorkerStatus('Activating newer build�',{updateReady: swUpdateReady});
         }
       });
     }
@@ -4203,7 +4208,7 @@
       }
       if(reg.installing) watchServiceWorker(reg.installing);
       reg.addEventListener('updatefound',() => {
-        setServiceWorkerStatus('Downloading newer build…',{updateReady: false});
+        setServiceWorkerStatus('Downloading newer build�',{updateReady: false});
         watchServiceWorker(reg.installing);
       });
     }
@@ -4217,7 +4222,7 @@
         setServiceWorkerStatus('Service worker not ready yet. Try again in a moment.',{updateReady: false});
         return;
       }
-      setServiceWorkerStatus('Checking for newer build…',{updateReady: swUpdateReady});
+      setServiceWorkerStatus('Checking for newer build�',{updateReady: swUpdateReady});
       try {
         await swRegistrationRef.update();
         if(!swUpdateReady) setServiceWorkerStatus(`No newer build detected. Current build: v${APP_VERSION}.`,{updateReady: false});
@@ -4403,14 +4408,14 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+          ${inv? '?? ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
       let html='';
 
       if(unifiedCurrent.length) {
-        const sortLabel=speciesAlphaSort? 'A–Z':'Most seen';
+        const sortLabel=speciesAlphaSort? 'A�Z':'Most seen';
         html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-current-chips">${unifiedCurrent.map(sp => currentPicksHTML(sp)).join('')}</div>`;
       }
@@ -4495,11 +4500,11 @@
           ? ` Condensed to ${speciesImportStats.storedRows.toLocaleString()} stored species records.`
           :'';
         info.textContent=`${speciesImportStats.sourceRows.toLocaleString()} source rows imported offline`+(listCount? ` across ${listCount} state lists.`:'.')+condensed;
-        if(importBtn) importBtn.textContent='📂 Re-import CSV';
+        if(importBtn) importBtn.textContent='?? Re-import CSV';
       } else {
         badge.textContent='No list loaded';
         info.textContent='No species list loaded';
-        if(importBtn) importBtn.textContent='📂 Import speciesList.csv';
+        if(importBtn) importBtn.textContent='?? Import speciesList.csv';
       }
       updateSpeciesInputState();
     }
@@ -4511,20 +4516,20 @@
       if(speciesInputEl) {
         speciesInputEl.disabled=!hasDB;
         speciesInputEl.placeholder=hasDB
-          ? 'Search by symbol, common name, scientific name, or 2-code…'
+          ? 'Search by symbol, common name, scientific name, or 2-code�'
           :'No species options available';
       }
       if(dwrInputEl) {
         dwrInputEl.disabled=!hasDB;
         dwrInputEl.placeholder=hasDB
-          ? 'Search species or 2-codes (max 3)…'
+          ? 'Search species or 2-codes (max 3)�'
           :'No species options available';
       }
     }
 
     async function importSpeciesCSV(file) {
       const btn=document.getElementById('import-species-btn');
-      btn.disabled=true; btn.textContent='Parsing…';
+      btn.disabled=true; btn.textContent='Parsing�';
       const reader=new FileReader();
       reader.onload=async e => {
         try {
@@ -4572,7 +4577,7 @@
           }
           if(!rawEntries.length) throw new Error('No valid species rows found after parsing.');
           const entries=aggregateSpeciesImportEntries(rawEntries);
-          btn.textContent='Saving…';
+          btn.textContent='Saving�';
           await dbReplaceAll('species',entries);
           speciesAllRecords=entries;
           speciesImportStats={sourceRows: rawEntries.length,storedRows: entries.length};
@@ -4583,13 +4588,13 @@
           updateSpeciesDBUI(entries.length);
           renderSpeciesListSelector();
           toast(`Loaded ${rawEntries.length.toLocaleString()} rows as ${entries.length.toLocaleString()} stored species records`,'ok');
-          btn.textContent='📂 Import speciesList.csv';
+          btn.textContent='?? Import speciesList.csv';
           renderCollect();
         } catch(err) {
           const info=document.getElementById('species-db-info');
           if(info) info.textContent='Species import failed. '+err.message;
           toast('Import failed: '+err.message,'err');
-          btn.textContent='📂 Import speciesList.csv';
+          btn.textContent='?? Import speciesList.csv';
         }
         btn.disabled=false;
       };
@@ -4597,9 +4602,9 @@
       reader.readAsText(file);
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  APP STATE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     let activeSiteId=null;
     let activeSite=null;
     let activeEventId=null;
@@ -4765,9 +4770,9 @@
       },delay);
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  NAVIGATION
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click',() => {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -4782,9 +4787,9 @@
       });
     });
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SIGNAL
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     function updateSignal() {
       const on=navigator.onLine;
       const pill=document.getElementById('signal-pill');
@@ -4800,7 +4805,7 @@
       if(navigator.onLine) {
         const settings=getSettings();
         if(settings.autoSync) {
-          toast('Back online. Auto-sync enabled, syncing pending records…','ok');
+          toast('Back online. Auto-sync enabled, syncing pending records�','ok');
           syncPendingSamples({silent: true,source: 'auto'});
         } else {
           toast('Back online. You can sync pending records.','ok');
@@ -4812,9 +4817,9 @@
     window.addEventListener('offline',handleConnectivityChange);
     updateSignal();
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  TOAST
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     let _tt;
     function toast(msg,type='') {
       const el=document.getElementById('toast');
@@ -4900,9 +4905,9 @@
       showInfoHelp(infoBtn.dataset.infoKey||'');
     });
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SITES PAGE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     function openNewSiteForm() {
       document.getElementById('new-site-form').style.display='';
       document.getElementById('new-site-toggle-btn').style.display='none';
@@ -4919,7 +4924,7 @@
     document.getElementById('get-gps-btn').addEventListener('click',() => {
       if(!navigator.geolocation) {toast('Geolocation not supported on this device','err'); return;}
       const btn=document.getElementById('get-gps-btn');
-      btn.textContent='📍 Getting location…';
+      btn.textContent='?? Getting location�';
       btn.disabled=true;
       navigator.geolocation.getCurrentPosition(
         pos => {
@@ -4929,12 +4934,12 @@
             // altitude is in metres; convert to feet
             document.getElementById('new-site-elev').value=Math.round(pos.coords.altitude*3.28084);
           }
-          btn.textContent='📍 Use My GPS Location';
+          btn.textContent='?? Use My GPS Location';
           btn.disabled=false;
           toast('Location captured','ok');
         },
         err => {
-          btn.textContent='📍 Use My GPS Location';
+          btn.textContent='?? Use My GPS Location';
           btn.disabled=false;
           const msg={1: 'Permission denied',2: 'Position unavailable',3: 'Timed out'};
           toast('GPS error: '+(msg[err.code]||err.message),'err');
@@ -4980,13 +4985,13 @@
       }
     });
 
-    // ── Edit Site modal ──
+    // -- Edit Site modal --
     async function openEditSiteModal(siteId) {
       const site=await dbGet('sites',siteId);
       if(!site) {toast('Site not found','err'); return;}
       const protocols=await dbGetAll('protocols');
       const sel=document.getElementById('edit-site-protocol');
-      sel.innerHTML=`<option value="">— None —</option>`+
+      sel.innerHTML=`<option value="">� None �</option>`+
         protocols.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
       document.getElementById('edit-site-id').value=site.id;
       document.getElementById('edit-site-name').value=site.name||'';
@@ -5014,7 +5019,7 @@
     document.getElementById('edit-get-gps-btn').addEventListener('click',() => {
       if(!navigator.geolocation) {toast('Geolocation not supported on this device','err'); return;}
       const btn=document.getElementById('edit-get-gps-btn');
-      btn.textContent='📍 Getting location…';
+      btn.textContent='?? Getting location�';
       btn.disabled=true;
       navigator.geolocation.getCurrentPosition(
         pos => {
@@ -5022,12 +5027,12 @@
           document.getElementById('edit-site-lng').value=pos.coords.longitude.toFixed(6);
           if(pos.coords.altitude!==null&&!document.getElementById('edit-site-elev').value)
             document.getElementById('edit-site-elev').value=Math.round(pos.coords.altitude*3.28084);
-          btn.textContent='📍 Use My GPS Location';
+          btn.textContent='?? Use My GPS Location';
           btn.disabled=false;
           toast('Location captured','ok');
         },
         err => {
-          btn.textContent='📍 Use My GPS Location';
+          btn.textContent='?? Use My GPS Location';
           btn.disabled=false;
           const msg={1: 'Permission denied',2: 'Position unavailable',3: 'Timed out'};
           toast('GPS error: '+(msg[err.code]||err.message),'err');
@@ -5068,7 +5073,7 @@
       }
     });
 
-    // ── Custom Plant Lists event handlers ──
+    // -- Custom Plant Lists event handlers --
     document.getElementById('add-custom-list-btn')?.addEventListener('click',() => {
       if(speciesAllRecords.length===0) {
         toast('Import a species CSV first before creating custom lists','warn'); return;
@@ -5202,12 +5207,12 @@
       const {folders,sites: allSites,samples: allSamples}=siteListCache;
       const el=document.getElementById('site-list');
 
-      // ── Breadcrumb ──
+      // -- Breadcrumb --
       const path=await buildFolderPath(currentFolderId,folders);
       const bcEl=document.getElementById('folder-breadcrumb');
       let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
       path.forEach((f,i) => {
-        bcHTML+=`<span class="crumb-sep">›</span>`;
+        bcHTML+=`<span class="crumb-sep">�</span>`;
         if(i===path.length-1) {
           bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
         } else {
@@ -5223,10 +5228,10 @@
         });
       });
 
-      // ── Location hint on create form ──
+      // -- Location hint on create form --
       updateCreateLocationHint(folders,path);
 
-      // ── Sub-folders at current level ──
+      // -- Sub-folders at current level --
       const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
       const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
       const localFolders=allSubFolders.filter(f => f.localOnly);
@@ -5236,26 +5241,26 @@
         const subCount=folders.filter(sf => sf.parentId===f.id).length;
         const siteCount=countSitesInFolder(f.id,folders,allSites);
         const isLocal=f.localOnly===true;
-        const icon='📁';
+        const icon='??';
         const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
         const actions=isLocal
           ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
           :`<div class="folder-actions">
-              <button class="f-action" data-rename-folder="${f.id}" title="Rename">✏️</button>
-              <button class="f-action del" data-del-folder="${f.id}" title="Delete">✕</button>
+              <button class="f-action" data-rename-folder="${f.id}" title="Rename">??</button>
+              <button class="f-action del" data-del-folder="${f.id}" title="Delete">?</button>
              </div>`;
         html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
-            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' · ':''}${siteCount} site${siteCount!==1? 's':''}</div>
+            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' � ':''}${siteCount} site${siteCount!==1? 's':''}</div>
           </div>
           ${actions}
-        <span class="site-arrow" style="margin-left:4px;">›</span>
+        <span class="site-arrow" style="margin-left:4px;">�</span>
         </div>`;
       });
 
-      // ── Sites at current level ──
+      // -- Sites at current level --
       const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
       const active=levelSites.filter(s => !s.archived);
       const archived=levelSites.filter(s => s.archived);
@@ -5263,9 +5268,9 @@
 
       if(!visible.length&&!subFolders.length&&!localFolders.length) {
         if(!allSites.length&&!folders.length) {
-          html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
+          html+='<div class="empty"><span class="e-icon">??</span><p>No sites yet.<br>Create one above.</p></div>';
         } else {
-          html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
+          html+='<div class="empty"><span class="e-icon">'+(showArchived? '??':'??')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
         }
       }
 
@@ -5279,45 +5284,45 @@
         if(s.elev) meta.push(`${s.elev} ft`);
         if(s.aspect) meta.push(s.aspect);
         if(done) meta.push(`${done} collected`);
-        const subStr=meta.join(' · ')||'No data yet';
+        const subStr=meta.join(' � ')||'No data yet';
         if(s.archived) {
           html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
-            <div class="site-icon">📦</div>
+            <div class="site-icon">??</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
-              <div class="site-sub">${done} collected · archived</div>
+              <div class="site-sub">${done} collected � archived</div>
             </div>
-            <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
+            <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">?</span>
           </div>`;
         } else {
           html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
-            <div class="site-icon">🌿</div>
+            <div class="site-icon">??</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
               <div class="site-sub">${subStr}</div>
             </div>
-            <span class="site-arrow" data-edit="${s.id}" title="Edit site" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">✏️</span>
-            <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
-            <span class="site-arrow">›</span>
+            <span class="site-arrow" data-edit="${s.id}" title="Edit site" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">??</span>
+            <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">??</span>
+            <span class="site-arrow">�</span>
           </div>`;
         }
       });
 
-      // ── Local-only folders at the very bottom, after sites ──
+      // -- Local-only folders at the very bottom, after sites --
       localFolders.forEach(f => {
         const subCount=folders.filter(sf => sf.parentId===f.id).length;
         const siteCount=countSitesInFolder(f.id,folders,allSites);
-        const icon='📁';
+        const icon='??';
         const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
         const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
         html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
-            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' · ':''}${siteCount} site${siteCount!==1? 's':''}</div>
+            <div class="folder-sub">${subCount>0? subCount+' folder'+(subCount!==1? 's':'')+' � ':''}${siteCount} site${siteCount!==1? 's':''}</div>
           </div>
           ${actions}
-        <span class="site-arrow" style="margin-left:4px;">›</span>
+        <span class="site-arrow" style="margin-left:4px;">�</span>
         </div>`;
       });
 
@@ -5325,14 +5330,14 @@
       if(archived.length||showArchived) {
         html+=`<div style="text-align:center;margin-top:12px;">
           <button id="toggle-archived-btn" class="btn btn-ghost" style="font-size:.72rem;padding:6px 14px;">
-            ${showArchived? '← Back to active sites':`Show ${archived.length} archived site${archived.length!==1? 's':''}`}
+            ${showArchived? '? Back to active sites':`Show ${archived.length} archived site${archived.length!==1? 's':''}`}
           </button>
         </div>`;
       }
 
       el.innerHTML=html;
 
-      // ── Wire folder clicks ──
+      // -- Wire folder clicks --
       el.querySelectorAll('[data-folder-id]').forEach(item => {
         item.addEventListener('click',e => {
           const renBtn=e.target.closest('[data-rename-folder]');
@@ -5346,7 +5351,7 @@
         });
       });
 
-      // ── Wire site clicks ──
+      // -- Wire site clicks --
       el.querySelectorAll('.site-item').forEach(item => {
         item.addEventListener('click',e => {
           const editBtn=e.target.closest('[data-edit]');
@@ -5365,12 +5370,12 @@
 
     async function updateCreateLocationHint(folders,path) {
       if(!path) path=await buildFolderPath(currentFolderId,folders||await dbGetAll('folders'));
-      const label=path.length? path.map(f => esc(f.name)).join(' › '):'Root';
+      const label=path.length? path.map(f => esc(f.name)).join(' � '):'Root';
       const hint=document.getElementById('create-site-location');
-      if(hint) hint.innerHTML=`📁 Creating in: <strong>${label}</strong>`;
+      if(hint) hint.innerHTML=`?? Creating in: <strong>${label}</strong>`;
     }
 
-    // ── New folder wiring ──
+    // -- New folder wiring --
     document.getElementById('new-folder-btn').addEventListener('click',() => {
       document.getElementById('new-folder-row').style.display='flex';
       document.getElementById('new-folder-input').focus();
@@ -5469,16 +5474,16 @@
     function updateCrumb() {
       const el=document.getElementById('site-crumb');
       if(activeSite&&activeEvent)
-        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> · ${esc(activeEvent.name)} `;
+        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> � ${esc(activeEvent.name)} `;
       else if(activeSite)
         el.innerHTML=`<strong>${esc(activeSite.name)}</strong>`;
       else
         el.textContent='No site selected';
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  COLLECT PAGE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     document.getElementById('new-event-toggle-btn').addEventListener('click',openNewEventForm);
     document.getElementById('new-event-cancel-btn').addEventListener('click',closeNewEventForm);
     async function renderCollect() {
@@ -5509,7 +5514,7 @@
       const _lng=hasGps? parseFloat(activeSite.lng):null;
       const _navUri=hasGps? `geo:${_lat},${_lng}?q=${_lat},${_lng}(${encodeURIComponent(activeSite.name)})`:'';
       const _gMaps=hasGps? `https://www.google.com/maps/search/?api=1&query=${_lat},${_lng}`:'';
-      const gpsStr=hasGps? `📍 ${activeSite.lat}, ${activeSite.lng}`:'';
+      const gpsStr=hasGps? `?? ${activeSite.lat}, ${activeSite.lng}`:'';
       hdr.innerHTML=`
           <div class="card-title">${esc(activeSite.name)}
         <span class="badge">${totalDone} collected</span>
@@ -5517,15 +5522,15 @@
           <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.68rem;color:var(--muted);margin-top:6px;align-items:center;">
             ${activeSite.desc? `<span style="font-style:italic;">${esc(activeSite.desc)}</span>`:''}
             ${gpsStr? `<span>${gpsStr}</span>`:''}
-            ${hasGps? `<a href="${_navUri}" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;" title="Navigate to site in maps app">🧭 Navigate</a>`:''}
-            ${hasGps? `<a href="${_gMaps}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;">🌍 Maps</a>`:''}
-            <span>📅 ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
+            ${hasGps? `<a href="${_navUri}" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;" title="Navigate to site in maps app">?? Navigate</a>`:''}
+            ${hasGps? `<a href="${_gMaps}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:.68rem;">?? Maps</a>`:''}
+            <span>?? ${allEvents.length} event${allEvents.length!==1? 's':''}</span>
           </div>`;
 
       // Event list
       const evList=document.getElementById('event-list');
       if(!allEvents.length) {
-        evList.innerHTML='<div class="empty" style="padding:24px 0;"><span class="e-icon">📅</span><p>No events yet.<br>Create one above.</p></div>';
+        evList.innerHTML='<div class="empty" style="padding:24px 0;"><span class="e-icon">??</span><p>No events yet.<br>Create one above.</p></div>';
       } else {
         evList.innerHTML=allEvents.map(ev => {
           const evSamples=allSamples.filter(s => s.eventId===ev.id);
@@ -5533,23 +5538,23 @@
           const evTotal=(ev.transects||4)*(ev.samples||50);
           const pct=evTotal? Math.round(evDone/evTotal*100):0;
           const isActive=activeEventId===ev.id;
-          const cfgStr=`${ev.transects||4}T × ${ev.samples||50}S · ${ev.length||100}${ev.unit||'m'} · ${ev.coverPts||2} cover pts · frame ${ev.frameW||40}×${ev.frameH||40}cm`;
+          const cfgStr=`${ev.transects||4}T � ${ev.samples||50}S � ${ev.length||100}${ev.unit||'m'} � ${ev.coverPts||2} cover pts � frame ${ev.frameW||40}�${ev.frameH||40}cm`;
           const proto=ev.protocolId? protocolMap[ev.protocolId]:null;
           const protoTag=proto? `<span class="badge" style="margin-left:4px;font-size:.6rem;">${esc(proto.name)}</span>`:'';
           const evMethods=ev.methods||[];
           const hasUsdaMethod=evMethods.includes('freq')||evMethods.includes('dwr');
           const listLabel=speciesListOptions.find(x => x.key===selectedSpeciesListKey)?.label||'All';
-          const listBadge=hasUsdaMethod? `<span class="badge" style="margin-left:4px;font-size:.6rem;background:var(--s3);color:var(--muted);" title="Active plant list">🌿 ${esc(listLabel)}</span>`:'';
+          const listBadge=hasUsdaMethod? `<span class="badge" style="margin-left:4px;font-size:.6rem;background:var(--s3);color:var(--muted);" title="Active plant list">?? ${esc(listLabel)}</span>`:'';
           return `
           <div class="event-item${isActive? ' active-event':''}" data-eid="${ev.id}">
-            <div class="site-icon" style="font-size:1.1rem;">📅</div>
+            <div class="site-icon" style="font-size:1.1rem;">??</div>
             <div class="site-meta">
               <div class="site-name">${esc(ev.name)}${protoTag}${listBadge}</div>
-              <div class="site-sub">${evDone}/${evTotal} · ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
+              <div class="site-sub">${evDone}/${evTotal} � ${ev.eventDate||(new Date(ev.createdAt).toLocaleDateString())}</div>
               <div class="prog-bar-wrap" style="margin-top:5px;margin-bottom:0;height:3px;"><div class="prog-bar" style="width:${pct}%"></div></div>
             </div>
-            <button class="event-edit-btn btn btn-ghost btn-sm" data-edit-eid="${ev.id}" title="Edit event">✏️</button>
-            <span class="site-arrow" style="pointer-events:none;">›</span>
+            <button class="event-edit-btn btn btn-ghost btn-sm" data-edit-eid="${ev.id}" title="Edit event">??</button>
+            <span class="site-arrow" style="pointer-events:none;">�</span>
           </div>
           <div class="event-edit-block" id="eedit-${ev.id}" style="display:none;">
             <div class="card" style="margin-bottom:10px;border-color:var(--accent2);">
@@ -5566,9 +5571,9 @@
                 <label>Protocol</label>
                 <select id="eproto-${ev.id}">
                   ${allProtocols.length
-              ? `<option value="">— Keep current settings —</option>
+              ? `<option value="">� Keep current settings �</option>
                   ${sortProtocolsForDisplay(allProtocols).map(p => `<option value="${p.id}"${ev.protocolId===p.id? ' selected':''}>${esc(p.name)}</option>`).join('')}`
-              :'<option value="">— Import or Create Protocol —</option>'}
+              :'<option value="">� Import or Create Protocol �</option>'}
                 </select>
               </div>
               <div class="row2" style="margin-bottom:8px;">
@@ -5583,20 +5588,20 @@
               </div>
               <div class="field" style="margin-bottom:8px;">
                 <label>Notes</label>
-                <textarea id="enotes-${ev.id}" rows="2" placeholder="Weather, observer, conditions…">${esc(ev.notes||'')}</textarea>
+                <textarea id="enotes-${ev.id}" rows="2" placeholder="Weather, observer, conditions�">${esc(ev.notes||'')}</textarea>
               </div>
               <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:6px 8px;background:var(--s2);border-radius:6px;">${cfgStr}</div>
               <div style="display:flex;gap:8px;">
                 <button class="btn btn-ghost btn-sm" data-close-eid="${ev.id}">Cancel</button>
                 <button class="btn btn-ghost btn-sm event-apply-protocol-btn" data-eid="${ev.id}" ${allProtocols.length? '':'disabled title="Import or create a protocol first"'}>Apply Protocol</button>
                 <button class="btn btn-outline btn-sm event-details-save" data-eid="${ev.id}" style="flex:1;">Save</button>
-                <button class="btn btn-danger btn-sm event-delete-btn" data-del-eid="${ev.id}" title="Delete event">🗑</button>
+                <button class="btn btn-danger btn-sm event-delete-btn" data-del-eid="${ev.id}" title="Delete event">??</button>
               </div>
             </div>
           </div>`;
         }).join('');
 
-        // Row click → open transects
+        // Row click ? open transects
         evList.querySelectorAll('.event-item').forEach(row => {
           row.addEventListener('click',e => {
             if(e.target.closest('.event-edit-btn')) return; // handled separately
@@ -5711,7 +5716,7 @@
         html+=`<div class="transect-header" data-t="${t}" data-eid="${eventId}">
           <div class="transect-label">Transect ${t+1}</div>
           <div class="transect-prog">${tDone}/${activeSite.samples}</div>
-          <div class="transect-chevron" id="tchev-${eventId}-${t}">›</div>
+          <div class="transect-chevron" id="tchev-${eventId}-${t}">�</div>
         </div>
           <div id="tsamples-${eventId}-${t}" style="display:none;"><div class="sample-grid">`;
         for(let s=0;s<activeSite.samples;s++) {
@@ -5745,7 +5750,7 @@
       });
     }
 
-    // ── Protocol helpers ──
+    // -- Protocol helpers --
     async function loadAllProtocols() {
       return dbGetAll('protocols');
     }
@@ -6297,8 +6302,8 @@
       // Keep the first placeholder option, replace the rest
       while(selectEl.options.length>1) selectEl.remove(1);
       selectEl.options[0].textContent=protocols.length
-        ? '— Select a Protocol —'
-        :'— Import or Create Protocol (optional) —';
+        ? '� Select a Protocol �'
+        :'� Import or Create Protocol (optional) �';
       protocols.forEach(p => {
         const opt=document.createElement('option');
         opt.value=p.id;
@@ -6484,9 +6489,9 @@
 
     function sampleId(siteId,eventId,t,s) {return `${siteId}_${eventId}_T${t}_S${s} `;}
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SAMPLE PANEL
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     async function openSamplePanel(tIdx,sIdx) {
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
@@ -6498,7 +6503,7 @@
     }
 
     async function loadSampleIntoPanel(tIdx,sIdx) {
-      // ── FIX: always sync state so Save/advance uses the right position ──
+      // -- FIX: always sync state so Save/advance uses the right position --
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
       speciesAlphaSort=false; // reset ABC toggle per sample
@@ -6543,19 +6548,19 @@
 
       // Header
       const offset=Math.round((sIdx/((ev.samples||50)-1||1))*(ev.length||100));
-      document.getElementById('spt-main').textContent=`T${tIdx+1}  ·  S${sIdx+1} `;
+      document.getElementById('spt-main').textContent=`T${tIdx+1}  �  S${sIdx+1} `;
       document.getElementById('spt-sub').textContent=
-        `Sample ${sIdx+1} of ${ev.samples||50}  ·  ${offset} ${ev.unit||'m'} along transect`;
+        `Sample ${sIdx+1} of ${ev.samples||50}  �  ${offset} ${ev.unit||'m'} along transect`;
       document.getElementById('spt-ctx').textContent=
-        ev.name? `${esc(activeSite.name)}  ·  ${esc(ev.name)} `:esc(activeSite.name);
+        ev.name? `${esc(activeSite.name)}  �  ${esc(ev.name)} `:esc(activeSite.name);
       document.getElementById('quadrat-size-badge').textContent=
-        `${ev.frameW||40}×${ev.frameH||40} cm`;
+        `${ev.frameW||40}�${ev.frameH||40} cm`;
       document.getElementById('cover-pts-badge').textContent=
         `${ev.coverPts||2} pts/sample`;
 
       renderPanelSampleNav(tIdx,sIdx,ev);
 
-      // ── Highlight current dot + auto-expand its transect ──
+      // -- Highlight current dot + auto-expand its transect --
       document.querySelectorAll('.sample-dot').forEach(d => d.classList.remove('current'));
       const activeDot=document.querySelector(`.sample-dot[data-eid="${activeEventId}"][data-t="${tIdx}"][data-s="${sIdx}"]`);
       if(activeDot) {
@@ -6568,7 +6573,7 @@
         }
       }
 
-      // ── Flash animation + scroll to top ──
+      // -- Flash animation + scroll to top --
       const body=document.getElementById('sample-panel-body');
       body.classList.remove('loading');
       void body.offsetWidth;
@@ -6599,7 +6604,7 @@
       const offset=Math.round((sIdx/((sCount)-1||1))*(ev.length||100));
 
       navEl.innerHTML=`<div class="sample-nav-row">
-        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-prev-btn" ${atStart? 'disabled':''} aria-label="Previous sample">◀</button>
+        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-prev-btn" ${atStart? 'disabled':''} aria-label="Previous sample">?</button>
         <div class="sample-nav-group">
           <span class="sample-nav-label">Transect</span>
           <select id="transect-jump-select" class="sample-nav-select" aria-label="Jump to transect">
@@ -6612,7 +6617,7 @@
             ${Array.from({length: sCount},(_,i) => `<option value="${i}">S${i+1}</option>`).join('')}
           </select>
         </div>
-        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-next-btn" ${atEnd? 'disabled':''} aria-label="Next sample">▶</button>
+        <button class="btn btn-ghost btn-sm sample-nav-btn" id="sample-next-btn" ${atEnd? 'disabled':''} aria-label="Next sample">?</button>
         <div class="sample-nav-summary">${offset} ${ev.unit||'m'} along transect</div>
       </div>`;
 
@@ -6650,7 +6655,7 @@
       renderCollect();
     });
 
-    // save helper — force:true always writes; force:false skips empty samples
+    // save helper � force:true always writes; force:false skips empty samples
     async function saveCurrent({force=false}={}) {
       if(!activeSiteId||!activeEventId) return;
       const {transectIdx: t,sampleIdx: s}=samplePanelState;
@@ -6699,7 +6704,7 @@
       if(_advanceBusy) return;
       _advanceBusy=true;
       try {
-        // ── Incomplete-sample guard (forward only) ───────
+        // -- Incomplete-sample guard (forward only) -------
         if(dir>0&&(localStorage.getItem('ep_incomplete_warn')==='1'||localStorage.getItem('ep_incomplete_warn')===null)) {
           const methods=(Array.isArray(activeEvent?.methods)&&activeEvent.methods.length)
             ? activeEvent.methods
@@ -6752,7 +6757,7 @@
       } finally {_advanceBusy=false;}
     }
 
-    // ── Species search ────────────────────────────────────
+    // -- Species search ------------------------------------
     const speciesInput=document.getElementById('species-input');
     const speciesDrop=document.getElementById('species-dropdown');
     const speciesSearchCount=document.getElementById('species-search-count');
@@ -6949,7 +6954,7 @@
         el.hidden=false;
         el.innerHTML=`<div class="two-code-picks-head" data-method-key="${methodKey}" style="cursor:pointer;user-select:none;">
           <span style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:.75rem;transition:transform .15s;display:inline-block;transform:rotate(${expanded? '90deg':'0deg'});">▶</span>
+            <span style="font-size:.75rem;transition:transform .15s;display:inline-block;transform:rotate(${expanded? '90deg':'0deg'});">?</span>
             <span>Grouped / Unknown 2-Codes</span>
           </span>
         </div>
@@ -7053,7 +7058,7 @@
       const parts=[];
       if(p[4]) parts.push(p[4]);
       if(p[5]) parts.push(p[5]);
-      return parts.join(' · ');
+      return parts.join(' � ');
     }
 
     function speciesSecondaryLine(sp) {
@@ -7063,7 +7068,7 @@
 
     function formatSpeciesKeyBadge(sp) {
       const qualifier=speciesQualifierText(sp);
-      return `[${sp.symbol}]${qualifier? ` · ${qualifier}`:''}`;
+      return `[${sp.symbol}]${qualifier? ` � ${qualifier}`:''}`;
     }
 
     function closeSpeciesQualifierModal() {
@@ -7146,9 +7151,9 @@
     }
 
     function formatSpeciesFullLabel(sp) {
-      const symbol=String(sp?.symbol||'').trim().toUpperCase()||'—';
-      const sci=String(sp?.sci||'').trim()||'—';
-      const common=String(sp?.common||'').trim()||'—';
+      const symbol=String(sp?.symbol||'').trim().toUpperCase()||'�';
+      const sci=String(sp?.sci||'').trim()||'�';
+      const common=String(sp?.common||'').trim()||'�';
       const qualifier=normalizeSpeciesQualifier(sp?.qualifier||'')||'none';
       return `Code: ${symbol} | Scientific: ${sci} | Common: ${common} | Qualifier: ${qualifier}`;
     }
@@ -7490,7 +7495,7 @@
       await loadSampleIntoPanel(samplePanelState.transectIdx,samplePanelState.sampleIdx);
     });
 
-    // ── DWR search (max 3 species) ────────────────────────────────────
+    // -- DWR search (max 3 species) ------------------------------------
     const dwrInput=document.getElementById('dwr-input');
     const dwrDrop=document.getElementById('dwr-dropdown');
 
@@ -7574,14 +7579,14 @@
         return `<div class="dwr-chip-row" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--s2);border-radius:6px;border:1px solid var(--border);">
           <span style="font-weight:600;min-width:20px;">${idx+1}.</span>
           <div style="flex:1;">
-            <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">⚠️</span>':''}</div>
+            <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">??</span>':''}</div>
             <div style="font-size:.7rem;color:var(--muted);">${esc(formatSpeciesKeyBadge(sp))}</div>
             ${repeatBadge}
             ${speciesSecondaryLine(sp)}
           </div>
-          <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" class="dwr-qualifier" data-idx="${idx}" title="Edit qualifier">✎</button>
-          <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">↺</button>
-          <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">✕</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" class="dwr-qualifier" data-idx="${idx}" title="Edit qualifier">?</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">?</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">?</button>
         </div>`;
       }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.78rem;font-weight:600;color:#c0392b;">No species selected yet</span>':'');
 
@@ -7684,14 +7689,14 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+          ${inv? '?? ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
       let html='';
 
       if(unifiedCurrent.length) {
-        const sortLabel=dwrAlphaSort? 'A–Z':'Most seen';
+        const sortLabel=dwrAlphaSort? 'A�Z':'Most seen';
         html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-dwr-current-chips">${unifiedCurrent.map(sp => currentPickHTML(sp)).join('')}</div>`;
       }
@@ -7738,7 +7743,7 @@
         speciesInputEl.disabled=!!samplePanelState.freqNone||!hasDB;
         speciesInputEl.placeholder=samplePanelState.freqNone
           ? 'None in frame selected'
-          :(hasDB? 'Search by symbol, common name, scientific name, or 2-code…':'No species options available');
+          :(hasDB? 'Search by symbol, common name, scientific name, or 2-code�':'No species options available');
       }
       if(speciesClearBtn&&samplePanelState.freqNone) speciesClearBtn.style.display='none';
 
@@ -7747,8 +7752,8 @@
 
       if(samplePanelState.freqNone) {
         el.innerHTML=`<div class="species-chip" style="background:#f7d98a;border:1px solid #d19b1f;color:#4f3900;">
-          ⚠ No species in frame <span style="opacity:.75;font-size:.62rem">(recorded)</span>
-          <button class="chip-remove" data-none="1">✕</button>
+          ? No species in frame <span style="opacity:.75;font-size:.62rem">(recorded)</span>
+          <button class="chip-remove" data-none="1">?</button>
         </div>`;
         el.querySelectorAll('.chip-remove').forEach(btn => {
           btn.addEventListener('click',() => {
@@ -7764,11 +7769,11 @@
         const invasive=sp.native==='N';
         return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
           ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(sp))}</span>
-      ${invasive? '<span title="Non-native" style="font-size:.7rem">⚠️</span>':''}
+      ${invasive? '<span title="Non-native" style="font-size:.7rem">??</span>':''}
         ${speciesSecondaryLine(sp)}
-        <button class="chip-qualifier" data-key="${esc(speciesEntryKey(sp))}" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.82rem;padding:0 2px;">✎</button>
-        <button class="chip-edit" data-sym="${sp.symbol}" title="Replace this species across event" style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.82rem;padding:0 2px;">↺</button>
-        <button class="chip-remove" data-key="${esc(speciesEntryKey(sp))}">✕</button>
+        <button class="chip-qualifier" data-key="${esc(speciesEntryKey(sp))}" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.82rem;padding:0 2px;">?</button>
+        <button class="chip-edit" data-sym="${sp.symbol}" title="Replace this species across event" style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.82rem;padding:0 2px;">?</button>
+        <button class="chip-remove" data-key="${esc(speciesEntryKey(sp))}">?</button>
     </div>`;
       }).join('')||'<span style="font-size:.78rem;font-weight:600;color:#c0392b;">No species added yet</span>';
       el.querySelectorAll('.chip-remove').forEach(btn => {
@@ -7795,7 +7800,7 @@
       el.querySelectorAll('.species-chip[data-sym]').forEach(chip => wireBulkReplaceTrigger(chip,'.chip-remove'));
     }
 
-    // ── Species Drawer ────────────────────────────────────
+    // -- Species Drawer ------------------------------------
     let drawerShowSiteSpecies=true;
     let speciesDrawerCollapsed=localStorage.getItem('ep_species_drawer_collapsed')!=='0';
 
@@ -7804,7 +7809,7 @@
       const btn=document.getElementById('drawer-collapse-btn');
       if(!panel||!btn) return;
       panel.classList.toggle('species-drawer-collapsed',speciesDrawerCollapsed);
-      btn.textContent=speciesDrawerCollapsed? '❮':'❯';
+      btn.textContent=speciesDrawerCollapsed? '?':'?';
       btn.title=speciesDrawerCollapsed? 'Open species list':'Collapse species list';
     }
 
@@ -7842,9 +7847,9 @@
               ${qualifier? `<span class="qualifier-badge" style="font-size:.65rem;color:var(--muted);margin-left:4px;">${esc(qualifier)}</span>`:''}
             </div>
             <div style="display:flex;gap:4px;align-items:center;">
-              <button class="drawer-edit-qualifier-btn" data-role="edit-qualifier" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;">✎</button>
+              <button class="drawer-edit-qualifier-btn" data-role="edit-qualifier" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;">?</button>
               <span class="method-badge">List</span>
-              <button class="drawer-remove-btn" data-role="remove-event-species" title="Remove from event list">✕</button>
+              <button class="drawer-remove-btn" data-role="remove-event-species" title="Remove from event list">?</button>
             </div>
           </div>`;
         }).join('');
@@ -7929,7 +7934,7 @@
     document.getElementById('drawer-toggle-site-species-btn').addEventListener('click',async e => {
       drawerShowSiteSpecies=!drawerShowSiteSpecies;
       e.currentTarget.dataset.show=drawerShowSiteSpecies;
-      e.currentTarget.textContent=drawerShowSiteSpecies? '■ Hide site species':'▶ Show site species';
+      e.currentTarget.textContent=drawerShowSiteSpecies? '� Hide site species':'? Show site species';
       e.currentTarget.classList.toggle('active',drawerShowSiteSpecies);
       await renderSpeciesDrawer();
     });
@@ -8088,7 +8093,7 @@
       });
     });
 
-    // ── Cover grid ────────────────────────────────────────
+    // -- Cover grid ----------------------------------------
     function renderCoverGrid() {
       const maxHits=activeEvent? (activeEvent.coverPts||2):(activeSite?.coverPts||2);
       const coverCats=getCoverCatsForEvent(activeEvent);
@@ -8142,7 +8147,7 @@
         return;
       }
       el.innerHTML=samplePanelState.coverHits.map((h,i) => `
-          <div class="hit-chip">${h.label} <button data-hi="${i}">✕</button></div>`).join('');
+          <div class="hit-chip">${h.label} <button data-hi="${i}">?</button></div>`).join('');
       el.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click',() => {
           samplePanelState.coverHits.splice(+btn.dataset.hi,1);
@@ -8154,9 +8159,9 @@
 
 
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SUMMARY PAGE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     async function renderSummary() {
       const noSite=document.getElementById('summary-no-site');
       const content=document.getElementById('summary-content');
@@ -8205,7 +8210,7 @@
         evFilled.forEach(s => (s.coverHits||[]).forEach(h => {covTotals[h.id]=(covTotals[h.id]||0)+1; hits++;}));
         const nativeSp=Object.keys(spMeta).filter(sym => spMeta[sym]?.native==='Y').length;
         const invasiveSp=Object.keys(spMeta).filter(sym => spMeta[sym]?.native==='N').length;
-        const topCover=coverCatalog.reduce((best,c) => (covTotals[c.id]||0)>(covTotals[best.id]||0)? c:best,coverCatalog[0]||{id: '',label: '—',icon: '•'});
+        const topCover=coverCatalog.reduce((best,c) => (covTotals[c.id]||0)>(covTotals[best.id]||0)? c:best,coverCatalog[0]||{id: '',label: '�',icon: '�'});
         return {ev,evFilled,spFreq,spMeta,covTotals,hits,nativeSp,invasiveSp,topCover,color: EV_COLORS[i%EV_COLORS.length]};
       });
 
@@ -8225,10 +8230,10 @@
       const overallTotal=sortedEvents.reduce((sum,ev) => sum+getEvTotal(ev),0)||1;
       const completion=overallTotal? Math.round(allFilled.length/overallTotal*100):0;
 
-      // ─ Card 1: Overview ─
+      // - Card 1: Overview -
       const overviewHTML=`
             <div class="card">
-        <div class="card-title">${esc(activeSite.name)} — Overview</div>
+        <div class="card-title">${esc(activeSite.name)} � Overview</div>
         <div class="stat-grid">
           <div class="stat-box"><div class="stat-val">${allFilled.length}<span style="font-size:.65rem;color:var(--muted)">/${overallTotal}</span></div><div class="stat-lbl">Samples</div></div>
           <div class="stat-box"><div class="stat-val">${Object.keys(speciesFreq).length}</div><div class="stat-lbl">Species</div></div>
@@ -8242,7 +8247,7 @@
         </div>
       </div>`;
 
-      // ─ Card 2: Event timeline ─
+      // - Card 2: Event timeline -
       let eventTimelineHTML='';
       if(sortedEvents.length>0) {
         const rows=evStats.map(({ev,evFilled,spFreq,nativeSp,invasiveSp,covTotals,hits,topCover,color}) => {
@@ -8268,7 +8273,7 @@
         </div>`;
       }
 
-      // ─ Card 3: Overall species frequency ─
+      // - Card 3: Overall species frequency -
       const sortedSpecies=Object.entries(speciesFreq).sort((a,b) => b[1]-a[1]);
       const speciesRows=sortedSpecies.map(([sym,count]) => {
         const meta=speciesMeta[sym];
@@ -8281,7 +8286,7 @@
         </tr>`;
       }).join('')||'<tr><td colspan="3" style="color:var(--muted);font-size:.75rem;padding:12px 8px;">No species recorded yet</td></tr>';
 
-      // ─ Card 4: Species × Event (interactive, sortable, filterable) ─
+      // - Card 4: Species � Event (interactive, sortable, filterable) -
       const spDbLookup={};
       speciesDB.forEach(p => {spDbLookup[p[0]]={dur: (p[4]||'').split(',')[0].trim(),habit: (p[5]||'').split(',')[0].trim()};});
 
@@ -8311,8 +8316,8 @@
         const groupBy=spTrendState.groupBy||'';
         const evHdrs=evStats.map(({ev,color},i) => {
           const si=spTrendState.sortCol===String(i)
-            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '↓':'↑'}</span>`
-            :`<span style="opacity:.3;">↕</span>`;
+            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '?':'?'}</span>`
+            :`<span style="opacity:.3;">?</span>`;
           return `<th class="ev-col sort-th" data-sort-col="${i}">
             <span class="ev-dot" style="background:${color};"></span>${esc(ev.eventDate||new Date(ev.createdAt).toLocaleDateString())} ${si}
           </th>`;
@@ -8330,7 +8335,7 @@
         let bodyHTML='';
 
         if(groupBy) {
-          // ── Grouped mode: sum freq% by group ──
+          // -- Grouped mode: sum freq% by group --
           const getGroupKey=sp => {
             if(groupBy==='habit') return sp.habit||'Unknown';
             if(groupBy==='dur') return sp.dur||'Unknown';
@@ -8357,7 +8362,7 @@
             const fp=g.evSumP[0]||0;
             const lp=g.evSumP[g.evSumP.length-1]||0;
             const d=lp-fp;
-            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
+            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '?':'?'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">�</span>`;
             return `<tr><td style="font-weight:700;font-size:.8rem;">${esc(g.key)}</td>${cells}<td class="ev-col">${dHTML}</td></tr>`;
           }).join('');
           bodyHTML=`<div style="overflow-x:auto;"><table class="trend-table">
@@ -8366,7 +8371,7 @@
           </table></div>`;
 
         } else {
-          // ── Individual species mode (original) ──
+          // -- Individual species mode (original) --
           const dir=spTrendState.sortDir==='desc'? -1:1;
           let filtered=[...spList].sort((a,b) => {
             if(spTrendState.sortCol==='overall') return dir*(b.overall-a.overall);
@@ -8375,8 +8380,8 @@
             return 0;
           }).slice(0,50);
           const siOver=spTrendState.sortCol==='overall'
-            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '↓':'↑'}</span>`
-            :`<span style="opacity:.3;">↕</span>`;
+            ? `<span style="color:var(--accent);">${spTrendState.sortDir==='desc'? '?':'?'}</span>`
+            :`<span style="opacity:.3;">?</span>`;
           const rows=filtered.map(({sym,meta,dur,habit,evFreqs}) => {
             const invasive=meta.native==='N';
             const nBadge=meta.native==='Y'? '<span class="nat-badge nat">N</span>':
@@ -8389,13 +8394,13 @@
             const fp=evFreqs[0]?.p||0;
             const lp=evFreqs[evFreqs.length-1]?.p||0;
             const d=lp-fp;
-            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? (invasive? 'var(--danger)':'var(--accent)'):'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
+            const dHTML=d? `<span style="font-size:.65rem;color:${d>0? (invasive? 'var(--danger)':'var(--accent)'):'var(--warn)'};">${d>0? '?':'?'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">�</span>`;
             return `<tr>
               <td>
                 <div style="font-size:.68rem;font-weight:700;font-family:var(--font-mono);color:var(--accent2);">[${esc(sym)}]</div>
                 <div style="font-size:.72rem;">${esc(speciesDisplayPrimary(meta))} ${nBadge}</div>
                 <div style="font-size:.56rem;color:var(--muted);font-style:italic;">${esc(speciesDisplaySecondary(meta)||'')}</div>
-                ${dur||habit? `<div style="font-size:.56rem;color:var(--dim);margin-top:2px;">${[dur,habit].filter(Boolean).join(' · ')}</div>`:''}
+                ${dur||habit? `<div style="font-size:.56rem;color:var(--dim);margin-top:2px;">${[dur,habit].filter(Boolean).join(' � ')}</div>`:''}
               </td>${cells}<td class="ev-col">${dHTML}</td>
             </tr>`;
           }).join('');
@@ -8405,7 +8410,7 @@
           </table></div>`;
         }
 
-        const subLbl=groupBy? '(summed freq % by group)':'(% of sampled plots · top 50)';
+        const subLbl=groupBy? '(summed freq % by group)':'(% of sampled plots � top 50)';
         el.innerHTML=`
           <div class="card-title">Species Freq by Event <span style="font-size:.6rem;color:var(--muted);font-weight:400;">${subLbl}</span></div>
           ${controlsHTML}${bodyHTML}`;
@@ -8427,7 +8432,7 @@
         });
       }
 
-      // ─ Card 5: Overall cover ─
+      // - Card 5: Overall cover -
       const coverRows=coverCatalog.map(c => {
         const n=coverTotals[c.id]||0;
         const pct=totalHits? Math.round(n/totalHits*100):0;
@@ -8438,7 +8443,7 @@
         </tr>`;
       }).join('');
 
-      // ─ Card 6: Cover × Event (2+ events) ─
+      // - Card 6: Cover � Event (2+ events) -
       let coverTrendHTML='';
       if(sortedEvents.length>=2) {
         const evHdrs=evStats.map(({ev,color}) =>
@@ -8453,7 +8458,7 @@
           const fp=evStats[0].hits? Math.round((evStats[0].covTotals[c.id]||0)/evStats[0].hits*100):0;
           const lp=evStats[evStats.length-1].hits? Math.round((evStats[evStats.length-1].covTotals[c.id]||0)/evStats[evStats.length-1].hits*100):0;
           const d=lp-fp;
-          const dHTML=d!==0? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '▲':'▼'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">—</span>`;
+          const dHTML=d!==0? `<span style="font-size:.65rem;color:${d>0? 'var(--accent)':'var(--warn)'};">${d>0? '?':'?'}${Math.abs(d)}pp</span>`:`<span style="font-size:.65rem;color:var(--dim);">�</span>`;
           return `<tr><td>${c.icon} ${c.label}</td>${cells} <td class="ev-col">${dHTML}</td></tr>`;
         }).join('');
         coverTrendHTML=`
@@ -8466,7 +8471,7 @@
         </div>`;
       }
 
-      // ─ Card 7: Transect breakdown ─
+      // - Card 7: Transect breakdown -
       let transectHTML='';
       if(allFilled.length>0) {
         const maxT=allFilled.reduce((m,s) => Math.max(m,s.transectIdx||0),0);
@@ -8480,7 +8485,7 @@
           }));
           const richness=Object.keys(tSpFreq).length;
           const topEntry=Object.entries(tSpFreq).sort((a,b) => b[1]-a[1])[0];
-          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(tSpMeta[topEntry[0]]))}</span>`:'—';
+          const topName=topEntry? `${esc(speciesDisplayPrimary(tSpMeta[topEntry[0]]))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(tSpMeta[topEntry[0]]))}</span>`:'�';
           return `<tr>
             <td style="font-weight:700;font-family:var(--font-ui);">T${t+1}</td>
             <td style="text-align:center;">${tSamples.length}</td>
@@ -8511,9 +8516,9 @@
       refreshSpTrend();
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  SYNC PAGE
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     function authLibraryReady() {
       return typeof window.msal!=='undefined'&&typeof window.msal.PublicClientApplication==='function';
     }
@@ -8643,6 +8648,7 @@
         approvalsCallerIsAdmin=false;
         setApprovalsCardVisibility(false);
         setApprovalsAdminBadge(false);
+        ensureDefaultSyncSettings();
         updateAuthUI();
         renderSync();
         toast('Signed in','ok');
@@ -8708,7 +8714,7 @@
       const unsyncedCount=samples.filter(x => x.hasData&&x.syncStatus!=='synced'&&!excludedIds.has(x.siteId)).length;
       const failedCount=samples.filter(x => x.hasData&&x.syncStatus==='failed'&&!excludedIds.has(x.siteId)).length;
       document.getElementById('pending-badge').textContent=failedCount
-        ? `${unsyncedCount} unsynced · ${failedCount} failed`
+        ? `${unsyncedCount} unsynced � ${failedCount} failed`
         :`${unsyncedCount} unsynced`;
 
       const rows=activeSites.map(site => {
@@ -8720,8 +8726,8 @@
         const sSynced=samples.filter(x => x.siteId===site.id&&x.syncStatus==='synced').length;
         return `<div class="sync-status-row">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${isLocal? ' <span style="font-size:.6rem;color:var(--gold);">🧪 local only</span>':''}</div>
-        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' · not synced':` · ${sPend} pending · ${sFail} failed · ${sSynced} synced`}</div>
+        <div style="font-size:.82rem;font-weight:600;">${esc(site.name)}${isLocal? ' <span style="font-size:.6rem;color:var(--gold);">?? local only</span>':''}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${sDone}/${sTotal} collected${isLocal? ' � not synced':` � ${sPend} pending � ${sFail} failed � ${sSynced} synced`}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;">
         ${!isLocal&&sPend>0? `<div class="status-dot sd-pending" title="Pending"></div>`:''}
@@ -8729,7 +8735,7 @@
         ${!isLocal&&sSynced>0? `<div class="status-dot sd-synced" title="Synced"></div>`:''}
       </div>
     </div>`;
-      }).join('')||'<div class="empty"><span class="e-icon">📡</span><p>No sites created yet.</p></div>';
+      }).join('')||'<div class="empty"><span class="e-icon">??</span><p>No sites created yet.</p></div>';
 
       document.getElementById('sync-site-list').innerHTML=rows;
       const signedIn=!!getAuthAccount();
@@ -8765,7 +8771,7 @@
       if(!listEl) return;
       if(!protocols.length) {listEl.innerHTML='<div style="font-size:.75rem;color:var(--muted);">No protocols.</div>'; return;}
       listEl.innerHTML=protocols.map(p => {
-        const cfgStr=`${p.transects}T × ${p.samples}S · ${p.length}${p.unit} · ${p.frameW}×${p.frameH}cm`;
+        const cfgStr=`${p.transects}T � ${p.samples}S � ${p.length}${p.unit} � ${p.frameW}�${p.frameH}cm`;
         const methodStr=protocolMethodsText(p.methods);
         const orderedMethodStr=protocolMethodsOrderedText(p.methods);
         const desc=p.description? `<div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${esc(p.description)}</div>`:'';
@@ -8784,7 +8790,7 @@
             ${desc}
             ${importMeta}
           </div>
-          ${!p.builtIn? `<button class="btn btn-danger btn-sm proto-delete-btn" data-proto-id="${p.id}" title="Delete protocol" style="flex-shrink:0;">🗑</button>`:''}
+          ${!p.builtIn? `<button class="btn btn-danger btn-sm proto-delete-btn" data-proto-id="${p.id}" title="Delete protocol" style="flex-shrink:0;">??</button>`:''}
         </div>`;
       }).join('');
       listEl.querySelectorAll('.proto-delete-btn').forEach(btn => {
@@ -8880,12 +8886,23 @@
 
     function getSettings() {
       return {
-        url: localStorage.getItem('ep_url')||'',
-        key: localStorage.getItem('ep_key')||'',
+        url: localStorage.getItem('ep_url')||DEFAULT_SYNC_URL,
+        key: localStorage.getItem('ep_key')||DEFAULT_SYNC_KEY,
         incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1',
         speciesDisplay: localStorage.getItem('ep_species_display_mode')||'species',
         autoSync: localStorage.getItem('ep_auto_sync')==='1',
       };
+    }
+
+    function ensureDefaultSyncSettings() {
+      const hasUrl=!!String(localStorage.getItem('ep_url')||'').trim();
+      if(!hasUrl&&DEFAULT_SYNC_URL) {
+        localStorage.setItem('ep_url',DEFAULT_SYNC_URL);
+      }
+      const hasKey=localStorage.getItem('ep_key')!=null;
+      if(!hasKey&&DEFAULT_SYNC_KEY!==undefined) {
+        localStorage.setItem('ep_key',DEFAULT_SYNC_KEY);
+      }
     }
 
     function saveSyncDetail(detail) {
@@ -9053,6 +9070,21 @@
       const card=document.getElementById('azure-connection-card');
       if(!card) return;
       card.style.display=(approvalsCallerIsAdmin||isDeveloperUnlocked())? '':'none';
+      updateManagedSyncStatus();
+    }
+
+    function updateManagedSyncStatus() {
+      const el=document.getElementById('managed-sync-status');
+      if(!el) return;
+      const signedIn=!!getAuthAccount();
+      const showManagedMessage=signedIn&&!approvalsCallerIsAdmin&&!isDeveloperUnlocked();
+      if(showManagedMessage) {
+        el.textContent='You can sync after admin approval. Connection settings on this device are managed and locked by your admin.';
+        el.style.display='block';
+      } else {
+        el.textContent='';
+        el.style.display='none';
+      }
     }
 
     function getApprovalsUrl(syncUrl) {
@@ -9267,7 +9299,7 @@
     document.getElementById('save-cfg-btn').addEventListener('click',saveSettings);
     document.getElementById('save-azure-cfg-btn').addEventListener('click',saveSettings);
 
-    // ── Export / Backup ──
+    // -- Export / Backup --
     function setExportStatus(msg,type='') {
       const el=document.getElementById('export-status');
       if(!el) return;
@@ -9311,8 +9343,8 @@
 
     document.getElementById('export-json-btn').addEventListener('click',async () => {
       const btn=document.getElementById('export-json-btn');
-      btn.disabled=true; btn.textContent='Exporting…';
-      setExportStatus('Preparing JSON export…');
+      btn.disabled=true; btn.textContent='Exporting�';
+      setExportStatus('Preparing JSON export�');
       try {
         const [sites,events,samples]=await Promise.all([
           dbGetAll('sites'),dbGetAll('events'),dbGetAll('samples'),
@@ -9339,14 +9371,14 @@
         toast('Export failed: '+err.message,'err');
         setExportStatus('JSON export failed: '+err.message,'err');
       } finally {
-        btn.disabled=false; btn.textContent='⬇ Export JSON';
+        btn.disabled=false; btn.textContent='? Export JSON';
       }
     });
 
     document.getElementById('export-csv-btn').addEventListener('click',async () => {
       const btn=document.getElementById('export-csv-btn');
-      btn.disabled=true; btn.textContent='Exporting…';
-      setExportStatus('Preparing CSV export…');
+      btn.disabled=true; btn.textContent='Exporting�';
+      setExportStatus('Preparing CSV export�');
       try {
         const [sites,events,samples]=await Promise.all([
           dbGetAll('sites'),dbGetAll('events'),dbGetAll('samples'),
@@ -9403,7 +9435,7 @@
         toast('Export failed: '+err.message,'err');
         setExportStatus('CSV export failed: '+err.message,'err');
       } finally {
-        btn.disabled=false; btn.textContent='⬇ Export CSV (samples)';
+        btn.disabled=false; btn.textContent='? Export CSV (samples)';
       }
     });
 
@@ -9413,7 +9445,7 @@
       return s;
     }
 
-    // ── Wipe database ──
+    // -- Wipe database --
     document.getElementById('wipe-db-btn').addEventListener('click',() => {
       document.getElementById('wipe-db-pw').value='';
       document.getElementById('wipe-db-err').style.display='none';
@@ -9521,7 +9553,7 @@
 
       const btn=document.getElementById('sync-btn');
       isSyncInProgress=true;
-      btn.disabled=true; btn.textContent='Syncing…';
+      btn.disabled=true; btn.textContent='Syncing�';
 
       let ok=0,fail=0;
       let lastFailure=null;
@@ -9585,7 +9617,7 @@
         }
       } finally {
         isSyncInProgress=false;
-        btn.textContent='↑ Sync All Unsynced';
+        btn.textContent='? Sync All Unsynced';
         renderSync();
       }
 
@@ -9634,9 +9666,9 @@
       renderApprovalsList(approvalsUsersCache);
     });
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  MAP
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     let _leafletMap=null;
     let _mapMarkerGroup=null;
     let _mapLocMarker=null;
@@ -9694,16 +9726,16 @@
             <div style="display:flex;flex-direction:column;gap:5px;">
               <button onclick="mapSelectSite('${site.id}')"
                 style="padding:6px 10px;background:#2a7a4f;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:.78rem;">
-                📋 Open in Collect
+                ?? Open in Collect
               </button>
               <a href="${navUri}" style="display:block;text-align:center;padding:5px 10px;
                 background:#1a5a9f;color:#fff;border-radius:5px;font-size:.78rem;text-decoration:none;">
-                🧭 Navigate (Maps app)
+                ?? Navigate (Maps app)
               </a>
               <a href="${gMaps}" target="_blank" rel="noopener noreferrer"
                 style="display:block;text-align:center;padding:5px 10px;
                 background:#555;color:#fff;border-radius:5px;font-size:.78rem;text-decoration:none;">
-                🌍 Google Maps
+                ?? Google Maps
               </a>
             </div>
           </div>`;
@@ -9720,7 +9752,7 @@
       }
     }
 
-    // Called from popup button — select site and jump to Collect tab
+    // Called from popup button � select site and jump to Collect tab
     window.mapSelectSite=function(siteId) {
       activeSiteId=siteId;
       // Switch to collect tab
@@ -9741,14 +9773,14 @@
         _mapLocMarker=L.circleMarker([lat,lng],{
           radius: 8,fillColor: '#3b82f6',color: '#fff',
           weight: 2,opacity: 1,fillOpacity: 0.9
-        }).addTo(_leafletMap).bindPopup('📍 You are here').openPopup();
+        }).addTo(_leafletMap).bindPopup('?? You are here').openPopup();
         _leafletMap.setView([lat,lng],14);
       },() => toast('Could not get location','err'));
     }
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  UTILS
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     function esc(s) {return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
     // Species CSV import button
@@ -9790,10 +9822,11 @@
       if(banner) banner.classList.remove('visible');
     });
 
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     //  INIT
-    // ══════════════════════════════════════════════════════
+    // ------------------------------------------------------
     async function init() {
+      ensureDefaultSyncSettings();
       renderAppVersion();
       await initAuth();
       // Ensure the local-only practice folder always exists
@@ -9825,8 +9858,8 @@
     }
     init();
 
-    // ── Service Worker registration ──
-    // SW + manifest require a real HTTP origin — skip silently when opened as a local file
+    // -- Service Worker registration --
+    // SW + manifest require a real HTTP origin � skip silently when opened as a local file
     const _swSupported='serviceWorker' in navigator&&location.protocol!=='file:';
     if(_swSupported) {
       navigator.serviceWorker.addEventListener('controllerchange',() => {
@@ -9847,11 +9880,11 @@
     } else if(!('serviceWorker' in navigator)) {
       setServiceWorkerStatus('Service worker updates are unavailable in this browser.',{updateReady: false});
     } else {
-      // file:// — offline caching not available; app still works fully online
+      // file:// � offline caching not available; app still works fully online
       setServiceWorkerStatus('Offline cache unavailable when opened as a local file. Serve via http:// to enable.',{updateReady: false});
     }
 
-    // ── Theme toggle ──
+    // -- Theme toggle --
     (function initTheme() {
       const saved=localStorage.getItem('ecoplot-theme');
       const preferLight=saved? saved==='light':true; // default: light mode
@@ -9862,7 +9895,7 @@
     function updateThemeBtn() {
       const light=document.documentElement.classList.contains('light');
       const btn=document.getElementById('theme-toggle');
-      if(btn) {btn.textContent=light? '🌙':'☀️'; btn.title=light? 'Switch to dark mode':'Switch to light mode';}
+      if(btn) {btn.textContent=light? '??':'??'; btn.title=light? 'Switch to dark mode':'Switch to light mode';}
       // Update Apple status bar meta
       const meta=document.querySelector('meta[name="theme-color"]');
       if(meta) meta.content=light? '#f2f5f2':'#080c09';
@@ -9874,7 +9907,7 @@
       updateThemeBtn();
     });
 
-    // ── Install banner (iOS Safari, not standalone) ──
+    // -- Install banner (iOS Safari, not standalone) --
     (function checkInstallBanner() {
       const isStandalone=window.navigator.standalone===true
         ||window.matchMedia('(display-mode: standalone)').matches;
