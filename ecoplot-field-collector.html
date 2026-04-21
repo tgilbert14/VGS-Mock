@@ -3280,7 +3280,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=53;
+    const APP_BUILD_REV=54;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -3621,6 +3621,7 @@
     // Empty until user imports a CSV via the Setup tab
     let speciesDB=[];
     let speciesAllRecords=[];
+    let speciesDBLoadPromise=null;
     let speciesListOptions=[{key: 'all',label: 'All'}];
     let speciesImportStats={sourceRows: 0,storedRows: 0};
     let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
@@ -4619,41 +4620,63 @@
       return fields;
     }
 
-    async function loadSpeciesDB() {
-      const all=await dbGetAll('species');
-      speciesAllRecords=all.map(r => {
-        const symbol=String(r.symbol||'').trim().toUpperCase();
-        const statesRaw=Array.isArray(r.states)? r.states:[String(r.state||'').trim()].filter(Boolean);
-        const listKeysRaw=Array.isArray(r.listKeys)
-          ? r.listKeys
-          :[String(r.listKey||normalizeSpeciesListKey(r.state)||'all').trim()].filter(Boolean);
-        const state=statesRaw[0]||String(r.state||'').trim();
-        const listKey=listKeysRaw[0]||String(r.listKey||normalizeSpeciesListKey(state)||'all');
-        return {
-          ...r,
-          symbol,
-          sci: String(r.sci||'').trim(),
-          common: String(r.common||'').trim(),
-          state,
-          listKey,
-          states: statesRaw,
-          listKeys: listKeysRaw,
-          sourceRowCount: Math.max(1,parseInt(r.sourceRowCount,10)||statesRaw.length||1),
-        };
-      }).filter(r => !!r.symbol);
-      speciesImportStats={
-        sourceRows: speciesAllRecords.reduce((sum,r) => sum+(parseInt(r.sourceRowCount,10)||1),0),
-        storedRows: speciesAllRecords.length,
+    function scheduleSpeciesDBWarmup() {
+      if(speciesAllRecords.length||speciesDBLoadPromise) return;
+      const run=() => {
+        loadSpeciesDB().catch(err => console.warn('Species DB warmup failed:',err));
       };
-      speciesListOptions=getSpeciesListOptions(speciesAllRecords);
-      if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
-        selectedSpeciesListKey='all';
-        localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+      if(typeof window.requestIdleCallback==='function') {
+        window.requestIdleCallback(run,{timeout: 3000});
+      } else {
+        setTimeout(run,1500);
       }
-      rebuildActiveSpeciesDB();
-      updateSpeciesDBUI(speciesAllRecords.length);
-      renderSpeciesListSelector();
-      renderCustomListPicks();
+    }
+
+    async function loadSpeciesDB() {
+      if(speciesAllRecords.length) return speciesAllRecords;
+      if(speciesDBLoadPromise) return speciesDBLoadPromise;
+      speciesDBLoadPromise=(async () => {
+        const all=await dbGetAll('species');
+        speciesAllRecords=all.map(r => {
+          const symbol=String(r.symbol||'').trim().toUpperCase();
+          const statesRaw=Array.isArray(r.states)? r.states:[String(r.state||'').trim()].filter(Boolean);
+          const listKeysRaw=Array.isArray(r.listKeys)
+            ? r.listKeys
+            :[String(r.listKey||normalizeSpeciesListKey(r.state)||'all').trim()].filter(Boolean);
+          const state=statesRaw[0]||String(r.state||'').trim();
+          const listKey=listKeysRaw[0]||String(r.listKey||normalizeSpeciesListKey(state)||'all');
+          return {
+            ...r,
+            symbol,
+            sci: String(r.sci||'').trim(),
+            common: String(r.common||'').trim(),
+            state,
+            listKey,
+            states: statesRaw,
+            listKeys: listKeysRaw,
+            sourceRowCount: Math.max(1,parseInt(r.sourceRowCount,10)||statesRaw.length||1),
+          };
+        }).filter(r => !!r.symbol);
+        speciesImportStats={
+          sourceRows: speciesAllRecords.reduce((sum,r) => sum+(parseInt(r.sourceRowCount,10)||1),0),
+          storedRows: speciesAllRecords.length,
+        };
+        speciesListOptions=getSpeciesListOptions(speciesAllRecords);
+        if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
+          selectedSpeciesListKey='all';
+          localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+        }
+        rebuildActiveSpeciesDB();
+        updateSpeciesDBUI(speciesAllRecords.length);
+        renderSpeciesListSelector();
+        renderCustomListPicks();
+        return speciesAllRecords;
+      })();
+      try {
+        return await speciesDBLoadPromise;
+      } finally {
+        speciesDBLoadPromise=null;
+      }
     }
 
     function updateSpeciesDBUI(count) {
@@ -4953,6 +4976,7 @@
         renderSiteList({invalidate: !_sitesPagePrimed});
         _sitesPagePrimed=true;
       }
+      if(page==='setup') scheduleSpeciesDBWarmup();
       if(page==='summary') renderSummary();
       if(page==='sync') renderSync();
       if(page==='map') renderMap();
@@ -6789,16 +6813,29 @@
       body.classList.add('loading');
       body.scrollTop=0;
 
+      const panelRenderToken=++_samplePanelRenderToken;
       renderSpeciesChips();
-      renderSeenSpecies();
-      renderDWRSeenSpecies();
       renderCoverGrid();
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(ev);
-      renderSpeciesDrawer();
+
+      const drawerList=document.getElementById('drawer-species-list');
+      if(drawerList&&activeSiteId) {
+        drawerList.innerHTML='<div style="padding:8px;font-size:.7rem;color:var(--muted);text-align:center;">Loading species…</div>';
+      }
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if(panelRenderToken!==_samplePanelRenderToken) return;
+          renderSeenSpecies();
+          renderDWRSeenSpecies();
+          renderSpeciesDrawer();
+        },0);
+      });
     }
 
+    let _samplePanelRenderToken=0;
     let _sampleJumpBusy=false;
     function renderPanelSampleNav(tIdx,sIdx,ev) {
       const navEl=document.getElementById('panel-sample-nav');
@@ -8199,6 +8236,7 @@
     function openDrawerSpeciesSearchModal() {
       const modal=document.getElementById('drawer-search-modal');
       const searchInput=document.getElementById('drawer-search-input');
+      const statusEl=document.getElementById('drawer-search-status');
 
       drawerSearchState={token: 0};
       modal.classList.add('open');
@@ -8208,6 +8246,17 @@
       if(activeRadio) activeRadio.checked=true;
       setDrawerSearchEmptyState();
       focusTextField(searchInput);
+
+      if(!speciesAllRecords.length) {
+        if(statusEl) statusEl.textContent='Loading species database…';
+        loadSpeciesDB().then(() => {
+          if(!modal.classList.contains('open')) return;
+          setDrawerSearchEmptyState();
+        }).catch(err => {
+          if(statusEl) statusEl.textContent='Species database unavailable';
+          console.warn('Species DB load failed:',err);
+        });
+      }
 
       // Wire up search input
       searchInput.addEventListener('input',updateDrawerSearchResults);
@@ -10094,7 +10143,7 @@
         if(p.builtIn) await dbDelete('protocols',p.id);
       }
 
-      loadSpeciesDB();
+      scheduleSpeciesDBWarmup();
       renderCustomListsSetup();
       renderCustomListPicks();
       renderEventCustomListToggles();
@@ -10164,17 +10213,7 @@
       }
     })();
 
-    // iOS Safari sometimes drops the first tap focus inside layered/fixed UI.
-    if(isIOSFamilyDevice()) {
-      document.addEventListener('touchend',e => {
-        const target=e.target?.closest('input,textarea');
-        if(!isTextEntryField(target)) return;
-        if(document.activeElement===target) return;
-        setTimeout(() => {
-          if(document.activeElement!==target) focusTextField(target);
-        },0);
-      },{capture: true,passive: true});
-    }
+    // Global touchend refocus fallback removed: it was causing pointer/keyboard timing conflicts.
 
     document.getElementById('install-dismiss').addEventListener('click',() => {
       document.getElementById('install-banner').classList.remove('visible');
