@@ -3274,7 +3274,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=48;
+    const APP_BUILD_REV=49;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -4783,6 +4783,8 @@
     let eventSamplesCache={eventId: null,samples: null};
     let siteSamplesCache={siteId: null,samples: null};
     let siteListCache={folders: null,sites: null,samples: null};
+    let _siteListRendering=false;   // in-flight guard
+    let _siteListDirty=false;       // queued re-render request
     let seenRefreshTimer=null;
     let drawerNewestSpeciesKey='';
     let drawerNewestNeedsFocus=false;
@@ -5358,60 +5360,69 @@
     }
 
     async function renderSiteList({invalidate=false}={}) {
-      if(invalidate||!siteListCache.folders) {
-        const [folders,allSites,allSamples]=await Promise.all([
-          dbGetAll('folders'),
-          dbGetAll('sites'),
-          dbGetAll('samples'),
-        ]);
-        siteListCache={folders,sites: allSites,samples: allSamples};
+      if(_siteListRendering) {
+        // Another render is already in-flight — just mark dirty so it re-runs when done.
+        if(invalidate) siteListCache={folders: null,sites: null,samples: null};
+        _siteListDirty=true;
+        return;
       }
-      const {folders,sites: allSites,samples: allSamples}=siteListCache;
-      const el=document.getElementById('site-list');
-
-      // ── Breadcrumb ──
-      const path=await buildFolderPath(currentFolderId,folders);
-      const bcEl=document.getElementById('folder-breadcrumb');
-      let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
-      path.forEach((f,i) => {
-        bcHTML+=`<span class="crumb-sep">›</span>`;
-        if(i===path.length-1) {
-          bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
-        } else {
-          bcHTML+=`<button class="crumb-btn" data-crumb="${f.id}">${esc(f.name)}</button>`;
+      _siteListRendering=true;
+      _siteListDirty=false;
+      try {
+        if(invalidate||!siteListCache.folders) {
+          const [folders,allSites,allSamples]=await Promise.all([
+            dbGetAll('folders'),
+            dbGetAll('sites'),
+            dbGetAll('samples'),
+          ]);
+          siteListCache={folders,sites: allSites,samples: allSamples};
         }
-      });
-      bcEl.innerHTML=bcHTML;
-      bcEl.querySelectorAll('[data-crumb]').forEach(btn => {
-        btn.addEventListener('click',() => {
-          currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
-          updateCreateLocationHint(folders);
-          requestAnimationFrame(() => renderSiteList());
+        const {folders,sites: allSites,samples: allSamples}=siteListCache;
+        const el=document.getElementById('site-list');
+
+        // ── Breadcrumb ──
+        const path=await buildFolderPath(currentFolderId,folders);
+        const bcEl=document.getElementById('folder-breadcrumb');
+        let bcHTML=`<button class="crumb-btn" data-crumb="root">Root</button>`;
+        path.forEach((f,i) => {
+          bcHTML+=`<span class="crumb-sep">›</span>`;
+          if(i===path.length-1) {
+            bcHTML+=`<span class="crumb-current">${esc(f.name)}</span>`;
+          } else {
+            bcHTML+=`<button class="crumb-btn" data-crumb="${f.id}">${esc(f.name)}</button>`;
+          }
         });
-      });
+        bcEl.innerHTML=bcHTML;
+        bcEl.querySelectorAll('[data-crumb]').forEach(btn => {
+          btn.addEventListener('click',() => {
+            currentFolderId=btn.dataset.crumb==='root'? null:btn.dataset.crumb;
+            updateCreateLocationHint(folders);
+            requestAnimationFrame(() => renderSiteList());
+          });
+        });
 
-      // ── Location hint on create form ──
-      updateCreateLocationHint(folders,path);
+        // ── Location hint on create form ──
+        updateCreateLocationHint(folders,path);
 
-      // ── Sub-folders at current level ──
-      const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
-      const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
-      const localFolders=allSubFolders.filter(f => f.localOnly);
-      let html='';
+        // ── Sub-folders at current level ──
+        const allSubFolders=folders.filter(f => f.parentId===currentFolderId);
+        const subFolders=allSubFolders.filter(f => !f.localOnly).sort((a,b) => a.name.localeCompare(b.name));
+        const localFolders=allSubFolders.filter(f => f.localOnly);
+        let html='';
 
-      subFolders.forEach(f => {
-        const subCount=folders.filter(sf => sf.parentId===f.id).length;
-        const siteCount=countSitesInFolder(f.id,folders,allSites);
-        const isLocal=f.localOnly===true;
-        const icon='📁';
-        const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
-        const actions=isLocal
-          ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
-          :`<div class="folder-actions">
+        subFolders.forEach(f => {
+          const subCount=folders.filter(sf => sf.parentId===f.id).length;
+          const siteCount=countSitesInFolder(f.id,folders,allSites);
+          const isLocal=f.localOnly===true;
+          const icon='📁';
+          const localBadge=isLocal? `<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`:'';
+          const actions=isLocal
+            ? `<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`
+            :`<div class="folder-actions">
               <button class="f-action" data-rename-folder="${f.id}" title="Rename">✏️</button>
               <button class="f-action del" data-del-folder="${f.id}" title="Delete">✕</button>
              </div>`;
-        html+=`<div class="folder-item" data-folder-id="${f.id}">
+          html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
@@ -5420,35 +5431,35 @@
           ${actions}
         <span class="site-arrow" style="margin-left:4px;">›</span>
         </div>`;
-      });
+        });
 
-      // ── Sites at current level ──
-      const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
-      const active=levelSites.filter(s => !s.archived);
-      const archived=levelSites.filter(s => s.archived);
-      const visible=showArchived? archived:active;
+        // ── Sites at current level ──
+        const levelSites=allSites.filter(s => (s.folderId||null)===currentFolderId);
+        const active=levelSites.filter(s => !s.archived);
+        const archived=levelSites.filter(s => s.archived);
+        const visible=showArchived? archived:active;
 
-      if(!visible.length&&!subFolders.length&&!localFolders.length) {
-        if(!allSites.length&&!folders.length) {
-          html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
-        } else {
-          html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
+        if(!visible.length&&!subFolders.length&&!localFolders.length) {
+          if(!allSites.length&&!folders.length) {
+            html+='<div class="empty"><span class="e-icon">🌾</span><p>No sites yet.<br>Create one above.</p></div>';
+          } else {
+            html+='<div class="empty"><span class="e-icon">'+(showArchived? '📦':'🌾')+'</span><p>'+(showArchived? 'No archived sites here.':'This folder is empty.')+'</p></div>';
+          }
         }
-      }
 
-      visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
-        const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
-        const isSel=activeSiteId===s.id;
-        const meta=[];
-        if(s.siteType&&s.siteType!=='None') meta.push(s.siteType);
-        if(s.status&&s.status!=='None') meta.push(s.status);
-        if(s.desc) meta.push(esc(s.desc));
-        if(s.elev) meta.push(`${s.elev} ft`);
-        if(s.aspect) meta.push(s.aspect);
-        if(done) meta.push(`${done} collected`);
-        const subStr=meta.join(' · ')||'No data yet';
-        if(s.archived) {
-          html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
+        visible.sort((a,b) => b.createdAt-a.createdAt).forEach(s => {
+          const done=allSamples.filter(x => x.siteId===s.id&&x.hasData).length;
+          const isSel=activeSiteId===s.id;
+          const meta=[];
+          if(s.siteType&&s.siteType!=='None') meta.push(s.siteType);
+          if(s.status&&s.status!=='None') meta.push(s.status);
+          if(s.desc) meta.push(esc(s.desc));
+          if(s.elev) meta.push(`${s.elev} ft`);
+          if(s.aspect) meta.push(s.aspect);
+          if(done) meta.push(`${done} collected`);
+          const subStr=meta.join(' · ')||'No data yet';
+          if(s.archived) {
+            html+=`<div class="site-item" data-id="${s.id}" style="opacity:.55;">
             <div class="site-icon">📦</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
@@ -5456,8 +5467,8 @@
             </div>
             <span class="site-arrow" data-restore="${s.id}" title="Restore" style="margin-right:4px;font-size:.85rem;color:var(--accent2);">↩</span>
           </div>`;
-        } else {
-          html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
+          } else {
+            html+=`<div class="site-item${isSel? ' active-site':''}" data-id="${s.id}">
             <div class="site-icon">🌿</div>
             <div class="site-meta">
               <div class="site-name">${esc(s.name)}</div>
@@ -5467,17 +5478,17 @@
             <span class="site-arrow" data-del="${s.id}" title="Archive" style="margin-right:4px;font-size:.8rem;color:var(--muted);opacity:.6;">📦</span>
             <span class="site-arrow">›</span>
           </div>`;
-        }
-      });
+          }
+        });
 
-      // ── Local-only folders at the very bottom, after sites ──
-      localFolders.forEach(f => {
-        const subCount=folders.filter(sf => sf.parentId===f.id).length;
-        const siteCount=countSitesInFolder(f.id,folders,allSites);
-        const icon='📁';
-        const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
-        const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
-        html+=`<div class="folder-item" data-folder-id="${f.id}">
+        // ── Local-only folders at the very bottom, after sites ──
+        localFolders.forEach(f => {
+          const subCount=folders.filter(sf => sf.parentId===f.id).length;
+          const siteCount=countSitesInFolder(f.id,folders,allSites);
+          const icon='📁';
+          const localBadge=`<span style="font-size:.55rem;padding:2px 6px;border-radius:100px;border:1px solid var(--gold);color:var(--gold);margin-left:6px;">local only</span>`;
+          const actions=`<span style="font-size:.65rem;color:var(--muted);padding:4px 6px;">protected</span>`;
+          html+=`<div class="folder-item" data-folder-id="${f.id}">
           <div class="folder-icon">${icon}</div>
           <div class="folder-meta">
             <div class="folder-name">${esc(f.name)}${localBadge}</div>
@@ -5486,48 +5497,54 @@
           ${actions}
         <span class="site-arrow" style="margin-left:4px;">›</span>
         </div>`;
-      });
+        });
 
-      // Archive toggle footer
-      if(archived.length||showArchived) {
-        html+=`<div style="text-align:center;margin-top:12px;">
+        // Archive toggle footer
+        if(archived.length||showArchived) {
+          html+=`<div style="text-align:center;margin-top:12px;">
           <button id="toggle-archived-btn" class="btn btn-ghost" style="font-size:.72rem;padding:6px 14px;">
             ${showArchived? '← Back to active sites':`Show ${archived.length} archived site${archived.length!==1? 's':''}`}
           </button>
         </div>`;
+        }
+
+        el.innerHTML=html;
+
+        // ── Wire folder clicks ──
+        el.querySelectorAll('[data-folder-id]').forEach(item => {
+          item.addEventListener('click',e => {
+            const renBtn=e.target.closest('[data-rename-folder]');
+            const delBtn=e.target.closest('[data-del-folder]');
+            if(renBtn) {e.stopPropagation(); promptRenameFolder(renBtn.dataset.renameFolder,folders); return;}
+            if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
+            currentFolderId=item.dataset.folderId;
+            updateCreateLocationHint(folders);
+            // Defer re-render past the current frame so tap is painted immediately
+            requestAnimationFrame(() => renderSiteList());
+          });
+        });
+
+        // ── Wire site clicks ──
+        el.querySelectorAll('.site-item').forEach(item => {
+          item.addEventListener('click',e => {
+            const editBtn=e.target.closest('[data-edit]');
+            if(editBtn) {e.stopPropagation(); openEditSiteModal(editBtn.dataset.edit); return;}
+            const delBtn=e.target.closest('[data-del]');
+            if(delBtn) {promptDelete(delBtn.dataset.del); return;}
+            const restoreBtn=e.target.closest('[data-restore]');
+            if(restoreBtn) {restoreSite(restoreBtn.dataset.restore); return;}
+            if(!item.querySelector('[data-restore]')) selectSite(item.dataset.id);
+          });
+        });
+
+        const togBtn=document.getElementById('toggle-archived-btn');
+        if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList({invalidate: true});});
+      } catch(err) {
+        console.warn('renderSiteList error:',err);
+      } finally {
+        _siteListRendering=false;
+        if(_siteListDirty) renderSiteList();
       }
-
-      el.innerHTML=html;
-
-      // ── Wire folder clicks ──
-      el.querySelectorAll('[data-folder-id]').forEach(item => {
-        item.addEventListener('click',e => {
-          const renBtn=e.target.closest('[data-rename-folder]');
-          const delBtn=e.target.closest('[data-del-folder]');
-          if(renBtn) {e.stopPropagation(); promptRenameFolder(renBtn.dataset.renameFolder,folders); return;}
-          if(delBtn) {e.stopPropagation(); promptDeleteFolder(delBtn.dataset.delFolder,folders,allSites); return;}
-          currentFolderId=item.dataset.folderId;
-          updateCreateLocationHint(folders);
-          // Defer re-render past the current frame so tap is painted immediately
-          requestAnimationFrame(() => renderSiteList());
-        });
-      });
-
-      // ── Wire site clicks ──
-      el.querySelectorAll('.site-item').forEach(item => {
-        item.addEventListener('click',e => {
-          const editBtn=e.target.closest('[data-edit]');
-          if(editBtn) {e.stopPropagation(); openEditSiteModal(editBtn.dataset.edit); return;}
-          const delBtn=e.target.closest('[data-del]');
-          if(delBtn) {promptDelete(delBtn.dataset.del); return;}
-          const restoreBtn=e.target.closest('[data-restore]');
-          if(restoreBtn) {restoreSite(restoreBtn.dataset.restore); return;}
-          if(!item.querySelector('[data-restore]')) selectSite(item.dataset.id);
-        });
-      });
-
-      const togBtn=document.getElementById('toggle-archived-btn');
-      if(togBtn) togBtn.addEventListener('click',() => {showArchived=!showArchived; renderSiteList({invalidate: true});});
     }
 
     async function updateCreateLocationHint(folders,path) {
@@ -9925,12 +9942,12 @@
       if(dwrDropEl) {dwrDropEl.style.display='none'; dwrDropEl.innerHTML='';}
     });
     document.getElementById('app-check-update-btn').addEventListener('click',checkForAppUpdate);
-    (function(){
+    (function() {
       let reloading=false;
-      function doReload(btn){
+      function doReload(btn) {
         if(reloading) return;
         reloading=true;
-        if(btn){ btn.disabled=true; btn.textContent='Reloading…'; }
+        if(btn) {btn.disabled=true; btn.textContent='Reloading…';}
         window.location.reload();
       }
       const appUpdateBtn=document.getElementById('app-update-btn');
