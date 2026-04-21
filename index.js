@@ -399,7 +399,7 @@ app.http('approvals',{
           FROM approved_users
           ORDER BY is_approved ASC, requested_at DESC
         `);
-        return jsonResponse(200,{success: true,users: usersResult.recordset||[]});
+        return jsonResponse(200,{success: true,callerIsAdmin: true,users: usersResult.recordset||[]});
       }
 
       let body;

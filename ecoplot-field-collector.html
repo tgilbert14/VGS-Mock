@@ -2625,9 +2625,15 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">User Approvals</div>
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
+            Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
           <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
             to review pending users.</div>
+          <label
+            style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
+            <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
+            Show pending only
+          </label>
           <div id="approvals-list"></div>
           <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
             Approvals</button>
@@ -8632,6 +8638,9 @@
         authAccount=response?.account||getAuthAccount();
         if(authAccount) msalClient.setActiveAccount?.(authAccount);
         approvalsLoadedOnce=false;
+        approvalsUsersCache=[];
+        approvalsCallerIsAdmin=false;
+        setApprovalsAdminBadge(false);
         updateAuthUI();
         renderSync();
         toast('Signed in','ok');
@@ -8653,6 +8662,9 @@
       }
       authAccount=null;
       approvalsLoadedOnce=false;
+      approvalsUsersCache=[];
+      approvalsCallerIsAdmin=false;
+      setApprovalsAdminBadge(false);
       updateAuthUI();
       renderSync();
     }
@@ -8725,6 +8737,9 @@
       if(signedIn) {
         loadApprovals({silent: true});
       } else {
+        approvalsUsersCache=[];
+        approvalsCallerIsAdmin=false;
+        setApprovalsAdminBadge(false);
         setApprovalsStatus('Sign in as an admin to review users.');
         renderApprovalsList([]);
       }
@@ -8897,6 +8912,9 @@
     }
 
     let approvalsLoadedOnce=false;
+    let approvalsUsersCache=[];
+    let approvalsPendingOnly=true;
+    let approvalsCallerIsAdmin=false;
 
     function getApprovalsUrl(syncUrl) {
       try {
@@ -8917,15 +8935,28 @@
       el.style.color=type==='ok'? 'var(--accent)':type==='err'? 'var(--danger)':'var(--muted)';
     }
 
+    function setApprovalsAdminBadge(isAdmin) {
+      const badge=document.getElementById('approvals-admin-badge');
+      if(!badge) return;
+      if(isAdmin) {
+        badge.style.display='inline-flex';
+        badge.style.background='rgba(46,125,79,.2)';
+        badge.style.color='var(--accent)';
+      } else {
+        badge.style.display='none';
+      }
+    }
+
     function renderApprovalsList(users=[]) {
       const listEl=document.getElementById('approvals-list');
       if(!listEl) return;
-      if(!users.length) {
-        listEl.innerHTML='<div style="font-size:.68rem;color:var(--muted);">No users found.</div>';
+      const filtered=approvalsPendingOnly? users.filter(u => !u.isApproved):users;
+      if(!filtered.length) {
+        listEl.innerHTML=`<div style="font-size:.68rem;color:var(--muted);">${users.length? 'No users match current filter.':'No users found.'}</div>`;
         return;
       }
 
-      listEl.innerHTML=users.map(u => {
+      listEl.innerHTML=filtered.map(u => {
         const label=u.email||u.displayName||u.userOid;
         const approved=!!u.isApproved;
         const approvedBadge=approved
@@ -8977,17 +9008,28 @@
         let data={};
         try {data=raw? JSON.parse(raw):{};} catch {}
         if(!res.ok) {
+          if(res.status===403) {
+            approvalsCallerIsAdmin=false;
+            setApprovalsAdminBadge(false);
+            approvalsUsersCache=[];
+          }
           setApprovalsStatus(data?.detail||data?.error||`Approval request failed (HTTP ${res.status}).`,'err');
           renderApprovalsList([]);
           return;
         }
 
         const users=Array.isArray(data?.users)? data.users:[];
+        approvalsCallerIsAdmin=!!(data?.callerIsAdmin??true);
+        setApprovalsAdminBadge(approvalsCallerIsAdmin);
+        approvalsUsersCache=users;
         const pending=users.filter(u => !u.isApproved).length;
         setApprovalsStatus(`Loaded ${users.length} user${users.length!==1? 's':''}. ${pending} pending.`,pending? '':'ok');
-        renderApprovalsList(users);
+        renderApprovalsList(approvalsUsersCache);
         approvalsLoadedOnce=true;
       } catch(err) {
+        approvalsCallerIsAdmin=false;
+        setApprovalsAdminBadge(false);
+        approvalsUsersCache=[];
         setApprovalsStatus(err?.message||'Could not load approvals.','err');
         renderApprovalsList([]);
       }
@@ -9019,6 +9061,11 @@
         let data={};
         try {data=raw? JSON.parse(raw):{};} catch {}
         if(!res.ok) {
+          if(res.status===403) {
+            approvalsCallerIsAdmin=false;
+            setApprovalsAdminBadge(false);
+            approvalsUsersCache=[];
+          }
           setApprovalsStatus(data?.detail||data?.error||`Update failed (HTTP ${res.status}).`,'err');
           return;
         }
@@ -9415,6 +9462,10 @@
       if(!userOid||!action) return;
       const approve=action==='approve';
       await updateApproval(userOid,approve);
+    });
+    document.getElementById('approvals-pending-only').addEventListener('change',e => {
+      approvalsPendingOnly=!!e.target.checked;
+      renderApprovalsList(approvalsUsersCache);
     });
 
     // ══════════════════════════════════════════════════════
