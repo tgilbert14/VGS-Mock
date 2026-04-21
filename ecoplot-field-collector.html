@@ -3280,7 +3280,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=52;
+    const APP_BUILD_REV=53;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -4943,18 +4943,42 @@
     // ══════════════════════════════════════════════════════
     //  NAVIGATION
     // ══════════════════════════════════════════════════════
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click',() => {
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('page-'+tab.dataset.page).classList.add('active');
-        if(tab.dataset.page==='collect') renderCollect();
-        if(tab.dataset.page==='sites') renderSiteList({invalidate: true});
-        if(tab.dataset.page==='summary') renderSummary();
-        if(tab.dataset.page==='sync') renderSync();
-        if(tab.dataset.page==='map') renderMap();
+    let _activePage=document.querySelector('.nav-tab.active')?.dataset.page||'collect';
+    let _navRenderToken=0;
+    let _sitesPagePrimed=false;
+
+    function runPageRender(page) {
+      if(page==='collect') renderCollect();
+      if(page==='sites') {
+        renderSiteList({invalidate: !_sitesPagePrimed});
+        _sitesPagePrimed=true;
+      }
+      if(page==='summary') renderSummary();
+      if(page==='sync') renderSync();
+      if(page==='map') renderMap();
+    }
+
+    function navigateToPage(page,{forceRender=false}={}) {
+      if(!page) return;
+      const samePage=_activePage===page;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active',t.dataset.page===page));
+      document.querySelectorAll('.page').forEach(p => p.classList.toggle('active',p.id===('page-'+page)));
+
+      if(samePage&&!forceRender) return;
+      _activePage=page;
+      const token=++_navRenderToken;
+
+      // Let visual tab switch paint first; render heavy content immediately after.
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if(token!==_navRenderToken) return;
+          runPageRender(page);
+        },0);
       });
+    }
+
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click',() => navigateToPage(tab.dataset.page));
     });
 
     // ══════════════════════════════════════════════════════
@@ -9972,13 +9996,7 @@
     // Called from popup button — select site and jump to Collect tab
     window.mapSelectSite=function(siteId) {
       activeSiteId=siteId;
-      // Switch to collect tab
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const collectTab=document.querySelector('.nav-tab[data-page="collect"]');
-      if(collectTab) collectTab.classList.add('active');
-      document.getElementById('page-collect').classList.add('active');
-      renderCollect();
+      navigateToPage('collect',{forceRender: true});
     };
 
     function mapLocateUser() {
@@ -10080,7 +10098,7 @@
       renderCustomListsSetup();
       renderCustomListPicks();
       renderEventCustomListToggles();
-      renderSiteList({invalidate: true});
+      // Defer heavy sites list render until user opens the Sites tab.
       document.getElementById('collect-no-site').style.display='';
     }
     init();
