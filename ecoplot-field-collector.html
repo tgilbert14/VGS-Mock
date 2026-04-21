@@ -15,6 +15,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="vendor/msal-browser.min.js"></script>
   <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   <style>
     :root {
@@ -8520,6 +8521,7 @@
     async function ensureAuthLibraryLoaded() {
       if(authLibraryReady()) return true;
       const candidates=[
+        'vendor/msal-browser.min.js',
         'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js',
         'https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js',
         'https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js'
@@ -8559,7 +8561,7 @@
       const account=getAuthAccount();
 
       if(!authLibraryReady()) {
-        if(statusEl) statusEl.textContent='Sign-in library did not load. Check internet/cdn access.';
+        if(statusEl) statusEl.textContent='Sign-in library did not load. Hard refresh the page (Ctrl+F5) and try again.';
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='none';
         return;

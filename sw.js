@@ -1,10 +1,11 @@
 // EcoPlot Field Collector — Service Worker
 // Bump CACHE_VERSION whenever the HTML build revision changes.
-const CACHE_VERSION='2026.04.20.41';
+const CACHE_VERSION='2026.04.20.42';
 const CACHE=`ecoplot-${CACHE_VERSION}`;
 const PRECACHE=[
     './ecoplot-field-collector.html',
-    './manifest.json'
+    './manifest.json',
+    './vendor/msal-browser.min.js'
 ];
 
 // Install: pre-cache the app shell
