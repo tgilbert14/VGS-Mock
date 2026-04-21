@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="EcoPlotMobile">
@@ -450,6 +451,19 @@
     textarea {
       resize: none;
       line-height: 1.5;
+    }
+
+    /* iOS Safari: keep text-entry controls at 16px to avoid forced zoom/focus glitches. */
+    @supports (-webkit-touch-callout: none) {
+
+      input[type=text],
+      input[type=number],
+      input[type=url],
+      input[type=password],
+      select,
+      textarea {
+        font-size: 16px;
+      }
     }
 
     .row2 {
@@ -3260,6 +3274,38 @@
         "api://025d2544-3267-47a5-a97d-261ae4e741fd/ecoPlot-scope"
       ]
     };
+
+    function isIOSFamilyDevice() {
+      const ua=navigator.userAgent||'';
+      return /iphone|ipad|ipod/i.test(ua)
+        ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    }
+
+    function isTextEntryField(el) {
+      if(!el) return false;
+      if(el.tagName==='TEXTAREA') return !el.disabled&&!el.readOnly;
+      if(el.tagName!=='INPUT') return false;
+      const type=String(el.type||'text').toLowerCase();
+      if(['button','checkbox','radio','range','file','submit','reset','image','color','hidden'].includes(type)) {
+        return false;
+      }
+      return !el.disabled&&!el.readOnly;
+    }
+
+    function focusTextField(el,{select=false}={}) {
+      if(!el||typeof el.focus!=='function') return;
+      const applyFocus=() => {
+        try {el.focus({preventScroll: true});} catch {try {el.focus();} catch {} }
+        if(select&&typeof el.select==='function') {
+          try {el.select();} catch {}
+        }
+      };
+      applyFocus();
+      if(isIOSFamilyDevice()) {
+        requestAnimationFrame(applyFocus);
+        setTimeout(applyFocus,120);
+      }
+    }
     const ALWAYS_AVAILABLE_TWO_CODE_SPECIES=[
       ['2BRY','Bryophyte (moss, liverwort, hornwort)','Bryophyte (moss, liverwort, hornwort)','?','',''],
       ['2CYAN','Cyanobacteria','Cyanobacteria','?','',''],
@@ -4993,7 +5039,7 @@
       document.getElementById('new-site-form').style.display='';
       document.getElementById('new-site-toggle-btn').style.display='none';
       renderSiteProtocolSelect(document.getElementById('new-site-protocol'));
-      document.getElementById('new-site-name').focus();
+      focusTextField(document.getElementById('new-site-name'));
     }
     function closeNewSiteForm() {
       document.getElementById('new-site-form').style.display='none';
@@ -5459,7 +5505,7 @@
     // ── New folder wiring ──
     document.getElementById('new-folder-btn').addEventListener('click',() => {
       document.getElementById('new-folder-row').style.display='flex';
-      document.getElementById('new-folder-input').focus();
+      focusTextField(document.getElementById('new-folder-input'));
     });
     document.getElementById('new-folder-cancel').addEventListener('click',() => {
       document.getElementById('new-folder-row').style.display='none';
@@ -5488,7 +5534,7 @@
       const old=folder.name;
       nameEl.innerHTML=`<input type="text" id="rename-folder-input" value="${esc(old)}" style="background:var(--s3);border:1px solid var(--accent2);border-radius:6px;padding:4px 8px;color:var(--text);font-family:var(--font-ui);font-weight:700;font-size:.88rem;width:100%;">`;
       const inp=document.getElementById('rename-folder-input');
-      inp.focus(); inp.select();
+      focusTextField(inp,{select: true});
       const save=async () => {
         const newName=inp.value.trim();
         if(newName&&newName!==old) {
@@ -7009,7 +7055,7 @@
     function openTwoCodeSearch(methodKey) {
       const input=methodKey==='dwr'? dwrInput:speciesInput;
       input.value='2';
-      input.focus();
+      focusTextField(input);
       input.dispatchEvent(new Event('input'));
     }
 
@@ -7179,8 +7225,7 @@
       speciesQualifierTarget.textContent=`${speciesDisplayPrimary(sp)} [${sp.symbol}]`;
       speciesQualifierInput.value=speciesQualifierText(sp);
       speciesQualifierModal.classList.add('open');
-      speciesQualifierInput.focus();
-      speciesQualifierInput.select();
+      focusTextField(speciesQualifierInput,{select: true});
     }
 
     async function applySpeciesQualifier() {
@@ -8072,7 +8117,7 @@
       const activeRadio=document.querySelector(`input[name="drawer-search-by"][value="${preferredMode}"]`)||document.getElementById('drawer-search-by-code');
       if(activeRadio) activeRadio.checked=true;
       setDrawerSearchEmptyState();
-      searchInput.focus();
+      focusTextField(searchInput);
 
       // Wire up search input
       searchInput.addEventListener('input',updateDrawerSearchResults);
@@ -9449,7 +9494,7 @@
       if(pw!=='1699') {
         document.getElementById('wipe-db-err').style.display='';
         document.getElementById('wipe-db-pw').value='';
-        document.getElementById('wipe-db-pw').focus();
+        focusTextField(document.getElementById('wipe-db-pw'));
         return;
       }
       setDeveloperUnlocked(true);
@@ -9896,12 +9941,24 @@
       const isStandalone=window.navigator.standalone===true
         ||window.matchMedia('(display-mode: standalone)').matches;
       const dismissed=localStorage.getItem('ecoplot-install-dismissed');
-      const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isIOS=isIOSFamilyDevice();
       const isSafari=/safari/i.test(navigator.userAgent)&&!/chrome|crios|fxios/i.test(navigator.userAgent);
       if(!isStandalone&&!dismissed&&isIOS&&isSafari) {
         document.getElementById('install-banner').classList.add('visible');
       }
     })();
+
+    // iOS Safari sometimes drops the first tap focus inside layered/fixed UI.
+    if(isIOSFamilyDevice()) {
+      document.addEventListener('touchend',e => {
+        const target=e.target?.closest('input,textarea');
+        if(!isTextEntryField(target)) return;
+        if(document.activeElement===target) return;
+        setTimeout(() => {
+          if(document.activeElement!==target) focusTextField(target);
+        },0);
+      },{capture: true,passive: true});
+    }
 
     document.getElementById('install-dismiss').addEventListener('click',() => {
       document.getElementById('install-banner').classList.remove('visible');
