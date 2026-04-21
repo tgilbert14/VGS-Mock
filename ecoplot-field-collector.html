@@ -2169,6 +2169,24 @@
       white-space: nowrap;
     }
 
+    .drawer-species-item .species-primary-line {
+      font-size: .66rem;
+      color: var(--text);
+      line-height: 1.25;
+      margin-top: 1px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .drawer-species-item .species-secondary-line {
+      font-size: .62rem;
+      color: var(--muted);
+      line-height: 1.2;
+      margin-top: 1px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     .drawer-species-item .method-badge {
       font-size: .6rem;
       background: var(--gold);
@@ -2553,6 +2571,32 @@
           </div>
         </div>
         <div class="card">
+          <div class="card-title">Account</div>
+          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in…</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" id="auth-login-btn" type="button">Sign In</button>
+            <button class="btn btn-ghost btn-sm" id="auth-logout-btn" type="button" style="display:none;">Sign
+              Out</button>
+            <button class="btn btn-ghost btn-sm" id="auth-refresh-admin-btn" type="button" disabled>Refresh Admin
+              Access</button>
+          </div>
+        </div>
+        <div class="card" id="approvals-card" style="display:none;">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
+            Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
+          <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
+            to review pending users.</div>
+          <label
+            style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
+            <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
+            Show pending only
+            <span id="approvals-pending-count-badge" class="badge" style="margin-left:auto;">0 pending</span>
+          </label>
+          <div id="approvals-list"></div>
+          <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
+            Approvals</button>
+        </div>
+        <div class="card">
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Species Database <button
                 type="button" class="info-icon-btn" data-info-key="setup-species"
                 title="Species database help">i</button></span><span class="badge" id="species-db-badge">Built-in
@@ -2714,30 +2758,6 @@
           </div>
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-azure-cfg-btn">Save Azure
             Connection</button>
-        </div>
-        <div class="card">
-          <div class="card-title">Account</div>
-          <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in…</div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="auth-login-btn" type="button">Sign In</button>
-            <button class="btn btn-ghost btn-sm" id="auth-logout-btn" type="button" style="display:none;">Sign
-              Out</button>
-          </div>
-        </div>
-        <div class="card" id="approvals-card" style="display:none;">
-          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
-            Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
-          <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
-            to review pending users.</div>
-          <label
-            style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;color:var(--text);margin-bottom:8px;">
-            <input type="checkbox" id="approvals-pending-only" style="width:auto;accent-color:var(--accent);" checked>
-            Show pending only
-            <span id="approvals-pending-count-badge" class="badge" style="margin-left:auto;">0 pending</span>
-          </label>
-          <div id="approvals-list"></div>
-          <button class="btn btn-outline btn-sm" id="approvals-refresh-btn" style="margin-top:10px;">Refresh
-            Approvals</button>
         </div>
         <div class="card">
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
@@ -3752,10 +3772,10 @@
       const base=createSpeciesEntry(entry);
       if(speciesDisplayMode==='common') {
         const preferred=base.common||base.sci||base.symbol;
-        return createSpeciesEntry({...base,common: preferred,sci: ''});
+        return createSpeciesEntry({...base,common: preferred});
       }
       const preferred=base.sci||base.common||base.symbol;
-      return createSpeciesEntry({...base,sci: preferred,common: ''});
+      return createSpeciesEntry({...base,sci: preferred});
     }
 
     function hasSpeciesEntry(list,entry,excludeIndex=-1) {
@@ -4088,8 +4108,8 @@
           const active=activeSymbols.has(sp.symbol);
           const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
           return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
-              <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
-              <span>${esc(sp.common||sp.sci||sp.symbol)}</span>
+              <span class="two-code-pick-symbol">[${esc(sp.symbol)}]</span>
+              <span>${esc(speciesDisplayPrimary(sp))}</span>
             </button>`;
         }).join('')}
         </div>`;
@@ -4358,18 +4378,33 @@
       }
     }
 
+    function speciesResolvedNames(sp) {
+      const symbol=String(sp?.symbol||'').trim().toUpperCase();
+      const row=symbol? getSpeciesSearchRecord(symbol):null;
+      const sci=String(sp?.sci||row?.[2]||'').trim();
+      const common=String(sp?.common||row?.[1]||'').trim();
+      return {sci,common,symbol};
+    }
+
     function speciesDisplayPrimary(sp) {
-      const sci=(sp?.sci||'').trim();
-      const common=(sp?.common||'').trim();
-      const symbol=(sp?.symbol||'').trim();
+      const {sci,common,symbol}=speciesResolvedNames(sp);
       if(speciesDisplayMode==='common') return common||sci||symbol;
       return sci||common||symbol;
     }
 
     function speciesDisplaySecondary(sp) {
-      const sci=(sp?.sci||'').trim();
-      const common=(sp?.common||'').trim();
+      const {sci,common}=speciesResolvedNames(sp);
       if(speciesDisplayMode==='common') return sci;
+      return common;
+    }
+
+    function speciesScientificName(sp) {
+      const {sci,common,symbol}=speciesResolvedNames(sp);
+      return sci||common||symbol;
+    }
+
+    function speciesCommonName(sp) {
+      const {common}=speciesResolvedNames(sp);
       return common;
     }
 
@@ -4535,7 +4570,7 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} ${renderSpeciesCodeBadgeHTML(sp)}
+          ${inv? '⚠️ ':''} ${renderSpeciesCodeBadgeHTML(sp,{includeQualifier: false})} ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
         </button>`;
       }
 
@@ -7822,7 +7857,7 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} ${renderSpeciesCodeBadgeHTML(sp)}
+          ${inv? '⚠️ ':''} ${renderSpeciesCodeBadgeHTML(sp,{includeQualifier: false})} ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
         </button>`;
       }
 
@@ -7971,13 +8006,17 @@
       } else {
         html=drawerSpecies.map((sp,idx) => {
           const qualifier=speciesQualifierText(sp);
+          const scientific=speciesScientificName(sp);
+          const common=speciesCommonName(sp);
+          const showCommon=!!common&&common.toLowerCase()!==scientific.toLowerCase();
+          const codeLine=qualifier? `${sp.symbol} - ${qualifier}`:sp.symbol;
           const key=speciesEntryKey(sp);
           const newestClass=key===drawerNewestSpeciesKey? ' newly-added':'';
-          return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
+          return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(common)}" data-sci="${esc(scientific)}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
             <div class="species-name">
-              <span class="species-code">${esc(sp.symbol)}</span>
-              <span class="species-common">${esc(sp.common||'')}</span>
-              ${qualifier? `<span class="qualifier-badge" style="font-size:.65rem;color:var(--muted);margin-left:4px;">${esc(qualifier)}</span>`:''}
+              <span class="species-code">${esc(codeLine)}</span>
+              <span class="species-primary-line">${esc(scientific||'Species name unavailable')}</span>
+              ${showCommon? `<span class="species-secondary-line">${esc(common)}</span>`:''}
             </div>
             <div style="display:flex;gap:4px;align-items:center;">
               <button class="drawer-edit-qualifier-btn" data-role="edit-qualifier" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;">✎</button>
@@ -7998,10 +8037,14 @@
         if(siteOnly.length>0) {
           html+=`<div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-size:.65rem;color:var(--muted);font-weight:600;padding:6px 8px;text-align:center;">Seen at Site</div>`;
           html+=siteOnly.map(sp => {
-            return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-site-species="true">
+            const scientific=speciesScientificName(sp);
+            const common=speciesCommonName(sp);
+            const showCommon=!!common&&common.toLowerCase()!==scientific.toLowerCase();
+            return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(common)}" data-sci="${esc(scientific)}" data-native="${esc(sp.native||'?')}" data-site-species="true">
               <div class="species-name">
                 <span class="species-code">${esc(sp.symbol)}</span>
-                <span class="species-common">${esc(sp.common||'')}</span>
+                <span class="species-primary-line">${esc(scientific||'Species name unavailable')}</span>
+                ${showCommon? `<span class="species-secondary-line">${esc(common)}</span>`:''}
               </div>
               <span class="method-badge">+Add</span>
             </div>`;
@@ -8740,12 +8783,17 @@
       const statusEl=document.getElementById('auth-status');
       const loginBtn=document.getElementById('auth-login-btn');
       const logoutBtn=document.getElementById('auth-logout-btn');
+      const refreshAdminBtn=document.getElementById('auth-refresh-admin-btn');
       const account=getAuthAccount();
 
       if(!authLibraryReady()) {
         if(statusEl) statusEl.textContent='Sign-in library did not load. Hard refresh the page (Ctrl+F5) and try again.';
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='none';
+        if(refreshAdminBtn) {
+          refreshAdminBtn.disabled=true;
+          refreshAdminBtn.title='Sign-in unavailable';
+        }
         return;
       }
 
@@ -8754,6 +8802,10 @@
         if(statusEl) statusEl.textContent=`Signed in as ${user}`;
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='';
+        if(refreshAdminBtn) {
+          refreshAdminBtn.disabled=false;
+          refreshAdminBtn.title='Re-check admin access and approvals';
+        }
       } else {
         if(statusEl) {
           statusEl.textContent=authInitError
@@ -8762,7 +8814,32 @@
         }
         if(loginBtn) loginBtn.style.display='';
         if(logoutBtn) logoutBtn.style.display='none';
+        if(refreshAdminBtn) {
+          refreshAdminBtn.disabled=true;
+          refreshAdminBtn.title='Sign in first';
+        }
       }
+    }
+
+    async function refreshAdminAccess({notify=true}={}) {
+      const account=getAuthAccount();
+      if(!account) {
+        if(notify) toast('Sign in first','warn');
+        updateAuthUI();
+        return;
+      }
+      approvalsLoadedOnce=false;
+      approvalsUsersCache=[];
+      approvalsCallerIsAdmin=false;
+      setApprovalsCardVisibility(false);
+      setApprovalsAdminBadge(false);
+      try {
+        await loadApprovals({silent: !notify,force: true});
+        if(notify) toast('Admin access refreshed','ok');
+      } catch(err) {
+        if(notify) toast(`Could not refresh admin access: ${err?.message||'unknown error'}`,'err');
+      }
+      renderSync();
     }
 
     async function initAuth() {
@@ -9678,6 +9755,9 @@
     });
     document.getElementById('auth-login-btn').addEventListener('click',authSignIn);
     document.getElementById('auth-logout-btn').addEventListener('click',authSignOut);
+    document.getElementById('auth-refresh-admin-btn').addEventListener('click',async () => {
+      await refreshAdminAccess({notify: true});
+    });
     document.getElementById('approvals-refresh-btn').addEventListener('click',async () => {
       approvalsLoadedOnce=false;
       await loadApprovals({silent: false,force: true});
