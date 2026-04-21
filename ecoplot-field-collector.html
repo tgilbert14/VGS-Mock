@@ -3450,6 +3450,7 @@
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
     let msalClient=null;
     let authAccount=null;
+    let authInitError='';
     let speciesSearchField=localStorage.getItem('ep_species_search_field')||'symbol';
     let speciesSearchMatchMode=localStorage.getItem('ep_species_search_match')||'starts';
     let searchSpeciesCache={rows: null,bySymbol: null,sourceRef: null};
@@ -8573,15 +8574,21 @@
         if(loginBtn) loginBtn.style.display='none';
         if(logoutBtn) logoutBtn.style.display='';
       } else {
-        if(statusEl) statusEl.textContent='Not signed in. Sign in to sync data.';
+        if(statusEl) {
+          statusEl.textContent=authInitError
+            ? `Sign-in setup error: ${authInitError}`
+            :'Not signed in. Sign in to sync data.';
+        }
         if(loginBtn) loginBtn.style.display='';
         if(logoutBtn) logoutBtn.style.display='none';
       }
     }
 
     async function initAuth() {
+      authInitError='';
       const loaded=await ensureAuthLibraryLoaded();
       if(!loaded) {
+        authInitError='MSAL library could not be loaded.';
         updateAuthUI();
         return;
       }
@@ -8591,6 +8598,8 @@
         await msalClient.handleRedirectPromise?.();
         getAuthAccount();
       } catch(err) {
+        msalClient=null;
+        authInitError=err?.message||'Unknown MSAL initialization error.';
         console.warn('MSAL init failed:',err);
       }
       updateAuthUI();
@@ -8598,7 +8607,11 @@
 
     async function authSignIn() {
       if(!msalClient) {
-        toast('Sign-in is not configured yet','err');
+        await initAuth();
+      }
+      if(!msalClient) {
+        toast(`Sign-in setup failed: ${authInitError||'MSAL did not initialize.'}`,'err');
+        updateAuthUI();
         return;
       }
       try {
