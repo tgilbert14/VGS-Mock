@@ -2624,7 +2624,7 @@
               Out</button>
           </div>
         </div>
-        <div class="card">
+        <div class="card" id="approvals-card" style="display:none;">
           <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">User
             Approvals <span id="approvals-admin-badge" class="badge" style="display:none;">Admin</span></div>
           <div id="approvals-status" style="font-size:.7rem;color:var(--muted);margin-bottom:10px;">Sign in as an admin
@@ -8641,6 +8641,7 @@
         approvalsLoadedOnce=false;
         approvalsUsersCache=[];
         approvalsCallerIsAdmin=false;
+        setApprovalsCardVisibility(false);
         setApprovalsAdminBadge(false);
         updateAuthUI();
         renderSync();
@@ -8665,6 +8666,7 @@
       approvalsLoadedOnce=false;
       approvalsUsersCache=[];
       approvalsCallerIsAdmin=false;
+      setApprovalsCardVisibility(false);
       setApprovalsAdminBadge(false);
       updateAuthUI();
       renderSync();
@@ -8740,6 +8742,7 @@
       } else {
         approvalsUsersCache=[];
         approvalsCallerIsAdmin=false;
+        setApprovalsCardVisibility(false);
         setApprovalsAdminBadge(false);
         setApprovalsStatus('Sign in as an admin to review users.');
         renderApprovalsList([]);
@@ -8936,9 +8939,16 @@
       el.style.color=type==='ok'? 'var(--accent)':type==='err'? 'var(--danger)':'var(--muted)';
     }
 
+    function setApprovalsCardVisibility(isVisible) {
+      const card=document.getElementById('approvals-card');
+      if(!card) return;
+      card.style.display=isVisible? '':'none';
+    }
+
     function setApprovalsAdminBadge(isAdmin) {
       const badge=document.getElementById('approvals-admin-badge');
       if(!badge) return;
+      setApprovalsCardVisibility(!!isAdmin);
       if(isAdmin) {
         badge.style.display='inline-flex';
         badge.style.background='rgba(46,125,79,.2)';

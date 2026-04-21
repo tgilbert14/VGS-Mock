@@ -359,7 +359,7 @@ app.http('observations',{
 
 app.http('approvals',{
   methods: ['GET','POST','OPTIONS'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: async (request) => {
     if((request.method||'').toUpperCase()==='OPTIONS') {
       return {status: 204,headers: CORS_HEADERS,body: ''};
