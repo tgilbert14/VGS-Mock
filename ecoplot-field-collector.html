@@ -203,42 +203,6 @@
     }
 
     /* ── Install banner ── */
-    #install-banner {
-      display: none;
-      background: var(--s2);
-      border-bottom: 1px solid var(--accent2);
-      padding: 10px 16px;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    #install-banner.visible {
-      display: flex;
-    }
-
-    #install-banner p {
-      flex: 1;
-      font-size: .7rem;
-      color: var(--text);
-      line-height: 1.4;
-    }
-
-    #install-banner strong {
-      color: var(--accent);
-    }
-
-    #install-dismiss {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 5px 10px;
-      font-size: .65rem;
-      color: var(--muted);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
     #update-banner {
       display: none;
       background: #1a3a24;
@@ -2306,13 +2270,6 @@
       <button id="theme-toggle" title="Toggle light/dark mode">☀️</button>
     </div>
 
-    <!-- Install banner (shown only in Safari, not in standalone) -->
-    <div id="install-banner">
-      <p>📲 <strong>Tip:</strong> Tap Share → <strong>Add to Home Screen</strong> to use EcoPlotMobile offline without a
-        connection.</p>
-      <button id="install-dismiss">Got it</button>
-    </div>
-
     <!-- Update banner (shown when a new SW build is waiting) -->
     <div id="update-banner">
       <p>🔄 <strong>Update available.</strong> Reload to get the latest version of EcoPlotMobile.</p>
@@ -3274,7 +3231,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=45;
+    const APP_BUILD_REV=46;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const msalConfig={
       auth: {
@@ -10139,18 +10096,6 @@
       updateThemeBtn();
     });
 
-    // ── Install banner (iOS Safari, not standalone) ──
-    (function checkInstallBanner() {
-      const isStandalone=window.navigator.standalone===true
-        ||window.matchMedia('(display-mode: standalone)').matches;
-      const dismissed=localStorage.getItem('ecoplot-install-dismissed');
-      const isIOS=isIOSFamilyDevice();
-      const isSafari=/safari/i.test(navigator.userAgent)&&!/chrome|crios|fxios/i.test(navigator.userAgent);
-      if(!isStandalone&&!dismissed&&isIOS&&isSafari) {
-        document.getElementById('install-banner').classList.add('visible');
-      }
-    })();
-
     // iOS Safari sometimes drops the first tap focus inside layered/fixed UI.
     if(isIOSFamilyDevice()) {
       document.addEventListener('touchend',e => {
@@ -10163,10 +10108,6 @@
       },{capture: true,passive: true});
     }
 
-    document.getElementById('install-dismiss').addEventListener('click',() => {
-      document.getElementById('install-banner').classList.remove('visible');
-      localStorage.setItem('ecoplot-install-dismissed','1');
-    });
   </script>
 </body>
 
