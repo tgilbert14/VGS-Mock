@@ -8593,7 +8593,7 @@
         return;
       }
       try {
-        msalClient=new window.msal.PublicClientApplication(AUTH_MSAL_CONFIG);
+        msalClient=new window.msal.PublicClientApplication(msalConfig);
         await msalClient.initialize?.();
         await msalClient.handleRedirectPromise?.();
         getAuthAccount();
@@ -8615,7 +8615,7 @@
         return;
       }
       try {
-        const response=await msalClient.loginPopup(AUTH_LOGIN_REQUEST);
+        const response=await msalClient.loginPopup(loginRequest);
         authAccount=response?.account||getAuthAccount();
         if(authAccount) msalClient.setActiveAccount?.(authAccount);
         updateAuthUI();
@@ -8632,7 +8632,7 @@
         const account=getAuthAccount();
         await msalClient.logoutPopup({
           account,
-          postLogoutRedirectUri: AUTH_MSAL_CONFIG.auth.redirectUri,
+          postLogoutRedirectUri: msalConfig.auth.redirectUri,
         });
       } catch(err) {
         console.warn('Sign-out warning:',err);
@@ -8647,12 +8647,12 @@
       const account=getAuthAccount();
       if(!account) return null;
       try {
-        const result=await msalClient.acquireTokenSilent({...AUTH_LOGIN_REQUEST,account});
+        const result=await msalClient.acquireTokenSilent({...loginRequest,account});
         return result?.accessToken||null;
       } catch(err) {
         if(!interactive) return null;
         try {
-          const result=await msalClient.acquireTokenPopup(AUTH_LOGIN_REQUEST);
+          const result=await msalClient.acquireTokenPopup(loginRequest);
           return result?.accessToken||null;
         } catch(err2) {
           console.warn('Token acquire failed:',err2);
