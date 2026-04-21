@@ -932,7 +932,7 @@
     }
 
     #sample-panel.open {
-      transform: translateY(0);
+      transform: none;
     }
 
     #sample-panel-header {
@@ -3301,6 +3301,15 @@
         ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
     }
 
+    function isStandaloneDisplayMode() {
+      try {
+        return window.navigator.standalone===true
+          ||window.matchMedia('(display-mode: standalone)').matches;
+      } catch {
+        return false;
+      }
+    }
+
     function isTextEntryField(el) {
       if(!el) return false;
       if(el.tagName==='TEXTAREA') return !el.disabled&&!el.readOnly;
@@ -3314,8 +3323,13 @@
 
     function focusTextField(el,{select=false}={}) {
       if(!el||typeof el.focus!=='function') return;
+      const forcePlainFocus=isIOSFamilyDevice()&&isStandaloneDisplayMode();
       const applyFocus=() => {
-        try {el.focus({preventScroll: true});} catch {try {el.focus();} catch {} }
+        if(forcePlainFocus) {
+          try {el.focus();} catch {}
+        } else {
+          try {el.focus({preventScroll: true});} catch {try {el.focus();} catch {} }
+        }
         if(select&&typeof el.select==='function') {
           try {el.select();} catch {}
         }
@@ -3323,6 +3337,9 @@
       applyFocus();
       if(isIOSFamilyDevice()) {
         requestAnimationFrame(applyFocus);
+        if(forcePlainFocus) {
+          setTimeout(applyFocus,60);
+        }
         setTimeout(applyFocus,120);
       }
     }
@@ -10153,6 +10170,14 @@
 
     // iOS Safari sometimes drops the first tap focus inside layered/fixed UI.
     if(isIOSFamilyDevice()) {
+      // Keep a synchronous in-gesture focus attempt for standalone/PWA mode.
+      document.addEventListener('touchstart',e => {
+        const target=e.target?.closest('input,textarea');
+        if(!isTextEntryField(target)) return;
+        if(document.activeElement===target) return;
+        if(isStandaloneDisplayMode()) focusTextField(target);
+      },{capture: true,passive: true});
+
       document.addEventListener('touchend',e => {
         const target=e.target?.closest('input,textarea');
         if(!isTextEntryField(target)) return;
