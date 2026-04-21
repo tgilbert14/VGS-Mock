@@ -2612,6 +2612,8 @@
             <label for="cfg-key">API Key (x-functions-key)</label>
             <input type="password" id="cfg-key" placeholder="optional">
           </div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-azure-cfg-btn">Save Azure
+            Connection</button>
         </div>
         <div class="card">
           <div class="card-title">Account</div>
@@ -8856,7 +8858,7 @@
       }
       return new Set(sites.filter(s => localFolderIds.has(s.folderId)).map(s => s.id));
     }
-    document.getElementById('save-cfg-btn').addEventListener('click',() => {
+    function saveSettings() {
       localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
       localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
       localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
@@ -8871,7 +8873,10 @@
       }
       renderSummary();
       toast('Settings saved','ok');
-    });
+    }
+
+    document.getElementById('save-cfg-btn').addEventListener('click',saveSettings);
+    document.getElementById('save-azure-cfg-btn').addEventListener('click',saveSettings);
 
     // ── Export / Backup ──
     function setExportStatus(msg,type='') {
