@@ -2643,6 +2643,9 @@
           <div class="card-title"><span style="display:inline-flex;align-items:center;">Sync Status <button
                 type="button" class="info-icon-btn" data-info-key="setup-sync"
                 title="Sync status help">i</button></span><span class="badge" id="pending-badge">0 pending</span></div>
+          <div id="managed-sync-status"
+            style="display:none;font-size:.68rem;color:var(--muted);margin-bottom:8px;border:1px solid var(--line);border-radius:8px;padding:8px;background:rgba(255,255,255,.02);">
+          </div>
           <div id="sync-site-list"></div>
           <div id="sync-detail"
             style="display:none;font-size:.7rem;line-height:1.45;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:rgba(255,255,255,.03);">
@@ -3154,8 +3157,10 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=56;
+    const APP_BUILD_REV=57;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
+    const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
+    const DEFAULT_SYNC_KEY='';
     const msalConfig={
       auth: {
         clientId: "025d2544-3267-47a5-a97d-261ae4e741fd",
@@ -8604,6 +8609,8 @@
       }
     }
 
+    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
     async function initAuth() {
       authInitError='';
       const loaded=await ensureAuthLibraryLoaded();
@@ -8615,8 +8622,21 @@
       try {
         msalClient=new window.msal.PublicClientApplication(msalConfig);
         await msalClient.initialize?.();
-        await msalClient.handleRedirectPromise?.();
-        getAuthAccount();
+        const redirectResult=await msalClient.handleRedirectPromise?.();
+        if(redirectResult?.account) {
+          authAccount=redirectResult.account;
+          msalClient.setActiveAccount?.(authAccount);
+          approvalsLoadedOnce=false;
+          approvalsUsersCache=[];
+          approvalsCallerIsAdmin=false;
+          setApprovalsCardVisibility(false);
+          setApprovalsAdminBadge(false);
+          ensureDefaultSyncSettings();
+          renderSync();
+          toast('Signed in','ok');
+        } else {
+          getAuthAccount();
+        }
       } catch(err) {
         msalClient=null;
         authInitError=err?.message||'Unknown MSAL initialization error.';
@@ -8635,6 +8655,10 @@
         return;
       }
       try {
+        if(isMobile) {
+          await msalClient.loginRedirect(loginRequest);
+          return; // page will reload after redirect
+        }
         const response=await msalClient.loginPopup(loginRequest);
         authAccount=response?.account||getAuthAccount();
         if(authAccount) msalClient.setActiveAccount?.(authAccount);
@@ -8643,6 +8667,7 @@
         approvalsCallerIsAdmin=false;
         setApprovalsCardVisibility(false);
         setApprovalsAdminBadge(false);
+        ensureDefaultSyncSettings();
         updateAuthUI();
         renderSync();
         toast('Signed in','ok');
@@ -8655,6 +8680,10 @@
       if(!msalClient) return;
       try {
         const account=getAuthAccount();
+        if(isMobile) {
+          await msalClient.logoutRedirect({account,postLogoutRedirectUri: msalConfig.auth.redirectUri});
+          return;
+        }
         await msalClient.logoutPopup({
           account,
           postLogoutRedirectUri: msalConfig.auth.redirectUri,
@@ -8880,12 +8909,23 @@
 
     function getSettings() {
       return {
-        url: localStorage.getItem('ep_url')||'',
-        key: localStorage.getItem('ep_key')||'',
+        url: localStorage.getItem('ep_url')||DEFAULT_SYNC_URL,
+        key: localStorage.getItem('ep_key')||DEFAULT_SYNC_KEY,
         incompleteWarn: localStorage.getItem('ep_incomplete_warn')==='1',
         speciesDisplay: localStorage.getItem('ep_species_display_mode')||'species',
         autoSync: localStorage.getItem('ep_auto_sync')==='1',
       };
+    }
+
+    function ensureDefaultSyncSettings() {
+      const hasUrl=!!String(localStorage.getItem('ep_url')||'').trim();
+      if(!hasUrl&&DEFAULT_SYNC_URL) {
+        localStorage.setItem('ep_url',DEFAULT_SYNC_URL);
+      }
+      const hasKey=localStorage.getItem('ep_key')!=null;
+      if(!hasKey&&DEFAULT_SYNC_KEY!==undefined) {
+        localStorage.setItem('ep_key',DEFAULT_SYNC_KEY);
+      }
     }
 
     function saveSyncDetail(detail) {
@@ -9053,6 +9093,21 @@
       const card=document.getElementById('azure-connection-card');
       if(!card) return;
       card.style.display=(approvalsCallerIsAdmin||isDeveloperUnlocked())? '':'none';
+      updateManagedSyncStatus();
+    }
+
+    function updateManagedSyncStatus() {
+      const el=document.getElementById('managed-sync-status');
+      if(!el) return;
+      const signedIn=!!getAuthAccount();
+      const showManagedMessage=signedIn&&!approvalsCallerIsAdmin&&!isDeveloperUnlocked();
+      if(showManagedMessage) {
+        el.textContent='You can sync after admin approval. Connection settings on this device are managed and locked by your admin.';
+        el.style.display='block';
+      } else {
+        el.textContent='';
+        el.style.display='none';
+      }
     }
 
     function getApprovalsUrl(syncUrl) {
@@ -9794,6 +9849,7 @@
     //  INIT
     // ══════════════════════════════════════════════════════
     async function init() {
+      ensureDefaultSyncSettings();
       renderAppVersion();
       await initAuth();
       // Ensure the local-only practice folder always exists
