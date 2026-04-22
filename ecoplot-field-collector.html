@@ -3157,7 +3157,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=57;
+    const APP_BUILD_REV=58;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -8711,6 +8711,10 @@
       } catch(err) {
         if(!interactive) return null;
         try {
+          if(isMobile) {
+            await msalClient.acquireTokenRedirect(loginRequest);
+            return null;
+          }
           const result=await msalClient.acquireTokenPopup(loginRequest);
           return result?.accessToken||null;
         } catch(err2) {
