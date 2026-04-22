@@ -27,7 +27,7 @@ const VALID_AUDIENCES=[AUTH_CLIENT_ID,`api://${AUTH_CLIENT_ID}`];
 const CORS_HEADERS={
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-functions-key'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
 function jsonResponse(status,payload) {
@@ -251,7 +251,7 @@ async function isAdminUser(db,user) {
 // ── Function handler ───────────────────────────────────────────────────────────
 app.http('observations',{
   methods: ['POST','OPTIONS'],
-  authLevel: 'function',
+  authLevel: 'anonymous',
   handler: async (request,context) => {
 
     // Handle CORS preflight
