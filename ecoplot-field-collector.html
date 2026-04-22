@@ -9014,7 +9014,7 @@
         const messageLine=detail.message? `<div style="color:${tone};margin-bottom:${detail.body? '6px':'0'};">${esc(detail.message)}</div>`:'';
         const bodyLine=detail.body? `<div style="white-space:pre-wrap;word-break:break-word;color:${bodyTone};font-weight:${detail.type==='err'? '600':'400'};">${esc(detail.body)}</div>`:'';
         const timeLine=detail.at? `<div style="margin-top:6px;color:var(--muted);font-size:.65rem;">${esc(new Date(detail.at).toLocaleString())}</div>`:'';
-        const copyBtn=`<button type="button" id="sync-copy-detail-btn" class="btn btn-ghost btn-sm" style="margin-top:8px;">Copy error details</button>`;
+        const copyBtn=`<button type="button" id="sync-copy-detail-btn" class="btn btn-ghost btn-sm" style="margin-top:8px;">Copy details</button>`;
         el.innerHTML=`${statusLine}${messageLine}${bodyLine}${timeLine}${copyBtn}`;
         el.style.borderColor=borderTone;
         el.style.background=backgroundTone;
