@@ -3157,7 +3157,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=58;
+    const APP_BUILD_REV=62;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -6347,12 +6347,14 @@
       const fetchBox=document.getElementById('new-event-method-fetch');
 
       const hasProtocolMethods=Array.isArray(methods)&&methods.length>0;
-      const showCover=hasProtocolMethods&&methods.includes('cover');
-      const showFreq=hasProtocolMethods&&methods.includes('freq');
-      const showDwr=hasProtocolMethods&&methods.includes('dwr');
-      const showFetch=hasProtocolMethods&&methods.includes('fetch');
 
       if(hasProtocolMethods) {
+        // Protocol mode: show only protocol's methods and set checkbox states
+        const showCover=methods.includes('cover');
+        const showFreq=methods.includes('freq');
+        const showDwr=methods.includes('dwr');
+        const showFetch=methods.includes('fetch');
+
         const container=coverWrap?.parentElement;
         if(container) {
           methods.forEach(m => {
@@ -6360,17 +6362,27 @@
             if(node) container.appendChild(node);
           });
         }
+
+        coverWrap.style.display=showCover? 'flex':'none';
+        freqWrap.style.display=showFreq? 'flex':'none';
+        dwrWrap.style.display=showDwr? 'flex':'none';
+        fetchWrap.style.display=showFetch? 'flex':'none';
+
+        coverBox.checked=showCover;
+        freqBox.checked=showFreq;
+        dwrBox.checked=showDwr;
+        fetchBox.checked=showFetch;
+      } else {
+        // Default / reset mode: show all methods and default all to checked
+        coverWrap.style.display='flex';
+        freqWrap.style.display='flex';
+        dwrWrap.style.display='flex';
+        fetchWrap.style.display='flex';
+        coverBox.checked=true;
+        freqBox.checked=true;
+        dwrBox.checked=true;
+        fetchBox.checked=true;
       }
-
-      coverWrap.style.display=showCover? 'flex':'none';
-      freqWrap.style.display=showFreq? 'flex':'none';
-      dwrWrap.style.display=showDwr? 'flex':'none';
-      fetchWrap.style.display=showFetch? 'flex':'none';
-
-      coverBox.checked=showCover;
-      freqBox.checked=showFreq;
-      dwrBox.checked=showDwr;
-      fetchBox.checked=showFetch;
     }
 
     async function applyProtocolToEvent(ev,protocolId,{overwriteName=false}={}) {
@@ -6397,16 +6409,13 @@
       sel.onchange=async () => {
         await applyProtocolToForm(sel.value);
       };
-      // When any config field changes manually, reset selector to no protocol mode.
+      // Keep the selected protocol attached to the event while allowing per-event overrides.
       const configFields=['new-event-transects','new-event-samples','new-event-length',
         'new-event-unit','new-event-coverpts','new-event-fw','new-event-fh',
         'new-event-method-cover','new-event-method-freq','new-event-method-dwr','new-event-method-fetch'];
       configFields.forEach(id => {
         document.getElementById(id).onchange=() => {
-          if(sel.value) {
-            sel.value='';
-            syncNewEventMethodOptions();
-          }
+          if(!sel.value) syncNewEventMethodOptions();
         };
       });
     }
@@ -6434,6 +6443,9 @@
     function closeNewEventForm() {
       document.getElementById('new-event-form').style.display='none';
       document.getElementById('new-event-toggle-btn').style.display='';
+      // Reset so next open always starts fresh (all methods checked, no protocol pre-selected)
+      document.getElementById('new-event-protocol').value='';
+      syncNewEventMethodOptions();
     }
 
     async function createEvent() {
@@ -6448,16 +6460,14 @@
         return;
       }
       const protocol=protocolId? await dbGet('protocols',protocolId):null;
+      // Always read from current checkbox states to allow users to disable protocol methods on-the-fly
       let methods=[];
-      if(protocolId&&protocol&&Array.isArray(protocol.methods)) {
-        methods=[...protocol.methods];
-      } else {
-        if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
-        if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
-        if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
-      }
+      if(document.getElementById('new-event-method-cover').checked) methods.push('cover');
+      if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
+      if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
+      if(document.getElementById('new-event-method-fetch').checked) methods.push('fetch');
       if(!methods.length) {
-        toast('Selected protocol has no active supported methods','warn');
+        toast('Select at least one method','warn');
         return;
       }
       const ev={
