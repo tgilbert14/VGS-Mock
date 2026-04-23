@@ -1160,6 +1160,17 @@
       pointer-events: none;
     }
 
+    .seen-chip.in-sample {
+      background: #2e6b2e;
+      border-color: #2e6b2e;
+      color: #fff;
+    }
+
+    .seen-chip.in-sample .seen-sample-dot {
+      background: rgba(255, 255, 255, .25);
+      color: #fff;
+    }
+
     .seen-freq-badge {
       display: inline-block;
       margin-left: 4px;
@@ -1318,9 +1329,13 @@
     }
 
     .two-code-pick-btn.active {
-      border-color: #e9b949;
-      color: #e9b949;
-      background: rgba(233, 185, 73, .18);
+      border-color: #c9980a;
+      color: #000;
+      background: #e9b949;
+    }
+
+    .two-code-pick-btn.active .two-code-pick-symbol {
+      color: #000;
     }
 
     .two-code-pick-btn[disabled] {
@@ -3157,7 +3172,7 @@
     //  USDA PLANT DATABASE — removed, import via CSV on the Setup tab
     // ══════════════════════════════════════════════════════
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=62;
+    const APP_BUILD_REV=64;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -4401,14 +4416,17 @@
           return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
         });
 
+      const freqCurrentSymbols=new Set((samplePanelState.species||[]).map(x => String(x?.symbol||'').trim().toUpperCase()));
+
       function currentPicksHTML(sp) {
         const inv=sp.native==='N';
         const sampleCount=freqMap[speciesEntryKey(sp)]||0;
         const sampleDot=sampleCount>0
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
-        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+        const inSample=freqCurrentSymbols.has(String(sp.symbol||'').trim().toUpperCase());
+        return `<button class="seen-chip${inv? ' invasive-sp':''}${inSample? ' in-sample':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:${inSample? '.4':'.5'}">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
@@ -6914,7 +6932,7 @@
 
       document.querySelectorAll('#seen-current-chips .seen-chip').forEach(btn => {
         const selected=speciesKeys.has(String(btn.dataset.key||''));
-        btn.classList.toggle('selected',selected);
+        btn.classList.toggle('in-sample',selected);
       });
 
       document.querySelectorAll('#seen-site-chips .seen-chip').forEach(btn => {
@@ -6926,7 +6944,7 @@
 
       document.querySelectorAll('#seen-dwr-current-chips .seen-chip').forEach(btn => {
         const selected=dwrKeys.has(String(btn.dataset.key||''));
-        btn.classList.toggle('selected',selected);
+        btn.classList.toggle('in-sample',selected);
       });
 
       document.querySelectorAll('#seen-dwr-site-chips .seen-chip').forEach(btn => {
@@ -7692,14 +7710,17 @@
           return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
         });
 
+      const dwrCurrentSymbols=new Set((samplePanelState.dwr||[]).map(x => String(x?.symbol||'').trim().toUpperCase()));
+
       function currentPickHTML(sp) {
         const inv=sp.native==='N';
         const sampleCount=freqMap[speciesEntryKey(sp)]||0;
         const sampleDot=sampleCount>0
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
-        return `<button class="seen-chip${inv? ' invasive-sp':''} selected" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:.5;">${esc(formatSpeciesKeyBadge(sp))}</span>
+        const inSample=dwrCurrentSymbols.has(String(sp.symbol||'').trim().toUpperCase());
+        return `<button class="seen-chip${inv? ' invasive-sp':''}${inSample? ' in-sample':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
+          ${inv? '⚠️ ':''} ${esc(speciesDisplayPrimary(sp))} ${sampleDot} <span style="font-size:.55rem;opacity:${inSample? '.4':'.5'}">${esc(formatSpeciesKeyBadge(sp))}</span>
         </button>`;
       }
 
