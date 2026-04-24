@@ -2817,37 +2817,28 @@
         </div>
         <div id="dwr-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;"></div>
         <div id="dwr-custom-list-switches" style="display:none;margin:-2px 0 10px 0;"></div>
-        <div style="font-size:.8rem;color:var(--muted);margin-bottom:10px;">Select the top 3 species by estimated dry
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px;">Select the top 3 species by estimated dry
           weight in this frame.</div>
-        <div id="dwr-search-wrap" style="margin-bottom:10px;">
-          <input type="text" id="dwr-input" placeholder="Search species or 2-codes (max 3)..." autocomplete="off"
-            autocorrect="off" spellcheck="false">
-          <button id="dwr-clear" style="display:none;">?</button>
+        <div id="dwr-chips" style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;margin-bottom:8px;">
         </div>
-        <div class="species-search-controls"
-          style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
-          <label style="font-size:.67rem;color:var(--muted);">Search by</label>
-          <select id="dwr-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
-            <option value="symbol">Code</option>
-            <option value="sci">Scientific</option>
-            <option value="common">Common</option>
-          </select>
-          <select id="dwr-search-match" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
-            <option value="starts">Starts with</option>
-            <option value="contains">Contains</option>
-          </select>
+        <div id="dwr-input-area">
+          <div id="dwr-quickpicks" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:28px;"></div>
+          <div style="position:relative;margin-bottom:8px;">
+            <input type="text" id="dwr-search-input" placeholder="Search species to add..." autocomplete="off"
+              autocorrect="off" spellcheck="false" style="width:100%;box-sizing:border-box;font-size:.8rem;">
+            <div id="dwr-search-dropdown"
+              style="position:absolute;left:0;right:0;top:100%;z-index:20;max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-top:2px;">
+            </div>
+          </div>
         </div>
-        <div id="dwr-search-note" style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the full
-          species pool (not
-          limited by active custom lists).</div>
+        <!-- Legacy elements preserved for JS compatibility -->
+        <input type="text" id="dwr-input" style="display:none;" autocomplete="off" autocorrect="off" spellcheck="false">
+        <div id="dwr-dropdown" style="display:none;"></div>
+        <button id="dwr-clear" style="display:none;"></button>
+        <div id="dwr-search-count" style="display:none;"></div>
+        <div id="dwr-seen-section" style="display:none;"></div>
         <div class="two-code-picks" id="dwr-two-code-picks" hidden></div>
         <div class="two-code-picks" id="dwr-custom-list-picks" hidden></div>
-        <div id="dwr-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;"></div>
-        <div id="dwr-dropdown"
-          style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-bottom:10px;">
-        </div>
-        <div id="dwr-seen-section"></div>
-        <div id="dwr-chips" style="display:flex;flex-direction:column;gap:8px;font-size:.85rem;"></div>
       </div>
 
       <!-- Fetch -->
@@ -3231,7 +3222,7 @@
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=70;
+    const APP_BUILD_REV=71;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -4740,6 +4731,7 @@
       renderSpeciesDrawer();
       renderLpiInputArea();
       renderFreqInputArea();
+      renderDwrInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4761,6 +4753,7 @@
       renderSpeciesDrawer();
       renderLpiInputArea();
       renderFreqInputArea();
+      renderDwrInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4793,6 +4786,7 @@
       renderSpeciesDrawer();
       renderLpiInputArea();
       renderFreqInputArea();
+      renderDwrInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -7691,6 +7685,7 @@
     });
 
     function renderDWRChips() {
+      renderDwrInputArea();
       const el=document.getElementById('dwr-chips');
       const countBadge=document.getElementById('dwr-count-badge');
       if(countBadge) countBadge.textContent=`${samplePanelState.dwr.length}/3 species`;
@@ -8379,6 +8374,39 @@
       if(!sealed) renderFreqQuickpicks();
     }
 
+    function renderDwrQuickpicks() {
+      const qp=document.getElementById('dwr-quickpicks');
+      if(!qp) return;
+      const pool=getEventSpeciesPool().slice().sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''));
+      const currentSyms=new Set((samplePanelState.dwr||[]).map(sp => String(sp.symbol||'').trim().toUpperCase()));
+      const full=(samplePanelState.dwr||[]).length>=3;
+      qp.innerHTML=pool.length?
+        pool.map(sp => {
+          const sym=sp.symbol||'';
+          const inSample=currentSyms.has(sym.toUpperCase());
+          return `<button class="btn btn-ghost btn-sm" data-dwr-qp="${esc(sym)}" data-dwr-qp-common="${esc(sp.common||'')}" data-dwr-qp-sci="${esc(sp.sci||'')}" data-dwr-qp-native="${esc(sp.native||'')}"
+            style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}${full&&!inSample? 'opacity:.45;':''}">
+            ${esc(sym)}</button>`;
+        }).join(''):
+        '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';
+      qp.querySelectorAll('[data-dwr-qp]').forEach(btn => {
+        btn.addEventListener('click',() => {
+          addSpeciesEntryToMethod('dwr',createSpeciesEntry({
+            symbol: btn.dataset.dwrQp,
+            common: btn.dataset.dwrQpCommon,
+            sci: btn.dataset.dwrQpSci,
+            native: btn.dataset.dwrQpNative,
+          }),{preferQualifier: true});
+        });
+      });
+    }
+
+    function renderDwrInputArea() {
+      const inputArea=document.getElementById('dwr-input-area');
+      if(!inputArea) return;
+      renderDwrQuickpicks();
+    }
+
     function renderLpiSurface() {
       const grid=document.getElementById('lpi-surface-grid');
       if(!grid) return;
@@ -8577,6 +8605,59 @@
         searchDropdown.innerHTML='';
         renderSpeciesChips();
         scheduleSeenRefresh(0);
+      });
+    })();
+
+    (function setupDwrHandlers() {
+      const searchInput=document.getElementById('dwr-search-input');
+      const searchDropdown=document.getElementById('dwr-search-dropdown');
+      if(!searchInput||!searchDropdown) return;
+
+      searchInput.addEventListener('input',() => {
+        const q=searchInput.value.trim();
+        if(!q) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        if(!speciesAllRecords.length) {
+          searchDropdown.innerHTML='<div style="padding:8px 10px;font-size:.78rem;color:var(--muted);">Import a species list to enable search</div>';
+          searchDropdown.style.display='block';
+          return;
+        }
+        const upper=q.toUpperCase();
+        const matches=speciesAllRecords.filter(r => {
+          const sym=String(r.symbol||r.SYMBOL||'').toUpperCase();
+          const common=String(r.common||r.Common_Name||'').toUpperCase();
+          return sym.startsWith(upper)||common.includes(upper);
+        }).slice(0,15);
+        if(!matches.length) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        searchDropdown.style.display='block';
+        searchDropdown.innerHTML=matches.map(r => {
+          const sym=String(r.symbol||r.SYMBOL||'');
+          const common=String(r.common||r.Common_Name||'');
+          const sci=String(r.sci||r.Scientific_Name||'');
+          const native=String(r.native||r.Native_Status||'');
+          return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
+            style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
+            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+          </div>`;
+        }).join('');
+        searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
+          row.addEventListener('click',() => {
+            addSpeciesEntryToMethod('dwr',createSpeciesEntry({
+              symbol: row.dataset.sym,
+              common: row.dataset.label,
+              sci: row.dataset.sci,
+              native: row.dataset.native,
+            }),{preferQualifier: true});
+            upsertEventSpeciesPoolEntry(
+              createSpeciesEntry({symbol: row.dataset.sym,common: row.dataset.label,sci: row.dataset.sci,native: row.dataset.native}),
+              {silent: true}
+            );
+            searchInput.value='';
+            searchDropdown.style.display='none';
+            searchDropdown.innerHTML='';
+          });
+          row.addEventListener('mouseover',() => {row.style.background='var(--s2)';});
+          row.addEventListener('mouseout',() => {row.style.background='';});
+        });
       });
     })();
 
