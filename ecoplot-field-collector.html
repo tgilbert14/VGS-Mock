@@ -2866,6 +2866,8 @@
           </div>
           <button id="lpi-basal-btn" class="btn btn-ghost btn-sm"
             style="margin-bottom:10px;width:100%;border:2px solid var(--border);">&#8595; Mark Last as Basal</button>
+          <div id="lpi-custom-list-switches" style="display:none;margin:0 0 10px 0;"></div>
+          <div class="two-code-picks" id="lpi-custom-list-picks" hidden></div>
           <div style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px;">Surface (closes point)
           </div>
           <div id="lpi-surface-grid" class="cover-grid"></div>
@@ -3222,7 +3224,7 @@
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=74;
+    const APP_BUILD_REV=77;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -3904,6 +3906,7 @@
       const panels=[
         {elId: 'species-custom-list-switches'},
         {elId: 'dwr-custom-list-switches'},
+        {elId: 'lpi-custom-list-switches'},
       ];
       const lists=[...customPlantLists].sort((a,b) => String(a.name||'').localeCompare(String(b.name||'')));
       const activeSet=new Set(activeCustomListIds);
@@ -3917,19 +3920,15 @@
           return;
         }
         el.style.display='block';
-        const activeNames=lists.filter(l => activeSet.has(l.id)).map(l => l.name);
-        const activeLabel=activeNames.length
-          ? `Active: ${activeNames.join(', ')}`
-          :'No custom lists active (all species available)';
-        el.innerHTML=`<div style="font-size:.7rem;color:${activeNames.length? 'var(--accent)':'var(--muted)'};margin-bottom:7px;font-weight:${activeNames.length? '700':'500'};">${esc(activeLabel)}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        const activeSet2=new Set(activeCustomListIds);
+        el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
             ${lists.map(l => {
-          const isActive=activeSet.has(l.id);
-          const btnText=isActive? `? ${l.name}`:l.name;
+          const isActive=activeSet2.has(l.id);
+          const btnLabel=isActive? `&#10003; ${esc(l.name)}`:esc(l.name);
           const btnStyle=isActive
             ? 'background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;box-shadow:0 0 0 2px var(--accent2);'
             :'opacity:.82;border-style:dashed;';
-          return `<button class="seen-toggle-btn${isActive? ' active':''}" data-cl-id="${esc(l.id)}" title="Click: toggle list. Shift+click, right-click, or press-hold: only this list" style="${btnStyle}">${esc(btnText)}</button>`;
+          return `<button class="seen-toggle-btn${isActive? ' active':''}" data-cl-id="${esc(l.id)}" title="Click: toggle list. Shift+click, right-click, or press-hold: only this list" style="${btnStyle}">${btnLabel}</button>`;
         }).join('')}
           </div>`;
 
@@ -3984,6 +3983,7 @@
       const panels=[
         {methodKey: 'species',elId: 'species-custom-list-picks'},
         {methodKey: 'dwr',elId: 'dwr-custom-list-picks'},
+        {methodKey: 'lpi',elId: 'lpi-custom-list-picks'},
       ];
       const activeLists=getActiveCustomLists();
       panels.forEach(({methodKey,elId}) => {
@@ -3997,7 +3997,8 @@
         const list=getMethodEntryList(methodKey);
         const activeSymbols=new Set((list||[]).map(item => String(item?.symbol||'').trim().toUpperCase()).filter(Boolean));
         const disabledByNone=methodKey==='species'&&samplePanelState.freqNone;
-        const atLimit=methodKey==='dwr'&&!methodAllowsMoreEntries(methodKey,list);
+        const lpiSealed=methodKey==='lpi'&&((samplePanelState.lpiHits||[]).some(h => h.layer==='basal')||!!samplePanelState.lpiSurface);
+        const atLimit=(methodKey==='dwr'&&!methodAllowsMoreEntries(methodKey,list))||lpiSealed;
         // Collect all species from active lists
         const allSpeciesBySymbol=new Map();
         activeLists.forEach(clist => {
@@ -4036,7 +4037,8 @@
         </div>`;
         el.querySelectorAll('.two-code-pick-btn').forEach(btn => {
           btn.addEventListener('click',() => {
-            addSpeciesEntryToMethod(methodKey,speciesFromDataset(btn));
+            if(methodKey==='lpi') addLpiHit(btn.dataset.sym,btn.dataset.common||'');
+            else addSpeciesEntryToMethod(methodKey,speciesFromDataset(btn));
           });
         });
       });
@@ -4193,19 +4195,8 @@
     function renderSpeciesMethodScopeLabels(methods=(activeEvent?.methods||[])) {
       const freqNote=document.getElementById('species-scope-note');
       const dwrNote=document.getElementById('dwr-scope-note');
-      const scopeLabel=getActiveScopeLabel();
-      const noteHtml=speciesAllRecords.length
-        ? `Plant List: ${esc(scopeLabel)}`
-        :'No plant list loaded <button type="button" class="info-icon-btn" data-info-key="plant-list-missing" title="Plant list help">i</button>';
-
-      if(freqNote) {
-        freqNote.innerHTML=noteHtml;
-        freqNote.style.display=methods.includes('freq')? '':'none';
-      }
-      if(dwrNote) {
-        dwrNote.innerHTML=noteHtml;
-        dwrNote.style.display=methods.includes('dwr')? '':'none';
-      }
+      if(freqNote) freqNote.style.display='none';
+      if(dwrNote) dwrNote.style.display='none';
     }
 
     function renderSamplePanelSpeciesScope(methods=(activeEvent?.methods||[])) {
@@ -8505,6 +8496,7 @@
         });
       });
       renderLpiInputArea();
+      renderCustomListPicks();
     }
 
     function renderHeightInput() {
