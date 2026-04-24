@@ -2742,10 +2742,10 @@
       <div class="drawer-header">
         <h3 style="margin:0;font-size:.9rem;">Species List</h3>
         <button id="drawer-add-species-btn" class="btn btn-ghost btn-sm" title="Search and add species">+ Add</button>
-        <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Collapse species list">?</button>
+        <button id="drawer-collapse-btn" class="drawer-collapse-btn" title="Open species list">&#127807;</button>
       </div>
       <div class="drawer-controls">
-        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn active" data-show="true">? Hide site
+        <button id="drawer-toggle-site-species-btn" class="seen-toggle-btn active" data-show="true">&#9660; Hide site
           species</button>
       </div>
       <div id="drawer-species-list" class="drawer-species-list"></div>
@@ -3222,7 +3222,7 @@
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=71;
+    const APP_BUILD_REV=74;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -3558,6 +3558,7 @@
     const USDA_SPECIES_METHODS=[
       {key: 'species',badge: 'freq',label: 'Frequency',uniquePerSample: true},
       {key: 'dwr',badge: 'dwr',label: 'DWR',uniquePerSample: false},
+      {key: 'lpi',sampleKey: 'lpiHits',badge: 'lpi',label: 'LPI',uniquePerSample: false},
     ];
     const USDA_SPECIES_METHOD_KEYS=USDA_SPECIES_METHODS.map(m => m.key);
     const FEATURED_TWO_CODE_SYMBOLS=['2FP','2FA','2GA','2GP','2SHRUB','2SUBS','2TREE'];
@@ -6920,11 +6921,14 @@
     }
 
     function getMethodEntryList(methodKey) {
-      return methodKey==='dwr'? samplePanelState.dwr:samplePanelState.species;
+      if(methodKey==='dwr') return samplePanelState.dwr;
+      if(methodKey==='lpi') return samplePanelState.lpiHits;
+      return samplePanelState.species;
     }
 
     function setMethodEntryList(methodKey,list) {
       if(methodKey==='dwr') samplePanelState.dwr=list;
+      else if(methodKey==='lpi') samplePanelState.lpiHits=list;
       else samplePanelState.species=list;
     }
 
@@ -7242,6 +7246,16 @@
         return;
       }
 
+      if(methodKey==='lpi') {
+        const hits=samplePanelState.lpiHits||[];
+        const hit=hits[entryIndex];
+        if(!hit) return;
+        hit.qualifier=normalizeSpeciesQualifier(speciesQualifierInput.value);
+        closeSpeciesQualifierModal();
+        renderLpiHits();
+        return;
+      }
+
       const list=[...getMethodEntryList(methodKey)];
       const current=list?.[entryIndex];
       if(!current) return;
@@ -7269,9 +7283,10 @@
       bulkReplaceSelected.textContent='No replacement selected';
     }
 
-    function countOccurrences(samples,entry,key) {
+    function countOccurrences(samples,entry,key,sampleKey) {
       const targetKey=speciesEntryKey(entry);
-      return samples.reduce((n,s) => n+((s[key]||[]).filter(x => speciesEntryKey(x)===targetKey).length),0);
+      const fieldKey=sampleKey||key;
+      return samples.reduce((n,s) => n+((s[fieldKey]||[]).filter(x => speciesEntryKey(x)===targetKey).length),0);
     }
 
     function selectedBulkReplaceMethodKeys() {
@@ -7349,7 +7364,7 @@
       const evSamples=await dbGetByIndex('samples','eventId',activeEventId);
       const occByKey={};
       USDA_SPECIES_METHODS.forEach(m => {
-        occByKey[m.key]=countOccurrences(evSamples,sp,m.key);
+        occByKey[m.key]=countOccurrences(evSamples,sp,m.key,m.sampleKey);
       });
 
       bulkReplaceState.oldSpecies=sp;
@@ -7576,12 +7591,17 @@
         methodKeys.forEach(key => {
           const cfg=USDA_SPECIES_METHODS.find(m => m.key===key);
           if(!cfg) return;
-          if(!Array.isArray(rec[key])||!rec[key].length) return;
+          const fieldKey=cfg.sampleKey||key;
+          if(!Array.isArray(rec[fieldKey])||!rec[fieldKey].length) return;
 
           let localChanges=0;
-          const mapped=rec[key].map(sp => {
+          const mapped=rec[fieldKey].map(sp => {
             if(speciesEntryKey(sp)===speciesEntryKey(oldSp)) {
               localChanges++;
+              if(cfg.sampleKey) {
+                // LPI hit: preserve layer, update symbol/label/qualifier
+                return {layer: sp.layer,symbol: newSp.symbol,label: newSp.common||newSp.label||'',qualifier: newSp.qualifier||''};
+              }
               return {...newSp};
             }
             return sp;
@@ -7592,14 +7612,14 @@
             const uniq=[];
             const seen=new Set();
             mapped.forEach(sp => {
-              const key=speciesEntryKey(sp);
-              if(seen.has(key)) return;
-              seen.add(key);
+              const k=speciesEntryKey(sp);
+              if(seen.has(k)) return;
+              seen.add(k);
               uniq.push(sp);
             });
-            rec[key]=uniq;
+            rec[fieldKey]=uniq;
           } else {
-            rec[key]=mapped;
+            rec[fieldKey]=mapped;
           }
           replacedCount+=localChanges;
           changed=true;
@@ -7715,9 +7735,9 @@
             ${repeatBadge}
             ${speciesSecondaryLine(sp)}
           </div>
-          <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" class="dwr-qualifier" data-idx="${idx}" title="Edit qualifier">?</button>
-          <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">?</button>
-          <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">?</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" class="dwr-qualifier" data-idx="${idx}" title="Edit qualifier">&#9998;</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" class="dwr-edit" data-idx="${idx}" title="Replace this species across event">&#8646;</button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0;" class="dwr-remove" data-idx="${idx}" title="Remove">&#215;</button>
         </div>`;
       }).join('')||(samplePanelState.dwr.length===0? '<span style="font-size:.78rem;font-weight:600;color:#c0392b;">No species selected yet</span>':'');
 
@@ -7937,7 +7957,7 @@
       const btn=document.getElementById('drawer-collapse-btn');
       if(!panel||!btn) return;
       panel.classList.toggle('species-drawer-collapsed',speciesDrawerCollapsed);
-      btn.innerHTML=speciesDrawerCollapsed? '&#9654;':'&#9664;';
+      btn.innerHTML=speciesDrawerCollapsed? '&#127807;':'&#9664;';
       btn.title=speciesDrawerCollapsed? 'Open species list':'Collapse species list';
     }
 
@@ -8062,7 +8082,7 @@
     document.getElementById('drawer-toggle-site-species-btn').addEventListener('click',async e => {
       drawerShowSiteSpecies=!drawerShowSiteSpecies;
       e.currentTarget.dataset.show=drawerShowSiteSpecies;
-      e.currentTarget.innerHTML=drawerShowSiteSpecies? '&#9660; Hide site species':'&#9654; Show site species';
+      e.currentTarget.innerHTML=drawerShowSiteSpecies? '&#9660; Hide site species':'&#9658; Show site species';
       e.currentTarget.classList.toggle('active',drawerShowSiteSpecies);
       await renderSpeciesDrawer();
     });
@@ -8440,11 +8460,18 @@
         const bg=isBasal? 'background:#5a2d0c;':'background:var(--s2);';
         const tc=isBasal? 'color:#f0d0b0;':'';
         const layerColor={top: 'var(--accent)',lower: '#6b8e23',basal: '#f0d0b0'};
+        const qual=h.qualifier? ` <span style="font-size:.65rem;color:var(--muted);">[${esc(h.qualifier)}]</span>`:'';
         return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;border-radius:8px;padding:5px 8px;${bg}${tc}">
           <span style="font-size:.7rem;font-weight:700;min-width:44px;color:${layerColor[h.layer]||'inherit'};">${esc(layerLabel[h.layer]||h.layer)}</span>
-          <span style="flex:1;font-size:.82rem;font-weight:600;">${esc(h.symbol||'')}</span>
-          ${h.label&&!isBasal? `<span style="font-size:.7rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.label)}</span>`:''}
-          ${!isBasal? `<button class="btn btn-ghost btn-sm" data-lpi-rm="${i}" style="padding:2px 6px;font-size:.7rem;color:var(--danger);flex-shrink:0;">&#10005;</button>`:''}
+          <div style="flex:1;min-width:0;">
+            <span style="font-size:.82rem;font-weight:600;">${esc(h.symbol||'')}${qual}</span>
+            ${h.label&&!isBasal? `<div style="font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.label)}</div>`:''}
+          </div>
+          ${!isBasal? `
+            <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" data-lpi-qual="${i}" title="Edit qualifier">&#9998;</button>
+            <button style="background:none;border:none;cursor:pointer;color:var(--accent2);font-size:.9rem;padding:0 2px;" data-lpi-edit="${i}" title="Replace this species across event">&#8646;</button>
+            <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0 2px;" data-lpi-rm="${i}" title="Remove">&#215;</button>
+          `:''}
         </div>`;
       }).join('');
       let surfaceHtml='';
@@ -8462,6 +8489,19 @@
         btn.addEventListener('click',() => {
           samplePanelState.lpiHits.splice(+btn.dataset.lpiRm,1);
           renderLpiHits();
+        });
+      });
+      list.querySelectorAll('[data-lpi-qual]').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          openSpeciesQualifierModal('lpi',+btn.dataset.lpiQual);
+        });
+      });
+      list.querySelectorAll('[data-lpi-edit]').forEach(btn => {
+        btn.addEventListener('click',e => {
+          e.stopPropagation();
+          const h=samplePanelState.lpiHits[+btn.dataset.lpiEdit];
+          if(h) openBulkReplaceModal({symbol: h.symbol,common: h.label||'',sci: '',native: '?'});
         });
       });
       renderLpiInputArea();
