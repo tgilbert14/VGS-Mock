@@ -2880,7 +2880,7 @@
             </div>
           </div>
           <button id="lpi-basal-btn" class="btn btn-ghost btn-sm"
-            style="margin-bottom:10px;width:100%;border:2px solid var(--border);">&#8595; Mark Next as Basal</button>
+            style="margin-bottom:10px;width:100%;border:2px solid var(--border);">&#8595; Mark Last as Basal</button>
           <div style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px;">Surface (closes point)
           </div>
           <div id="lpi-surface-grid" class="cover-grid"></div>
@@ -6829,7 +6829,6 @@
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(activeEvent||{fetchMeasuresPerSample: 1});
-      _lpiBasalMode=false;
       renderLpiHits();
       renderHeightInput();
     });
@@ -8308,17 +8307,15 @@
     ];
 
     let _lpiSearchCache=null;
-    let _lpiBasalMode=false;
 
     function addLpiHit(symbol,label) {
       const sym=symbol.toUpperCase();
       if(!sym) return;
       if(!samplePanelState.lpiHits) samplePanelState.lpiHits=[];
-      const layer=_lpiBasalMode? 'basal':samplePanelState.lpiHits.length===0? 'top':'lower';
+      const layer=samplePanelState.lpiHits.length===0? 'top':'lower';
       const isDupe=samplePanelState.lpiHits.some(h => h.layer===layer&&h.symbol===sym);
       if(isDupe) {toast(`${sym} already at ${layer} layer`,'err'); return;}
       samplePanelState.lpiHits.push({layer,symbol: sym,label: label||''});
-      _lpiBasalMode=false;
       renderLpiHits();
     }
 
@@ -8350,17 +8347,9 @@
         }
         const basalBtn=document.getElementById('lpi-basal-btn');
         if(basalBtn) {
-          if(_lpiBasalMode) {
-            basalBtn.style.background='var(--accent)';
-            basalBtn.style.color='#fff';
-            basalBtn.style.borderColor='var(--accent)';
-            basalBtn.innerHTML='&#8595; Basal Mode ON \u2014 tap species';
-          } else {
-            basalBtn.style.background='';
-            basalBtn.style.color='';
-            basalBtn.style.borderColor='';
-            basalBtn.innerHTML='&#8595; Mark Next as Basal';
-          }
+          const hasHits=(samplePanelState.lpiHits||[]).length>0;
+          basalBtn.disabled=!hasHits;
+          basalBtn.style.opacity=hasHits? '':'0.45';
         }
         renderLpiSurface();
       }
@@ -8475,8 +8464,10 @@
 
       if(basalBtn) {
         basalBtn.addEventListener('click',() => {
-          _lpiBasalMode=!_lpiBasalMode;
-          renderLpiInputArea();
+          const hits=samplePanelState.lpiHits||[];
+          if(!hits.length) {toast('Add a species hit first','err'); return;}
+          hits[hits.length-1].layer='basal';
+          renderLpiHits();
         });
       }
 
@@ -8484,7 +8475,6 @@
         resetBtn.addEventListener('click',() => {
           samplePanelState.lpiHits=[];
           samplePanelState.lpiSurface='';
-          _lpiBasalMode=false;
           renderLpiHits();
         });
       }
