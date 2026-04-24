@@ -3294,7 +3294,7 @@
     }
 
     function protocolMethodsOrderedText(methods) {
-      return (methods||[]).map((m,i) => `${i+1}. ${protocolMethodLabel(m)}`).join(' ? ')||'None';
+      return (methods||[]).map((m,i) => `${i+1}. ${protocolMethodLabel(m)}`).join(' • ')||'None';
     }
 
     function protocolImportedMetadataHTML(p) {
@@ -3337,7 +3337,7 @@
           <div><strong>${p.transects}</strong> transects</div>
           <div><strong>${p.samples}</strong> samples / transect</div>
           <div><strong>${p.length}${p.unit}</strong> transect length</div>
-          <div><strong>${p.frameW}?${p.frameH} cm</strong> frame</div>
+          <div><strong>${p.frameW}x${p.frameH} cm</strong> frame</div>
         </div>
         <div style="margin-bottom:4px;">Methods: ${esc(methods)}</div>
         <div style="margin-bottom:4px;">Method order: ${esc(orderedMethods)}</div>
@@ -5498,7 +5498,7 @@
     function updateCrumb() {
       const el=document.getElementById('site-crumb');
       if(activeSite&&activeEvent)
-        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> ? ${esc(activeEvent.name)} `;
+        el.innerHTML=`<strong>${esc(activeSite.name)}</strong> &bull; ${esc(activeEvent.name)} `;
       else if(activeSite)
         el.innerHTML=`<strong>${esc(activeSite.name)}</strong>`;
       else
@@ -5562,7 +5562,7 @@
           const evTotal=(ev.transects||4)*(ev.samples||50);
           const pct=evTotal? Math.round(evDone/evTotal*100):0;
           const isActive=activeEventId===ev.id;
-          const cfgStr=`${ev.transects||4}T ? ${ev.samples||50}S ? ${ev.length||100}${ev.unit||'m'} ? ${ev.coverPts||2} cover pts ? frame ${ev.frameW||40}?${ev.frameH||40}cm`;
+          const cfgStr=`${ev.transects||4}T &bull; ${ev.samples||50}S &bull; ${ev.length||100}${ev.unit||'m'} &bull; ${ev.coverPts||2} cover pts &bull; frame ${ev.frameW||40}x${ev.frameH||40}cm`;
           const proto=ev.protocolId? protocolMap[ev.protocolId]:null;
           const protoTag=proto? `<span class="badge" style="margin-left:4px;font-size:.6rem;">${esc(proto.name)}</span>`:'';
           const evMethods=ev.methods||[];
