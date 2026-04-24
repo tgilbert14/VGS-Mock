@@ -2442,6 +2442,16 @@
                     <input type="checkbox" id="new-event-method-fetch" style="width:auto;accent-color:var(--accent);">
                     Fetch
                   </label>
+                  <label id="new-event-method-lpi-wrap"
+                    style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                    <input type="checkbox" id="new-event-method-lpi" style="width:auto;accent-color:var(--accent);">
+                    Line-Point Intercept
+                  </label>
+                  <label id="new-event-method-height-wrap"
+                    style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                    <input type="checkbox" id="new-event-method-height" style="width:auto;accent-color:var(--accent);">
+                    Height Measurement
+                  </label>
                 </div>
               </div>
               <button class="btn btn-primary btn-full" id="create-event-btn">+ Create Event</button>
@@ -2584,6 +2594,16 @@
                   style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
                   <input type="checkbox" id="np-method-fetch" style="width:auto;accent-color:var(--accent);">
                   Fetch
+                </label>
+                <label
+                  style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                  <input type="checkbox" id="np-method-lpi" style="width:auto;accent-color:var(--accent);">
+                  Line-Point Intercept
+                </label>
+                <label
+                  style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--text);font-weight:normal;">
+                  <input type="checkbox" id="np-method-height" style="width:auto;accent-color:var(--accent);">
+                  Height Measurement
                 </label>
               </div>
             </div>
@@ -2842,6 +2862,45 @@
           <span id="fetch-count-badge" class="badge">0/0 entered</span>
         </div>
         <div id="fetch-inputs" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <!-- Line-Point Intercept (LPI) -->
+      <div class="card" id="panel-lpi-card">
+        <div class="card-title">Line-Point Intercept
+          <span id="lpi-hit-count-badge" class="badge">0 hits</span>
+        </div>
+        <div id="lpi-hits-list"></div>
+        <div id="lpi-input-area">
+          <div id="lpi-quickpicks" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:28px;"></div>
+          <div style="position:relative;margin-bottom:8px;">
+            <input type="text" id="lpi-search-input" placeholder="Search species to add hit..." autocomplete="off"
+              autocorrect="off" spellcheck="false" style="width:100%;box-sizing:border-box;font-size:.8rem;">
+            <div id="lpi-search-dropdown"
+              style="position:absolute;left:0;right:0;top:100%;z-index:20;max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-top:2px;">
+            </div>
+          </div>
+          <button id="lpi-basal-btn" class="btn btn-ghost btn-sm"
+            style="margin-bottom:10px;width:100%;border:2px solid var(--border);">&#8595; Mark Next as Basal</button>
+          <div style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:5px;">Surface (closes point)
+          </div>
+          <div id="lpi-surface-grid" class="cover-grid"></div>
+        </div>
+        <div id="lpi-sealed-bar"
+          style="display:none;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;">
+          <button id="lpi-reset-btn" class="btn btn-ghost btn-sm" style="width:100%;font-size:.78rem;">&#8635; Reset
+            Point</button>
+        </div>
+      </div>
+
+      <!-- Height Measurement -->
+      <div class="card" id="panel-height-card">
+        <div class="card-title">Height Measurement</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Top canopy height at this point.</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="number" id="height-input" placeholder="0" min="0" step="1"
+            style="width:90px;font-size:1.1rem;text-align:center;padding:6px 8px;">
+          <span style="font-size:.85rem;color:var(--muted);">cm</span>
+        </div>
       </div>
 
     </div>
@@ -3267,6 +3326,8 @@
       freq: 'Frequency Quadrat',
       dwr: 'Dry Weight Rank',
       fetch: 'Fetch',
+      lpi: 'Line-Point Intercept',
+      height: 'Height Measurement',
     };
 
     function coverIconForLabel(label) {
@@ -4639,7 +4700,10 @@
       species: [],   // [{symbol,common,sci,native}]
       freqNone: false,
       coverHits: [], // [{id,label}]
-      fetch: []
+      fetch: [],
+      lpiHits: [],   // [{layer:'top'|'lower'|'basal', symbol, label}]
+      lpiSurface: '', // surface code id e.g. 'S','R','L','WL','M','EL'
+      lpiHeight: null, // number in cm or null
     };
     let samplePanelOpen=false;
     let eventSamplesCache={eventId: null,samples: null};
@@ -6360,15 +6424,21 @@
         fetch: document.getElementById('new-event-method-fetch-wrap'),
         freq: document.getElementById('new-event-method-freq-wrap'),
         dwr: document.getElementById('new-event-method-dwr-wrap'),
+        lpi: document.getElementById('new-event-method-lpi-wrap'),
+        height: document.getElementById('new-event-method-height-wrap'),
       };
       const coverWrap=document.getElementById('new-event-method-cover-wrap');
       const freqWrap=document.getElementById('new-event-method-freq-wrap');
       const dwrWrap=document.getElementById('new-event-method-dwr-wrap');
       const fetchWrap=document.getElementById('new-event-method-fetch-wrap');
+      const lpiWrap=document.getElementById('new-event-method-lpi-wrap');
+      const heightWrap=document.getElementById('new-event-method-height-wrap');
       const coverBox=document.getElementById('new-event-method-cover');
       const freqBox=document.getElementById('new-event-method-freq');
       const dwrBox=document.getElementById('new-event-method-dwr');
       const fetchBox=document.getElementById('new-event-method-fetch');
+      const lpiBox=document.getElementById('new-event-method-lpi');
+      const heightBox=document.getElementById('new-event-method-height');
 
       const hasProtocolMethods=Array.isArray(methods)&&methods.length>0;
 
@@ -6378,6 +6448,8 @@
         const showFreq=methods.includes('freq');
         const showDwr=methods.includes('dwr');
         const showFetch=methods.includes('fetch');
+        const showLpi=methods.includes('lpi');
+        const showHeight=methods.includes('height');
 
         const container=coverWrap?.parentElement;
         if(container) {
@@ -6391,21 +6463,29 @@
         freqWrap.style.display=showFreq? 'flex':'none';
         dwrWrap.style.display=showDwr? 'flex':'none';
         fetchWrap.style.display=showFetch? 'flex':'none';
+        if(lpiWrap) lpiWrap.style.display=showLpi? 'flex':'none';
+        if(heightWrap) heightWrap.style.display=showHeight? 'flex':'none';
 
         coverBox.checked=showCover;
         freqBox.checked=showFreq;
         dwrBox.checked=showDwr;
         fetchBox.checked=showFetch;
+        if(lpiBox) lpiBox.checked=showLpi;
+        if(heightBox) heightBox.checked=showHeight;
       } else {
         // Default / reset mode: show all methods and default all to checked
         coverWrap.style.display='flex';
         freqWrap.style.display='flex';
         dwrWrap.style.display='flex';
         fetchWrap.style.display='flex';
+        if(lpiWrap) lpiWrap.style.display='flex';
+        if(heightWrap) heightWrap.style.display='flex';
         coverBox.checked=true;
         freqBox.checked=true;
         dwrBox.checked=true;
         fetchBox.checked=true;
+        if(lpiBox) lpiBox.checked=false;
+        if(heightBox) heightBox.checked=false;
       }
     }
 
@@ -6490,6 +6570,8 @@
       if(document.getElementById('new-event-method-freq').checked) methods.push('freq');
       if(document.getElementById('new-event-method-dwr').checked) methods.push('dwr');
       if(document.getElementById('new-event-method-fetch').checked) methods.push('fetch');
+      if(document.getElementById('new-event-method-lpi').checked) methods.push('lpi');
+      if(document.getElementById('new-event-method-height').checked) methods.push('height');
       if(!methods.length) {
         toast('Select at least one method','warn');
         return;
@@ -6553,12 +6635,16 @@
       const freqCard=document.getElementById('panel-freq-card');
       const dwrCard=document.getElementById('panel-dwr-card');
       const fetchCard=document.getElementById('panel-fetch-card');
+      const lpiCard=document.getElementById('panel-lpi-card');
+      const heightCard=document.getElementById('panel-height-card');
       if(coverCard) coverCard.style.display=methods.includes('cover')? '':'none';
       if(freqCard) freqCard.style.display=methods.includes('freq')? '':'none';
       if(dwrCard) dwrCard.style.display=methods.includes('dwr')? '':'none';
       if(fetchCard) fetchCard.style.display=methods.includes('fetch')? '':'none';
+      if(lpiCard) lpiCard.style.display=methods.includes('lpi')? '':'none';
+      if(heightCard) heightCard.style.display=methods.includes('height')? '':'none';
       if(sampleBody) {
-        const cardByMethod={cover: coverCard,fetch: fetchCard,freq: freqCard,dwr: dwrCard};
+        const cardByMethod={cover: coverCard,fetch: fetchCard,freq: freqCard,dwr: dwrCard,lpi: lpiCard,height: heightCard};
         methods.forEach(m => {
           const card=cardByMethod[m];
           if(card) sampleBody.appendChild(card);
@@ -6576,6 +6662,9 @@
       samplePanelState.coverHits=rec?.coverHits||[];
       samplePanelState.dwr=rec?.dwr||[];
       samplePanelState.fetch=Array.isArray(rec?.fetch)? rec.fetch.map(normalizeFetchValue):[];
+      samplePanelState.lpiHits=Array.isArray(rec?.lpiHits)? rec.lpiHits:[];
+      samplePanelState.lpiSurface=rec?.lpiSurface||'';
+      samplePanelState.lpiHeight=rec?.lpiHeight!=null? rec.lpiHeight:null;
       renderTwoCodeQuickPicks();
       renderCustomListPicks();
       renderEventCustomListToggles();
@@ -6621,6 +6710,8 @@
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(ev);
+      renderLpiHits();
+      renderHeightInput();
       renderSpeciesDrawer();
     }
 
@@ -6698,14 +6789,18 @@
       const coverHits=JSON.parse(JSON.stringify(samplePanelState.coverHits));
       const dwr=normalizeDwrForSave(JSON.parse(JSON.stringify(samplePanelState.dwr)));
       const fetch=JSON.parse(JSON.stringify((samplePanelState.fetch||[]).map(normalizeFetchValue)));
+      const lpiHits=JSON.parse(JSON.stringify(samplePanelState.lpiHits||[]));
+      const lpiSurface=samplePanelState.lpiSurface||'';
+      const lpiHeight=samplePanelState.lpiHeight!=null? +samplePanelState.lpiHeight:null;
       const hasFetch=fetch.some(v => String(v??'').trim()!=='');
-      const hasData=species.length>0||freqNone||coverHits.length>0||dwr.length>0||hasFetch;
+      const hasLpi=lpiHits.length>0||!!lpiSurface||lpiHeight!=null;
+      const hasData=species.length>0||freqNone||coverHits.length>0||dwr.length>0||hasFetch||hasLpi;
       if(!force&&!hasData) return;
       const sid=sampleId(activeSiteId,activeEventId,t,s);
       await dbPut('samples',{
         id: sid,siteId: activeSiteId,eventId: activeEventId,
         transectIdx: t,sampleIdx: s,
-        species,freqNone,coverHits,dwr,fetch,
+        species,freqNone,coverHits,dwr,fetch,lpiHits,lpiSurface,lpiHeight,
         hasData,savedAt: Date.now(),syncStatus: 'pending'
       });
       invalidateSeenSpeciesCaches({event: true,site: true});
@@ -6724,6 +6819,9 @@
       samplePanelState.coverHits=[];
       samplePanelState.dwr=[];
       samplePanelState.fetch=[];
+      samplePanelState.lpiHits=[];
+      samplePanelState.lpiSurface='';
+      samplePanelState.lpiHeight=null;
       renderSpeciesChips();
       renderSeenSpecies();
       renderDWRSeenSpecies();
@@ -6731,6 +6829,9 @@
       renderHitLog();
       renderDWRChips();
       renderFetchInputs(activeEvent||{fetchMeasuresPerSample: 1});
+      _lpiBasalMode=false;
+      renderLpiHits();
+      renderHeightInput();
     });
 
     let _advanceBusy=false;
@@ -7510,7 +7611,7 @@
         });
 
         if(changed) {
-          rec.hasData=(rec.species||[]).length>0||!!rec.freqNone||(rec.coverHits||[]).length>0||(rec.dwr||[]).length>0;
+          rec.hasData=(rec.species||[]).length>0||!!rec.freqNone||(rec.coverHits||[]).length>0||(rec.dwr||[]).length>0||(rec.lpiHits||[]).length>0||!!rec.lpiSurface||rec.lpiHeight!=null;
           rec.savedAt=Date.now();
           rec.syncStatus='pending';
           await dbPut('samples',rec);
@@ -8193,6 +8294,208 @@
         });
       });
     }
+
+    // -- LPI surface & hits --------------------------------
+    const LPI_SURFACE_CODES=[
+      {id: 'S',label: 'Bare Soil',icon: '&#129003;'},
+      {id: 'R',label: 'Rock',icon: '&#129704;'},
+      {id: 'L',label: 'Litter',icon: '&#127810;'},
+      {id: 'WL',label: 'Woody Litter',icon: '&#129717;'},
+      {id: 'M',label: 'Moss/BSC',icon: '&#127808;'},
+      {id: 'EL',label: 'Embed. Litter',icon: '&#127810;'},
+      {id: 'D',label: 'Duff',icon: '&#127807;'},
+      {id: 'W',label: 'Water',icon: '&#128167;'},
+    ];
+
+    let _lpiSearchCache=null;
+    let _lpiBasalMode=false;
+
+    function addLpiHit(symbol,label) {
+      const sym=symbol.toUpperCase();
+      if(!sym) return;
+      if(!samplePanelState.lpiHits) samplePanelState.lpiHits=[];
+      const layer=_lpiBasalMode? 'basal':samplePanelState.lpiHits.length===0? 'top':'lower';
+      const isDupe=samplePanelState.lpiHits.some(h => h.layer===layer&&h.symbol===sym);
+      if(isDupe) {toast(`${sym} already at ${layer} layer`,'err'); return;}
+      samplePanelState.lpiHits.push({layer,symbol: sym,label: label||''});
+      _lpiBasalMode=false;
+      renderLpiHits();
+    }
+
+    function renderLpiInputArea() {
+      const sealed=samplePanelState.lpiHits.some(h => h.layer==='basal')||!!samplePanelState.lpiSurface;
+      const inputArea=document.getElementById('lpi-input-area');
+      const sealedBar=document.getElementById('lpi-sealed-bar');
+      if(inputArea) inputArea.style.display=sealed? 'none':'';
+      if(sealedBar) sealedBar.style.display=sealed? '':'none';
+      if(!sealed) {
+        const qp=document.getElementById('lpi-quickpicks');
+        if(qp) {
+          const seen=[...(samplePanelState.species||[]),...(samplePanelState.dwr||[])];
+          const unique=[];
+          const seenSyms=new Set();
+          seen.forEach(sp => {
+            const sym=String(sp.symbol||sp.code||'').trim().toUpperCase();
+            if(sym&&!seenSyms.has(sym)) {seenSyms.add(sym); unique.push({symbol: sym,label: sp.common||sp.label||''});}
+          });
+          qp.innerHTML=unique.length?
+            unique.map(sp =>
+              `<button class="btn btn-ghost btn-sm" data-lpi-qp="${esc(sp.symbol)}" data-lpi-qp-label="${esc(sp.label)}"
+                style="font-size:.75rem;padding:3px 8px;">${esc(sp.symbol)}</button>`
+            ).join(''):
+            '<span style="font-size:.72rem;color:var(--muted);">No freq/DWR species yet</span>';
+          qp.querySelectorAll('[data-lpi-qp]').forEach(btn => {
+            btn.addEventListener('click',() => addLpiHit(btn.dataset.lpiQp,btn.dataset.lpiQpLabel));
+          });
+        }
+        const basalBtn=document.getElementById('lpi-basal-btn');
+        if(basalBtn) {
+          if(_lpiBasalMode) {
+            basalBtn.style.background='var(--accent)';
+            basalBtn.style.color='#fff';
+            basalBtn.style.borderColor='var(--accent)';
+            basalBtn.innerHTML='&#8595; Basal Mode ON \u2014 tap species';
+          } else {
+            basalBtn.style.background='';
+            basalBtn.style.color='';
+            basalBtn.style.borderColor='';
+            basalBtn.innerHTML='&#8595; Mark Next as Basal';
+          }
+        }
+        renderLpiSurface();
+      }
+    }
+
+    function renderLpiSurface() {
+      const grid=document.getElementById('lpi-surface-grid');
+      if(!grid) return;
+      const cur=samplePanelState.lpiSurface||'';
+      grid.innerHTML=LPI_SURFACE_CODES.map(c =>
+        `<div class="cover-btn${c.id===cur? ' selected':''}" data-lpi-sc="${esc(c.id)}" role="button" tabindex="0" title="${esc(c.label)}">
+          <span class="cover-label">${esc(c.id)}</span>
+          <span class="cover-count" style="font-size:.6rem;margin-top:1px;">${esc(c.label.split(' ')[0])}</span>
+        </div>`
+      ).join('');
+      grid.querySelectorAll('[data-lpi-sc]').forEach(btn => {
+        const onClick=() => {
+          samplePanelState.lpiSurface=btn.dataset.lpiSc;
+          renderLpiHits();
+        };
+        btn.addEventListener('click',onClick);
+        btn.addEventListener('keydown',e => {if(e.key==='Enter'||e.key===' ') {e.preventDefault(); onClick();} });
+      });
+    }
+
+    function renderLpiHits() {
+      const list=document.getElementById('lpi-hits-list');
+      const badge=document.getElementById('lpi-hit-count-badge');
+      if(!list) return;
+      const hits=samplePanelState.lpiHits||[];
+      const surface=samplePanelState.lpiSurface||'';
+      if(badge) badge.textContent=`${hits.length} hit${hits.length!==1? 's':''}`;
+      const layerLabel={top: 'Top',lower: 'Lower',basal: 'Basal'};
+      const hitHtml=hits.map((h,i) => {
+        const isBasal=h.layer==='basal';
+        const bg=isBasal? 'background:#5a2d0c;':'background:var(--s2);';
+        const tc=isBasal? 'color:#f0d0b0;':'';
+        const layerColor={top: 'var(--accent)',lower: '#6b8e23',basal: '#f0d0b0'};
+        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;border-radius:8px;padding:5px 8px;${bg}${tc}">
+          <span style="font-size:.7rem;font-weight:700;min-width:44px;color:${layerColor[h.layer]||'inherit'};">${esc(layerLabel[h.layer]||h.layer)}</span>
+          <span style="flex:1;font-size:.82rem;font-weight:600;">${esc(h.symbol||'')}</span>
+          ${h.label&&!isBasal? `<span style="font-size:.7rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.label)}</span>`:''}
+          ${!isBasal? `<button class="btn btn-ghost btn-sm" data-lpi-rm="${i}" style="padding:2px 6px;font-size:.7rem;color:var(--danger);flex-shrink:0;">&#10005;</button>`:''}
+        </div>`;
+      }).join('');
+      let surfaceHtml='';
+      if(surface) {
+        const scObj=LPI_SURFACE_CODES.find(c => c.id===surface);
+        const surfLabel=scObj? scObj.label:surface;
+        surfaceHtml=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;border-radius:8px;padding:5px 8px;background:#2e2a1a;">
+          <span style="font-size:.7rem;font-weight:700;min-width:44px;color:#c8b87a;">Surf.</span>
+          <span style="flex:1;font-size:.82rem;font-weight:600;color:#c8b87a;">${esc(scObj? surface+' \u2013 '+surfLabel:surface)}</span>
+        </div>`;
+      }
+      list.innerHTML=hitHtml+surfaceHtml||
+        '<div style="font-size:.75rem;color:var(--muted);padding:4px 0 8px;">No hits yet \u2014 tap a species below</div>';
+      list.querySelectorAll('[data-lpi-rm]').forEach(btn => {
+        btn.addEventListener('click',() => {
+          samplePanelState.lpiHits.splice(+btn.dataset.lpiRm,1);
+          renderLpiHits();
+        });
+      });
+      renderLpiInputArea();
+    }
+
+    function renderHeightInput() {
+      const el=document.getElementById('height-input');
+      if(!el) return;
+      el.value=samplePanelState.lpiHeight!=null? String(samplePanelState.lpiHeight):'';
+    }
+
+    // Wire LPI card handlers once at load time
+    (function setupLpiHandlers() {
+      const searchInput=document.getElementById('lpi-search-input');
+      const searchDropdown=document.getElementById('lpi-search-dropdown');
+      const basalBtn=document.getElementById('lpi-basal-btn');
+      const resetBtn=document.getElementById('lpi-reset-btn');
+      const heightInput=document.getElementById('height-input');
+      if(!searchInput||!searchDropdown) return;
+
+      searchInput.addEventListener('input',async () => {
+        const q=searchInput.value.trim();
+        if(!q) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        if(!_lpiSearchCache) {const all=await dbGetAll('species'); _lpiSearchCache=all||[];}
+        const upper=q.toUpperCase();
+        const matches=_lpiSearchCache.filter(sp => {
+          const sym=String(sp.symbol||sp.SYMBOL||'').toUpperCase();
+          const common=String(sp.common||sp.Common_Name||'').toUpperCase();
+          return sym.startsWith(upper)||common.includes(upper);
+        }).slice(0,15);
+        if(!matches.length) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        searchDropdown.style.display='block';
+        searchDropdown.innerHTML=matches.map(sp => {
+          const sym=sp.symbol||sp.SYMBOL||'';
+          const common=sp.common||sp.Common_Name||'';
+          return `<div data-sym="${esc(sym)}" data-label="${esc(common)}"
+            style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
+            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+          </div>`;
+        }).join('');
+        searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
+          row.addEventListener('click',() => {
+            addLpiHit(row.dataset.sym,row.dataset.label);
+            searchInput.value='';
+            searchDropdown.style.display='none';
+            searchDropdown.innerHTML='';
+          });
+          row.addEventListener('mouseover',() => {row.style.background='var(--s2)';});
+          row.addEventListener('mouseout',() => {row.style.background='';});
+        });
+      });
+
+      if(basalBtn) {
+        basalBtn.addEventListener('click',() => {
+          _lpiBasalMode=!_lpiBasalMode;
+          renderLpiInputArea();
+        });
+      }
+
+      if(resetBtn) {
+        resetBtn.addEventListener('click',() => {
+          samplePanelState.lpiHits=[];
+          samplePanelState.lpiSurface='';
+          _lpiBasalMode=false;
+          renderLpiHits();
+        });
+      }
+
+      if(heightInput) {
+        heightInput.addEventListener('change',() => {
+          const v=heightInput.value.trim();
+          samplePanelState.lpiHeight=(v!==''&&!isNaN(+v))? +v:null;
+        });
+      }
+    })();
 
 
 
@@ -8887,6 +9190,8 @@
       if(document.getElementById('np-method-freq').checked) methods.push('freq');
       if(document.getElementById('np-method-dwr').checked) methods.push('dwr');
       if(document.getElementById('np-method-fetch').checked) methods.push('fetch');
+      if(document.getElementById('np-method-lpi').checked) methods.push('lpi');
+      if(document.getElementById('np-method-height').checked) methods.push('height');
       if(!methods.length) {toast('Select at least one method','warn'); return;}
       const p={
         id: 'proto_custom_'+Date.now(),definitionPk: generateProtocolDefinitionPk(),name,builtIn: false,
@@ -9454,6 +9759,7 @@
         rows.push([
           'site_id','site_name','event_id','event_name','event_date',
           'transect','sample','species','cover_hits','dwr_entries','fetch_values',
+          'lpi_surface','lpi_hits','lpi_height',
           'sync_status','has_data',
         ].join(','));
 
@@ -9464,6 +9770,9 @@
           const coverHits=(s.coverHits||[]).map(h => h.id||h).join(';');
           const dwr=(s.dwrEntries||[]).map(e => e.symbol||'').join(';');
           const fetch=(s.fetchValues||[]).join(';');
+          const lpiSurface=s.lpiSurface||'';
+          const lpiHits=(s.lpiHits||[]).map(h => `${h.layer}:${h.symbol}`).join(';');
+          const lpiHeight=s.lpiHeight!=null? String(s.lpiHeight):'';
           const csvRow=[
             s.siteId,
             csvEsc(site.name||''),
@@ -9476,6 +9785,9 @@
             csvEsc(coverHits),
             csvEsc(dwr),
             csvEsc(fetch),
+            csvEsc(lpiSurface),
+            csvEsc(lpiHits),
+            csvEsc(lpiHeight),
             s.syncStatus||'',
             s.hasData? 'true':'false',
           ].join(',');
