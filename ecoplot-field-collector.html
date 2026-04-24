@@ -3237,7 +3237,7 @@
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=67;
+    const APP_BUILD_REV=70;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -4744,6 +4744,7 @@
       await dbPut('events',activeEvent);
       if(!silent) toast('Added to event species list','ok');
       renderSpeciesDrawer();
+      renderLpiInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4763,6 +4764,7 @@
       await dbPut('events',activeEvent);
       if(!silent) toast('Removed from event species list','ok');
       renderSpeciesDrawer();
+      renderLpiInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4793,6 +4795,7 @@
       activeEvent.speciesPool=pool;
       await dbPut('events',activeEvent);
       renderSpeciesDrawer();
+      renderLpiInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -8328,19 +8331,13 @@
       if(!sealed) {
         const qp=document.getElementById('lpi-quickpicks');
         if(qp) {
-          const seen=[...(samplePanelState.species||[]),...(samplePanelState.dwr||[])];
-          const unique=[];
-          const seenSyms=new Set();
-          seen.forEach(sp => {
-            const sym=String(sp.symbol||sp.code||'').trim().toUpperCase();
-            if(sym&&!seenSyms.has(sym)) {seenSyms.add(sym); unique.push({symbol: sym,label: sp.common||sp.label||''});}
-          });
-          qp.innerHTML=unique.length?
-            unique.map(sp =>
-              `<button class="btn btn-ghost btn-sm" data-lpi-qp="${esc(sp.symbol)}" data-lpi-qp-label="${esc(sp.label)}"
-                style="font-size:.75rem;padding:3px 8px;">${esc(sp.symbol)}</button>`
+          const pool=getEventSpeciesPool().slice().sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''));
+          qp.innerHTML=pool.length?
+            pool.map(sp =>
+              `<button class="btn btn-ghost btn-sm" data-lpi-qp="${esc(sp.symbol||'')}" data-lpi-qp-label="${esc(sp.common||'')}"
+                style="font-size:.75rem;padding:3px 8px;">${esc(sp.symbol||'')}</button>`
             ).join(''):
-            '<span style="font-size:.72rem;color:var(--muted);">No freq/DWR species yet</span>';
+            '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via drawer</span>';
           qp.querySelectorAll('[data-lpi-qp]').forEach(btn => {
             btn.addEventListener('click',() => addLpiHit(btn.dataset.lpiQp,btn.dataset.lpiQpLabel));
           });
@@ -8445,7 +8442,9 @@
         searchDropdown.innerHTML=matches.map(sp => {
           const sym=sp.symbol||sp.SYMBOL||'';
           const common=sp.common||sp.Common_Name||'';
-          return `<div data-sym="${esc(sym)}" data-label="${esc(common)}"
+          const sci=sp.sci||sp.Scientific_Name||'';
+          const native=sp.native||sp.Native_Status||'';
+          return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
             style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
             <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
           </div>`;
@@ -8453,6 +8452,10 @@
         searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
           row.addEventListener('click',() => {
             addLpiHit(row.dataset.sym,row.dataset.label);
+            upsertEventSpeciesPoolEntry(
+              createSpeciesEntry({symbol: row.dataset.sym,common: row.dataset.label,sci: row.dataset.sci,native: row.dataset.native}),
+              {silent: true}
+            );
             searchInput.value='';
             searchDropdown.style.display='none';
             searchDropdown.innerHTML='';
