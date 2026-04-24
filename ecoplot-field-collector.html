@@ -2777,40 +2777,34 @@
         <div id="species-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;">
         </div>
         <div id="species-custom-list-switches" style="display:none;margin:-2px 0 10px 0;"></div>
-        <div id="species-search-wrap">
-          <input type="text" id="species-input"
-            placeholder="Search by symbol, common name, scientific name, or 2-code..." autocomplete="off"
-            autocorrect="off" spellcheck="false">
-          <button id="species-clear" style="display:none;">?</button>
+        <div id="species-chips" class="species-chips"></div>
+        <div id="freq-input-area">
+          <div id="freq-quickpicks" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:28px;">
+          </div>
+          <div style="position:relative;margin-bottom:8px;">
+            <input type="text" id="freq-search-input" placeholder="Search species to add..." autocomplete="off"
+              autocorrect="off" spellcheck="false" style="width:100%;box-sizing:border-box;font-size:.8rem;">
+            <div id="freq-search-dropdown"
+              style="position:absolute;left:0;right:0;top:100%;z-index:20;max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:var(--s1);display:none;margin-top:2px;">
+            </div>
+          </div>
+          <button id="species-none-btn" class="btn btn-ghost btn-sm"
+            style="margin-bottom:10px;width:100%;border:2px solid var(--border);">&#8709; None in frame</button>
         </div>
-        <div class="species-search-controls"
-          style="display:flex;gap:6px;align-items:center;margin-top:-2px;margin-bottom:8px;">
-          <label style="font-size:.67rem;color:var(--muted);">Search by</label>
-          <select id="species-search-field" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
-            <option value="symbol">Code</option>
-            <option value="sci">Scientific</option>
-            <option value="common">Common</option>
-          </select>
-          <select id="species-search-match" style="width:auto;font-size:.72rem;padding:4px 22px 4px 8px;">
-            <option value="starts">Starts with</option>
-            <option value="contains">Contains</option>
-          </select>
+        <div id="freq-sealed-bar"
+          style="display:none;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;">
+          <button id="freq-reset-btn" class="btn btn-ghost btn-sm" style="width:100%;font-size:.78rem;">&#8635; Reset
+            Frame</button>
         </div>
-        <div id="species-search-note" style="font-size:.66rem;color:var(--muted);margin:-2px 0 6px 0;">Search uses the
-          full species pool (not
-          limited by active custom lists).</div>
+        <!-- Legacy elements preserved for JS compatibility -->
+        <input type="text" id="species-input" style="display:none;" autocomplete="off" autocorrect="off"
+          spellcheck="false">
+        <div id="species-dropdown" style="display:none;"></div>
+        <button id="species-clear" style="display:none;"></button>
+        <div id="species-search-count" style="display:none;"></div>
+        <div id="species-seen-section" style="display:none;"></div>
         <div class="two-code-picks" id="species-two-code-picks" hidden></div>
         <div class="two-code-picks" id="species-custom-list-picks" hidden></div>
-        <div id="species-search-count" style="display:none;font-size:.68rem;color:var(--muted);margin:6px 0 8px 0;">
-        </div>
-        <div style="display:flex;justify-content:flex-start;margin:6px 0 8px 0;">
-          <button class="seen-toggle-btn" id="species-none-btn"
-            title="Record that no species were present in this frame" style="border-color:#d19b1f;color:#d19b1f;">None
-            in frame</button>
-        </div>
-        <div id="species-dropdown"></div>
-        <div id="species-seen-section"></div>
-        <div id="species-chips" class="species-chips"></div>
       </div>
 
       <!-- Dry Weight Rank (DWR) -->
@@ -4745,6 +4739,7 @@
       if(!silent) toast('Added to event species list','ok');
       renderSpeciesDrawer();
       renderLpiInputArea();
+      renderFreqInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4765,6 +4760,7 @@
       if(!silent) toast('Removed from event species list','ok');
       renderSpeciesDrawer();
       renderLpiInputArea();
+      renderFreqInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -4796,6 +4792,7 @@
       await dbPut('events',activeEvent);
       renderSpeciesDrawer();
       renderLpiInputArea();
+      renderFreqInputArea();
       scheduleSeenRefresh(0);
       return true;
     }
@@ -7487,15 +7484,17 @@
     });
 
     document.getElementById('species-none-btn').addEventListener('click',() => {
-      samplePanelState.freqNone=!samplePanelState.freqNone;
-      if(samplePanelState.freqNone) {
-        samplePanelState.species=[];
-        speciesInput.value='';
-        document.getElementById('species-clear').style.display='none';
-        speciesDrop.classList.remove('open');
-        speciesDrop.innerHTML='';
-        if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
-      }
+      samplePanelState.freqNone=true;
+      samplePanelState.species=[];
+      speciesInput.value='';
+      document.getElementById('species-clear').style.display='none';
+      speciesDrop.classList.remove('open');
+      speciesDrop.innerHTML='';
+      if(speciesSearchCount) {speciesSearchCount.style.display='none'; speciesSearchCount.textContent='';}
+      const fsi=document.getElementById('freq-search-input');
+      const fsd=document.getElementById('freq-search-dropdown');
+      if(fsi) fsi.value='';
+      if(fsd) {fsd.style.display='none'; fsd.innerHTML='';}
       renderSpeciesChips();
       scheduleSeenRefresh(120);
     });
@@ -7866,18 +7865,12 @@
     });
 
     function renderSpeciesChips() {
+      renderFreqInputArea();
       const el=document.getElementById('species-chips');
       const abcBtn=document.getElementById('species-abc-btn');
-      const noneBtn=document.getElementById('species-none-btn');
       const speciesInputEl=document.getElementById('species-input');
       const speciesClearBtn=document.getElementById('species-clear');
       if(abcBtn) abcBtn.classList.toggle('active',speciesAlphaSort);
-      if(noneBtn) {
-        noneBtn.classList.toggle('active',samplePanelState.freqNone);
-        noneBtn.style.borderColor=samplePanelState.freqNone? '#d19b1f':'#d19b1f';
-        noneBtn.style.color=samplePanelState.freqNone? '#1b1b1b':'#d19b1f';
-        noneBtn.style.background=samplePanelState.freqNone? '#e9b949':'transparent';
-      }
       if(speciesInputEl) {
         const hasDB=hasSearchSpeciesDB();
         speciesInputEl.disabled=!!samplePanelState.freqNone||!hasDB;
@@ -8352,6 +8345,40 @@
       }
     }
 
+    function renderFreqQuickpicks() {
+      const qp=document.getElementById('freq-quickpicks');
+      if(!qp) return;
+      const pool=getEventSpeciesPool().slice().sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''));
+      const currentSyms=new Set((samplePanelState.species||[]).map(sp => String(sp.symbol||'').trim().toUpperCase()));
+      qp.innerHTML=pool.length?
+        pool.map(sp => {
+          const sym=sp.symbol||'';
+          const inSample=currentSyms.has(sym.toUpperCase());
+          return `<button class="btn btn-ghost btn-sm" data-freq-qp="${esc(sym)}" data-freq-qp-common="${esc(sp.common||'')}" data-freq-qp-sci="${esc(sp.sci||'')}" data-freq-qp-native="${esc(sp.native||'')}"
+            style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}">${esc(sym)}</button>`;
+        }).join(''):
+        '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';
+      qp.querySelectorAll('[data-freq-qp]').forEach(btn => {
+        btn.addEventListener('click',() => {
+          addSpeciesEntryToMethod('species',createSpeciesEntry({
+            symbol: btn.dataset.freqQp,
+            common: btn.dataset.freqQpCommon,
+            sci: btn.dataset.freqQpSci,
+            native: btn.dataset.freqQpNative,
+          }),{preferQualifier: true});
+        });
+      });
+    }
+
+    function renderFreqInputArea() {
+      const inputArea=document.getElementById('freq-input-area');
+      const sealedBar=document.getElementById('freq-sealed-bar');
+      const sealed=!!samplePanelState.freqNone;
+      if(inputArea) inputArea.style.display=sealed? 'none':'';
+      if(sealedBar) sealedBar.style.display=sealed? '':'none';
+      if(!sealed) renderFreqQuickpicks();
+    }
+
     function renderLpiSurface() {
       const grid=document.getElementById('lpi-surface-grid');
       if(!grid) return;
@@ -8490,6 +8517,68 @@
       }
     })();
 
+    (function setupFreqHandlers() {
+      const searchInput=document.getElementById('freq-search-input');
+      const searchDropdown=document.getElementById('freq-search-dropdown');
+      if(!searchInput||!searchDropdown) return;
+
+      searchInput.addEventListener('input',() => {
+        const q=searchInput.value.trim();
+        if(!q) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        if(!speciesAllRecords.length) {
+          searchDropdown.innerHTML='<div style="padding:8px 10px;font-size:.78rem;color:var(--muted);">Import a species list to enable search</div>';
+          searchDropdown.style.display='block';
+          return;
+        }
+        const upper=q.toUpperCase();
+        const matches=speciesAllRecords.filter(r => {
+          const sym=String(r.symbol||r.SYMBOL||'').toUpperCase();
+          const common=String(r.common||r.Common_Name||'').toUpperCase();
+          return sym.startsWith(upper)||common.includes(upper);
+        }).slice(0,15);
+        if(!matches.length) {searchDropdown.style.display='none'; searchDropdown.innerHTML=''; return;}
+        searchDropdown.style.display='block';
+        searchDropdown.innerHTML=matches.map(r => {
+          const sym=String(r.symbol||r.SYMBOL||'');
+          const common=String(r.common||r.Common_Name||'');
+          const sci=String(r.sci||r.Scientific_Name||'');
+          const native=String(r.native||r.Native_Status||'');
+          return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
+            style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
+            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+          </div>`;
+        }).join('');
+        searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
+          row.addEventListener('click',() => {
+            addSpeciesEntryToMethod('species',createSpeciesEntry({
+              symbol: row.dataset.sym,
+              common: row.dataset.label,
+              sci: row.dataset.sci,
+              native: row.dataset.native,
+            }),{preferQualifier: true});
+            upsertEventSpeciesPoolEntry(
+              createSpeciesEntry({symbol: row.dataset.sym,common: row.dataset.label,sci: row.dataset.sci,native: row.dataset.native}),
+              {silent: true}
+            );
+            searchInput.value='';
+            searchDropdown.style.display='none';
+            searchDropdown.innerHTML='';
+          });
+          row.addEventListener('mouseover',() => {row.style.background='var(--s2)';});
+          row.addEventListener('mouseout',() => {row.style.background='';});
+        });
+      });
+
+      document.getElementById('freq-reset-btn')?.addEventListener('click',() => {
+        samplePanelState.freqNone=false;
+        samplePanelState.species=[];
+        searchInput.value='';
+        searchDropdown.style.display='none';
+        searchDropdown.innerHTML='';
+        renderSpeciesChips();
+        scheduleSeenRefresh(0);
+      });
+    })();
 
 
     // ------------------------------------------------------
