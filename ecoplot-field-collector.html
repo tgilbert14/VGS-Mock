@@ -1127,6 +1127,35 @@
       color: var(--accent);
     }
 
+    .panel-display-select {
+      font-size: .6rem;
+      padding: 1px 6px 1px 8px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      height: 22px;
+      max-width: 82px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      background-size: 6px;
+      padding-right: 18px;
+      letter-spacing: .03em;
+      transition: border-color .15s, color .15s;
+    }
+
+    .panel-display-select:hover,
+    .panel-display-select:focus {
+      border-color: var(--accent2);
+      color: var(--accent);
+      outline: none;
+    }
+
     .seen-chips {
       display: flex;
       flex-wrap: wrap;
@@ -2490,6 +2519,8 @@
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading...</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" id="import-species-btn">&#11014; Import speciesList.csv</button>
+            <button class="btn btn-ghost btn-sm" id="restore-default-species-btn" type="button"
+              title="Re-load the built-in VGSDefaultSpeciesList.csv">&#8635; Restore default list</button>
             <button class="btn btn-ghost btn-sm" id="species-import-help-btn" type="button"
               title="Show required CSV columns">What CSV works?</button>
           </div>
@@ -2513,6 +2544,16 @@
               <select id="species-list-select" style="width:auto;min-width:170px;border-color:var(--accent2);"></select>
               <span id="species-list-meta" style="font-size:.72rem;color:var(--muted);"></span>
             </div>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label for="cfg-species-display"
+              style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;">Species
+              Display</label>
+            <select id="cfg-species-display" style="width:auto;min-width:150px;">
+              <option value="code">Code (default)</option>
+              <option value="species">Species name</option>
+              <option value="common">Common name</option>
+            </select>
           </div>
           <input type="file" id="species-csv-input" accept=".csv" style="display:none;">
         </div>
@@ -2628,15 +2669,6 @@
           </label>
           <div style="font-size:.67rem;color:var(--muted);margin-top:5px;">When enabled, pending records sync
             automatically after connectivity returns.</div>
-          <div class="field" style="margin-top:10px;">
-            <label for="cfg-species-display">USDA Species Display</label>
-            <select id="cfg-species-display">
-              <option value="species">Species name (default)</option>
-              <option value="common">Common name</option>
-            </select>
-            <div style="font-size:.67rem;color:var(--muted);margin-top:4px;">Controls how USDA species are shown
-              throughout collection and summary views.</div>
-          </div>
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-cfg-btn">Save Settings</button>
         </div>
         <div class="card" id="azure-connection-card" style="display:none;">
@@ -2772,6 +2804,11 @@
           </span>
           <span style="display:flex;gap:6px;align-items:center;">
             <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
+            <select id="freq-display-select" class="panel-display-select" title="Species display mode">
+              <option value="code">Code</option>
+              <option value="species">Name</option>
+              <option value="common">Common</option>
+            </select>
           </span>
         </div>
         <div id="species-scope-note" style="font-size:.75rem;color:var(--muted);margin:-4px 0 10px 0;display:none;">
@@ -2812,6 +2849,11 @@
         <div class="card-title">Dry Weight Rank (DWR)
           <span style="display:flex;gap:6px;align-items:center;">
             <button class="seen-toggle-btn" id="dwr-abc-btn" title="Sort alphabetically">ABC</button>
+            <select id="dwr-display-select" class="panel-display-select" title="Species display mode">
+              <option value="code">Code</option>
+              <option value="species">Name</option>
+              <option value="common">Common</option>
+            </select>
             <span id="dwr-count-badge" class="badge">0/3 species</span>
           </span>
         </div>
@@ -2852,7 +2894,14 @@
       <!-- Line-Point Intercept (LPI) -->
       <div class="card" id="panel-lpi-card">
         <div class="card-title">Line-Point Intercept
-          <span id="lpi-hit-count-badge" class="badge">0 hits</span>
+          <span style="display:flex;gap:6px;align-items:center;">
+            <select id="lpi-display-select" class="panel-display-select" title="Species display mode">
+              <option value="code">Code</option>
+              <option value="species">Name</option>
+              <option value="common">Common</option>
+            </select>
+            <span id="lpi-hit-count-badge" class="badge">0 hits</span>
+          </span>
         </div>
         <div id="lpi-hits-list"></div>
         <div id="lpi-input-area">
@@ -3223,8 +3272,8 @@
     // ------------------------------------------------------
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
-    const APP_BUILD_DATE='2026-04-21';
-    const APP_BUILD_REV=77;
+    const APP_BUILD_DATE='2026-04-25';
+    const APP_BUILD_REV=85;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -3541,7 +3590,7 @@
     let speciesImportStats={sourceRows: 0,storedRows: 0};
     let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
     let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
-    let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'species';
+    let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'code';
     let msalClient=null;
     let authAccount=null;
     let authInitError='';
@@ -3692,13 +3741,7 @@
     }
 
     function normalizeSpeciesEntryForStorage(entry) {
-      const base=createSpeciesEntry(entry);
-      if(speciesDisplayMode==='common') {
-        const preferred=base.common||base.sci||base.symbol;
-        return createSpeciesEntry({...base,common: preferred,sci: ''});
-      }
-      const preferred=base.sci||base.common||base.symbol;
-      return createSpeciesEntry({...base,sci: preferred,common: ''});
+      return createSpeciesEntry(entry);
     }
 
     function hasSpeciesEntry(list,entry,excludeIndex=-1) {
@@ -3763,7 +3806,12 @@
         }
       });
       labels.sort((a,b) => a.label.localeCompare(b.label));
-      return [{key: 'all',label: 'All'},...labels];
+      const presentRegions=new Set();
+      rows.forEach(r => (Array.isArray(r.regions)? r.regions:[]).forEach(rg => presentRegions.add(rg)));
+      const regionOpts=REGION_ORDER
+        .filter(rg => presentRegions.has(rg))
+        .map(rg => ({key: 'region:'+rg,label: REGION_LABELS[rg]||rg}));
+      return [{key: 'all',label: 'All'},...regionOpts,...labels];
     }
 
     function speciesImportRequirementsText() {
@@ -3786,6 +3834,7 @@
         const growthHabit=String(entry.growthHabit||'').trim();
         const state=String(entry.state||'All').trim()||'All';
         const listKey=String(entry.listKey||normalizeSpeciesListKey(state)||'all').trim()||'all';
+        const regions=Array.isArray(entry.regions)? entry.regions:[];
         const key=[symbol,sci,common,native,duration,growthHabit].join('\u0001');
         let group=grouped.get(key);
         if(!group) {
@@ -3801,6 +3850,7 @@
             listKey,
             states: [],
             listKeys: [],
+            regions: [],
             sourceRowCount: 0,
           };
           grouped.set(key,group);
@@ -3808,6 +3858,7 @@
         group.sourceRowCount+=1;
         if(!group.states.includes(state)) group.states.push(state);
         if(!group.listKeys.includes(listKey)) group.listKeys.push(listKey);
+        regions.forEach(rg => {if(!group.regions.includes(rg)) group.regions.push(rg);});
       });
       return [...grouped.values()].map((group,idx) => ({
         ...group,
@@ -3823,10 +3874,18 @@
       const useAll=selectedSpeciesListKey==='all';
       const rows=useAll
         ? speciesAllRecords
-        :speciesAllRecords.filter(r => {
-          const keys=Array.isArray(r.listKeys)&&r.listKeys.length? r.listKeys:[r.listKey||'all'];
-          return keys.includes(selectedSpeciesListKey);
-        });
+        :selectedSpeciesListKey.startsWith('region:')
+          ? (() => {
+            const rg=selectedSpeciesListKey.slice(7);
+            return speciesAllRecords.filter(r =>
+              String(r.symbol||'').startsWith('2')||
+              (Array.isArray(r.regions)? r.regions:[]).includes(rg)
+            );
+          })()
+          :speciesAllRecords.filter(r => {
+            const keys=Array.isArray(r.listKeys)&&r.listKeys.length? r.listKeys:[r.listKey||'all'];
+            return keys.includes(selectedSpeciesListKey);
+          });
       const bySymbol=new Map();
       rows.forEach(r => {
         const symbol=String(r.symbol||'').trim().toUpperCase();
@@ -4029,9 +4088,10 @@
           ${allSpecies.map(sp => {
           const active=activeSymbols.has(sp.symbol);
           const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
+          const pickLabel=speciesDisplayMode==='code'? speciesDisplaySecondary(sp):speciesDisplayPrimary(sp);
           return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
               <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
-              <span>${esc(sp.sci||sp.common||sp.symbol)}</span>
+              <span>${esc(pickLabel)}</span>
             </button>`;
         }).join('')}
         </div>`;
@@ -4291,16 +4351,27 @@
     }
 
     function speciesDisplayPrimary(sp) {
-      const sci=(sp?.sci||'').trim();
-      const common=(sp?.common||'').trim();
       const symbol=(sp?.symbol||'').trim();
+      let sci=(sp?.sci||'').trim();
+      let common=(sp?.common||'').trim();
+      if(symbol&&(!common||!sci)) {
+        const row=getSpeciesSearchRecord(symbol);
+        if(row) {if(!common) common=String(row[1]||'').trim(); if(!sci) sci=String(row[2]||'').trim();}
+      }
+      if(speciesDisplayMode==='code') return symbol;
       if(speciesDisplayMode==='common') return common||sci||symbol;
       return sci||common||symbol;
     }
 
     function speciesDisplaySecondary(sp) {
-      const sci=(sp?.sci||'').trim();
-      const common=(sp?.common||'').trim();
+      const symbol=(sp?.symbol||'').trim();
+      let sci=(sp?.sci||'').trim();
+      let common=(sp?.common||'').trim();
+      if(symbol&&(!common||!sci)) {
+        const row=getSpeciesSearchRecord(symbol);
+        if(row) {if(!common) common=String(row[1]||'').trim(); if(!sci) sci=String(row[2]||'').trim();}
+      }
+      if(speciesDisplayMode==='code') return common||sci||'';
       if(speciesDisplayMode==='common') return sci;
       return common;
     }
@@ -4469,8 +4540,9 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         const inSample=freqCurrentSymbols.has(String(sp.symbol||'').trim().toUpperCase());
+        const seenLabel=speciesDisplayMode==='code'? esc(speciesDisplaySecondary(sp)):esc(speciesDisplayPrimary(sp));
         return `<button class="seen-chip${inv? ' invasive-sp':''}${inSample? ' in-sample':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '&#9888; ':''}<span style="font-size:.68rem;font-weight:700;opacity:.85;">${esc(formatSpeciesKeyBadge(sp))}</span> ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
+          ${inv? '&#9888; ':''}<span style="font-size:.68rem;font-weight:700;opacity:.85;">${esc(formatSpeciesKeyBadge(sp))}</span> ${seenLabel} ${sampleDot}
         </button>`;
       }
 
@@ -4500,6 +4572,23 @@
       if(s.includes('(N)')) return 'Y';
       if(s.includes('(I)')) return 'N';
       return '?';
+    }
+
+    const REGION_LABELS={
+      L48: 'L48 — Lower 48',AK: 'AK — Alaska',HI: 'HI — Hawaii',
+      PR: 'PR — Puerto Rico',VI: 'VI — Virgin Islands',
+      CAN: 'CAN — Canada',GL: 'GL — Greenland',
+      SPM: 'SPM — St. Pierre & Miquelon',NA: 'NA — North America',
+    };
+    const REGION_ORDER=['L48','AK','HI','PR','VI','CAN','GL','SPM','NA'];
+
+    function parseRegions(s) {
+      if(!s) return [];
+      const regions=new Set();
+      const re=/([A-Z][A-Z0-9]+)\([NI?W]+\*?\)/g;
+      let m;
+      while((m=re.exec(s))!==null) regions.add(m[1]);
+      return [...regions];
     }
 
     function parseCSVLine(line) {
@@ -4543,6 +4632,10 @@
       if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
         selectedSpeciesListKey='all';
         localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+      }
+      if(speciesAllRecords.length===0) {
+        seedDefaultSpeciesList();
+        return;
       }
       rebuildActiveSpeciesDB();
       updateSpeciesDBUI(speciesAllRecords.length);
@@ -4589,55 +4682,107 @@
       }
     }
 
+    function parseSpeciesCSVText(text) {
+      const lines=text.split(/\r?\n/);
+      const firstLine=lines[0];
+      const delim=(firstLine.split('\t').length>firstLine.split(',').length)? '\t':',';
+      const parseLine=delim==='\t'
+        ? line => line.split('\t').map(f => f.replace(/^"|"$/g,'').trim())
+        :parseCSVLine;
+      const hdr=parseLine(lines[0]).map(normalizeCsvHeader);
+      const symCol=findHeaderIndex(hdr,['symbol','code']);
+      const sciCol=findHeaderIndex(hdr,['scientificname','scientific']);
+      const comCol=findHeaderIndex(hdr,['commonname','common']);
+      if(symCol<0||sciCol<0||comCol<0) {
+        throw new Error(speciesImportRequirementsText()+' '+speciesImportExampleHeader());
+      }
+      const durCol=findHeaderIndex(hdr,['duration']);
+      const habCol=findHeaderIndex(hdr,['growthhabit','growthform','habit']);
+      const natCol=findHeaderIndex(hdr,['nativestatus','native']);
+      const stateCol=findHeaderIndex(hdr,[
+        'state','states','statename','stateprovince','province','region',
+        'stateabbr','stateabbrev','stateabbreviation','statecode','stusps','usps','postalcode'
+      ]);
+      const rawEntries=[];
+      for(let i=1;i<lines.length;i++) {
+        const line=lines[i].trim();
+        if(!line) continue;
+        const f=parseLine(line);
+        if(f.length<Math.max(symCol,sciCol,comCol)+1) continue;
+        const symbol=String(f[symCol]||'').trim().toUpperCase();
+        const sci=normalizeMissingText(f[sciCol]);
+        const common=normalizeMissingText(f[comCol])||sci;
+        if(!symbol||!sci) continue;
+        const state=normalizeSingleStateValue(stateCol>=0? f[stateCol]:'');
+        const listKey=normalizeSpeciesListKey(state);
+        const native=parseNativeStatus(String(natCol>=0? f[natCol]:''));
+        const duration=normalizeMissingText(durCol>=0? f[durCol]:'');
+        const growthHabit=normalizeMissingText(habCol>=0? f[habCol]:'');
+        const regions=parseRegions(String(natCol>=0? f[natCol]:''));
+        rawEntries.push({
+          symbol,common,sci,native,duration,growthHabit,regions,
+          state: state||'All',
+          listKey,
+        });
+      }
+      if(!rawEntries.length) throw new Error('No valid species rows found after parsing.');
+      return rawEntries;
+    }
+
+    async function seedDefaultSpeciesList() {
+      const info=document.getElementById('species-db-info');
+      const badge=document.getElementById('species-db-badge');
+      // Browsers block fetch() for file:// origins (Chrome 92+). Open the file
+      // picker instead so the user can select VGSDefaultSpeciesList.csv manually.
+      if(window.location.protocol==='file:') {
+        toast('Local file — select VGSDefaultSpeciesList.csv in the picker','');
+        if(speciesAllRecords.length===0) {
+          if(info) info.textContent='Select VGSDefaultSpeciesList.csv to load the default species list.';
+          if(badge) badge.textContent='No list loaded';
+        }
+        document.getElementById('species-csv-input').click();
+        return;
+      }
+      if(info) info.textContent='Loading default species list…';
+      if(badge) badge.textContent='Loading…';
+      try {
+        const resp=await fetch('./VGSDefaultSpeciesList.csv');
+        if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const text=await resp.text();
+        const rawEntries=parseSpeciesCSVText(text);
+        const entries=aggregateSpeciesImportEntries(rawEntries);
+        await dbReplaceAll('species',entries);
+        speciesAllRecords=entries;
+        speciesImportStats={sourceRows: rawEntries.length,storedRows: entries.length};
+        speciesListOptions=getSpeciesListOptions(speciesAllRecords);
+        if(!speciesListOptions.some(opt => opt.key===selectedSpeciesListKey)) {
+          selectedSpeciesListKey='all';
+          localStorage.setItem('ep_species_list_key',selectedSpeciesListKey);
+        }
+        rebuildActiveSpeciesDB();
+        updateSpeciesDBUI(entries.length);
+        renderSpeciesListSelector();
+        renderCustomListPicks();
+        toast(`Default species list loaded (${entries.length.toLocaleString()} species)`,'ok');
+      } catch(err) {
+        console.warn('Could not load default species list:',err);
+        toast('Could not reload default list: '+err.message,'err');
+        if(speciesAllRecords.length>0) {
+          updateSpeciesDBUI(speciesAllRecords.length);
+        } else {
+          if(info) info.textContent='No species list loaded. Import a CSV to get started.';
+          if(badge) badge.textContent='No list loaded';
+        }
+      }
+    }
+
     async function importSpeciesCSV(file) {
       const btn=document.getElementById('import-species-btn');
       btn.disabled=true; btn.textContent='Parsing...';
       const reader=new FileReader();
       reader.onload=async e => {
         try {
-          const lines=e.target.result.split(/\r?\n/);
-          // Detect delimiter: tab vs comma
-          const firstLine=lines[0];
-          const delim=(firstLine.split('\t').length>firstLine.split(',').length)? '\t':',';
-          const parseLine=delim==='\t'
-            ? line => line.split('\t').map(f => f.replace(/^"|"$/g,'').trim())
-            :parseCSVLine;
-          const hdr=parseLine(lines[0]).map(normalizeCsvHeader);
-          const symCol=findHeaderIndex(hdr,['symbol','code']);
-          const sciCol=findHeaderIndex(hdr,['scientificname','scientific']);
-          const comCol=findHeaderIndex(hdr,['commonname','common']);
-          if(symCol<0||sciCol<0||comCol<0) {
-            throw new Error(speciesImportRequirementsText()+' '+speciesImportExampleHeader());
-          }
-          const durCol=findHeaderIndex(hdr,['duration']);
-          const habCol=findHeaderIndex(hdr,['growthhabit','growthform','habit']);
-          const natCol=findHeaderIndex(hdr,['nativestatus','native']);
-          const stateCol=findHeaderIndex(hdr,[
-            'state','states','statename','stateprovince','province','region',
-            'stateabbr','stateabbrev','stateabbreviation','statecode','stusps','usps','postalcode'
-          ]);
-          const rawEntries=[];
-          for(let i=1;i<lines.length;i++) {
-            const line=lines[i].trim();
-            if(!line) continue;
-            const f=parseLine(line);
-            if(f.length<Math.max(symCol,sciCol,comCol)+1) continue;
-            const symbol=String(f[symCol]||'').trim().toUpperCase();
-            const sci=normalizeMissingText(f[sciCol]);
-            const common=normalizeMissingText(f[comCol])||sci;
-            if(!symbol||!sci) continue;
-            const state=normalizeSingleStateValue(stateCol>=0? f[stateCol]:'');
-            const listKey=normalizeSpeciesListKey(state);
-            const native=parseNativeStatus(String(natCol>=0? f[natCol]:''));
-            const duration=normalizeMissingText(durCol>=0? f[durCol]:'');
-            const growthHabit=normalizeMissingText(habCol>=0? f[habCol]:'');
-            rawEntries.push({
-              symbol,common,sci,native,duration,growthHabit,
-              state: state||'All',
-              listKey,
-            });
-          }
-          if(!rawEntries.length) throw new Error('No valid species rows found after parsing.');
+          const rawEntries=parseSpeciesCSVText(e.target.result);
           const entries=aggregateSpeciesImportEntries(rawEntries);
           btn.textContent='Saving...';
           await dbReplaceAll('species',entries);
@@ -4650,7 +4795,7 @@
           updateSpeciesDBUI(entries.length);
           renderSpeciesListSelector();
           toast(`Loaded ${rawEntries.length.toLocaleString()} rows as ${entries.length.toLocaleString()} stored species records`,'ok');
-          btn.innerHTML='&#128229; Import speciesList.csv';
+          btn.innerHTML='&#128229; Re-import CSV';
           renderCollect();
         } catch(err) {
           const info=document.getElementById('species-db-info');
@@ -6609,6 +6754,7 @@
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
       speciesAlphaSort=false; // reset ABC toggle per sample
+      syncPanelDisplaySelects();
 
       // Ensure activeEvent is loaded (may be null when entering via sample dot click)
       if(!activeEvent&&activeEventId) activeEvent=await dbGet('events',activeEventId);
@@ -7085,9 +7231,10 @@
           ${picks.map(sp => {
           const active=list.some(item => String(item?.symbol||'').trim().toUpperCase()===sp.symbol);
           const disabled=(!active&&(disabledByNone||atLimit))? 'disabled':'';
+          const pickLabel=speciesDisplayMode==='code'? speciesDisplaySecondary(sp):speciesDisplayPrimary(sp);
           return `<button class="two-code-pick-btn${active? ' active':''}" data-method-key="${methodKey}" data-sym="${sp.symbol}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" ${disabled}>
               <span class="two-code-pick-symbol">${esc(sp.symbol)}</span>
-              <span>${esc(sp.sci||sp.common||sp.symbol)}</span>
+              <span>${esc(pickLabel)}</span>
             </button>`;
         }).join('')}
           <button class="two-code-pick-more" data-method-key="${methodKey}" style="align-self:center;">More 2-codes</button>
@@ -7722,7 +7869,7 @@
           <span style="font-weight:600;min-width:20px;">${idx+1}.</span>
           <div style="flex:1;">
             <div style="font-weight:600;">${esc(speciesDisplayPrimary(sp))}${invasive? ' <span title="Non-native" style="font-size:.75rem;">&#9888;</span>':''}</div>
-            <div style="font-size:.7rem;color:var(--muted);">${esc(formatSpeciesKeyBadge(sp))}</div>
+            <div style="font-size:.7rem;color:var(--muted);">${speciesDisplayMode==='code'? esc(speciesDisplaySecondary(sp)):esc(formatSpeciesKeyBadge(sp))}</div>
             ${repeatBadge}
             ${speciesSecondaryLine(sp)}
           </div>
@@ -7833,8 +7980,9 @@
           ? `<span class="seen-sample-dot" title="Seen in ${sampleCount} sample${sampleCount===1? '':'s'}">${sampleCount}</span>`
           :'';
         const inSample=dwrCurrentSymbols.has(String(sp.symbol||'').trim().toUpperCase());
+        const seenLabel=speciesDisplayMode==='code'? esc(speciesDisplaySecondary(sp)):esc(speciesDisplayPrimary(sp));
         return `<button class="seen-chip${inv? ' invasive-sp':''}${inSample? ' in-sample':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${inv? '&#9888; ':''}<span style="font-size:.68rem;font-weight:700;opacity:.85;">${esc(formatSpeciesKeyBadge(sp))}</span> ${esc(speciesDisplayPrimary(sp))} ${sampleDot}
+          ${inv? '&#9888; ':''}<span style="font-size:.68rem;font-weight:700;opacity:.85;">${esc(formatSpeciesKeyBadge(sp))}</span> ${seenLabel} ${sampleDot}
         </button>`;
       }
 
@@ -7906,8 +8054,12 @@
 
       el.innerHTML=display.map(sp => {
         const invasive=sp.native==='N';
+        const qualifier=speciesQualifierText(sp);
+        const badge=speciesDisplayMode==='code'
+          ? (qualifier? `<span style="opacity:.6;font-size:.6rem">[${esc(qualifier)}]</span>`:'')
+          :`<span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(sp))}</span>`;
         return `<div class="species-chip${invasive? ' invasive':''}" data-sym="${sp.symbol}" data-key="${esc(speciesEntryKey(sp))}" data-common="${esc(sp.common)}" data-sci="${esc(sp.sci)}" data-native="${sp.native}" data-qualifier="${esc(speciesQualifierText(sp))}">
-          ${esc(speciesDisplayPrimary(sp))} <span style="opacity:.6;font-size:.6rem">${esc(formatSpeciesKeyBadge(sp))}</span>
+          ${esc(speciesDisplayPrimary(sp))} ${badge}
       ${invasive? '<span title="Non-native" style="font-size:.7rem">&#9888;</span>':''}
         ${speciesSecondaryLine(sp)}
         <button class="chip-qualifier" data-key="${esc(speciesEntryKey(sp))}" title="Edit qualifier" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.82rem;padding:0 2px;">&#9998;</button>
@@ -7979,10 +8131,12 @@
           const qualifier=speciesQualifierText(sp);
           const key=speciesEntryKey(sp);
           const newestClass=key===drawerNewestSpeciesKey? ' newly-added':'';
+          const drawerPrimary=speciesDisplayMode==='code'? sp.symbol:speciesDisplayPrimary(sp);
+          const drawerSecondary=speciesDisplayMode==='code'? (sp.common||''):(sp.symbol||'');
           return `<div class="drawer-species-item${newestClass}" data-key="${esc(key)}" data-sym="${sp.symbol}" data-idx="${idx}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-qualifier="${esc(qualifier)}">
             <div class="species-name">
-              <span class="species-code">${esc(sp.symbol)}</span>
-              <span class="species-common">${esc(sp.common||'')}</span>
+              <span class="species-code">${esc(drawerPrimary)}</span>
+              <span class="species-common">${esc(drawerSecondary)}</span>
               ${qualifier? `<span class="qualifier-badge" style="font-size:.65rem;color:var(--muted);margin-left:4px;">${esc(qualifier)}</span>`:''}
             </div>
             <div style="display:flex;gap:4px;align-items:center;">
@@ -8004,10 +8158,12 @@
         if(siteOnly.length>0) {
           html+=`<div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-size:.65rem;color:var(--muted);font-weight:600;padding:6px 8px;text-align:center;">Seen at Site</div>`;
           html+=siteOnly.map(sp => {
+            const sitePrimary=speciesDisplayMode==='code'? sp.symbol:speciesDisplayPrimary(sp);
+            const siteSecondary=speciesDisplayMode==='code'? (sp.common||''):(sp.symbol||'');
             return `<div class="drawer-species-item from-site" data-key="${esc(speciesEntryKey(sp))}" data-sym="${sp.symbol}" data-common="${esc(sp.common||'')}" data-sci="${esc(sp.sci||'')}" data-native="${esc(sp.native||'?')}" data-site-species="true">
               <div class="species-name">
-                <span class="species-code">${esc(sp.symbol)}</span>
-                <span class="species-common">${esc(sp.common||'')}</span>
+                <span class="species-code">${esc(sitePrimary)}</span>
+                <span class="species-common">${esc(siteSecondary)}</span>
               </div>
               <span class="method-badge">+Add</span>
             </div>`;
@@ -8334,7 +8490,7 @@
           qp.innerHTML=pool.length?
             pool.map(sp =>
               `<button class="btn btn-ghost btn-sm" data-lpi-qp="${esc(sp.symbol||'')}" data-lpi-qp-label="${esc(sp.common||'')}"
-                style="font-size:.75rem;padding:3px 8px;">${esc(sp.symbol||'')}</button>`
+                title="${esc(sp.symbol||'')}" style="font-size:.75rem;padding:3px 8px;">${esc(speciesDisplayPrimary(sp))}</button>`
             ).join(''):
             '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via drawer</span>';
           qp.querySelectorAll('[data-lpi-qp]').forEach(btn => {
@@ -8361,7 +8517,7 @@
           const sym=sp.symbol||'';
           const inSample=currentSyms.has(sym.toUpperCase());
           return `<button class="btn btn-ghost btn-sm" data-freq-qp="${esc(sym)}" data-freq-qp-common="${esc(sp.common||'')}" data-freq-qp-sci="${esc(sp.sci||'')}" data-freq-qp-native="${esc(sp.native||'')}"
-            style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}">${esc(sym)}</button>`;
+            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}">${esc(speciesDisplayPrimary(sp))}</button>`;
         }).join(''):
         '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';
       qp.querySelectorAll('[data-freq-qp]').forEach(btn => {
@@ -8396,8 +8552,8 @@
           const sym=sp.symbol||'';
           const inSample=currentSyms.has(sym.toUpperCase());
           return `<button class="btn btn-ghost btn-sm" data-dwr-qp="${esc(sym)}" data-dwr-qp-common="${esc(sp.common||'')}" data-dwr-qp-sci="${esc(sp.sci||'')}" data-dwr-qp-native="${esc(sp.native||'')}"
-            style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}${full&&!inSample? 'opacity:.45;':''}">
-            ${esc(sym)}</button>`;
+            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}${full&&!inSample? 'opacity:.45;':''}">
+            ${esc(speciesDisplayPrimary(sp))}</button>`;
         }).join(''):
         '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';
       qp.querySelectorAll('[data-dwr-qp]').forEach(btn => {
@@ -8442,9 +8598,10 @@
       const list=document.getElementById('lpi-hits-list');
       const badge=document.getElementById('lpi-hit-count-badge');
       if(!list) return;
-      const hits=samplePanelState.lpiHits||[];
+      const allHits=samplePanelState.lpiHits||[];
+      const hits=allHits;
       const surface=samplePanelState.lpiSurface||'';
-      if(badge) badge.textContent=`${hits.length} hit${hits.length!==1? 's':''}`;
+      if(badge) badge.textContent=`${allHits.length} hit${allHits.length!==1? 's':''}`;
       const layerLabel={top: 'Top',lower: 'Lower',basal: 'Basal'};
       const hitHtml=hits.map((h,i) => {
         const isBasal=h.layer==='basal';
@@ -8452,11 +8609,13 @@
         const tc=isBasal? 'color:#f0d0b0;':'';
         const layerColor={top: 'var(--accent)',lower: '#6b8e23',basal: '#f0d0b0'};
         const qual=h.qualifier? ` <span style="font-size:.65rem;color:var(--muted);">[${esc(h.qualifier)}]</span>`:'';
+        const primaryLabel=speciesDisplayMode==='common'? (h.label||h.symbol||''):h.symbol||'';
+        const secondaryLabel=speciesDisplayMode==='code'? (h.label||''):'';
         return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;border-radius:8px;padding:5px 8px;${bg}${tc}">
           <span style="font-size:.7rem;font-weight:700;min-width:44px;color:${layerColor[h.layer]||'inherit'};">${esc(layerLabel[h.layer]||h.layer)}</span>
           <div style="flex:1;min-width:0;">
-            <span style="font-size:.82rem;font-weight:600;">${esc(h.symbol||'')}${qual}</span>
-            ${h.label&&!isBasal? `<div style="font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(h.label)}</div>`:''}
+            <span style="font-size:.82rem;font-weight:600;">${esc(primaryLabel)}${qual}</span>
+            ${(secondaryLabel||h.label)&&!isBasal&&speciesDisplayMode!=='common'? `<div style="font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(speciesDisplayMode==='code'? secondaryLabel:(h.label||''))}</div>`:''}
           </div>
           ${!isBasal? `
             <button style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;padding:0 2px;" data-lpi-qual="${i}" title="Edit qualifier">&#9998;</button>
@@ -8531,9 +8690,11 @@
           const common=sp.common||sp.Common_Name||'';
           const sci=sp.sci||sp.Scientific_Name||'';
           const native=sp.native||sp.Native_Status||'';
+          const srPrimary=speciesDisplayMode==='code'? sym:(speciesDisplayMode==='species'? (sci||common||sym):(common||sci||sym));
+          const srSecondary=speciesDisplayMode==='code'? common:sym;
           return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
             style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
-            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+            <strong>${esc(srPrimary)}</strong>${srSecondary? ` <span style="color:var(--muted);">${esc(srSecondary)}</span>`:''}
           </div>`;
         }).join('');
         searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
@@ -8603,9 +8764,11 @@
           const common=String(r.common||r.Common_Name||'');
           const sci=String(r.sci||r.Scientific_Name||'');
           const native=String(r.native||r.Native_Status||'');
+          const srPrimary=speciesDisplayMode==='code'? sym:(speciesDisplayMode==='species'? (sci||common||sym):(common||sci||sym));
+          const srSecondary=speciesDisplayMode==='code'? common:sym;
           return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
             style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
-            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+            <strong>${esc(srPrimary)}</strong>${srSecondary? ` <span style="color:var(--muted);">${esc(srSecondary)}</span>`:''}
           </div>`;
         }).join('');
         searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
@@ -8666,9 +8829,11 @@
           const common=String(r.common||r.Common_Name||'');
           const sci=String(r.sci||r.Scientific_Name||'');
           const native=String(r.native||r.Native_Status||'');
+          const srPrimary=speciesDisplayMode==='code'? sym:(speciesDisplayMode==='species'? (sci||common||sym):(common||sci||sym));
+          const srSecondary=speciesDisplayMode==='code'? common:sym;
           return `<div data-sym="${esc(sym)}" data-label="${esc(common)}" data-sci="${esc(sci)}" data-native="${esc(native)}"
             style="padding:7px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);">
-            <strong>${esc(sym)}</strong>${common? ` <span style="color:var(--muted);">${esc(common)}</span>`:''}
+            <strong>${esc(srPrimary)}</strong>${srSecondary? ` <span style="color:var(--muted);">${esc(srSecondary)}</span>`:''}
           </div>`;
         }).join('');
         searchDropdown.querySelectorAll('[data-sym]').forEach(row => {
@@ -9843,18 +10008,44 @@
       }
       return new Set(sites.filter(s => localFolderIds.has(s.folderId)).map(s => s.id));
     }
-    function saveSettings() {
-      localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
-      localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
-      localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
-      localStorage.setItem('ep_auto_sync',document.getElementById('cfg-auto-sync').checked? '1':'0');
-      speciesDisplayMode=document.getElementById('cfg-species-display').value||'species';
+    function syncPanelDisplaySelects() {
+      const mode=speciesDisplayMode;
+      ['cfg-species-display','freq-display-select','dwr-display-select','lpi-display-select'].forEach(id => {
+        const el=document.getElementById(id);
+        if(el) el.value=mode;
+      });
+    }
+
+    function applyDisplayModeFromPanel(mode) {
+      speciesDisplayMode=mode;
       localStorage.setItem('ep_species_display_mode',speciesDisplayMode);
+      syncPanelDisplaySelects();
       if(samplePanelOpen) {
         renderSpeciesChips();
         renderSeenSpecies();
         renderDWRSeenSpecies();
         renderDWRChips();
+        renderLpiHits();
+        renderSpeciesDrawer();
+      }
+      renderSummary();
+    }
+
+    function saveSettings() {
+      localStorage.setItem('ep_url',document.getElementById('cfg-url').value.trim());
+      localStorage.setItem('ep_key',document.getElementById('cfg-key').value.trim());
+      localStorage.setItem('ep_incomplete_warn',document.getElementById('cfg-incomplete-warn').checked? '1':'0');
+      localStorage.setItem('ep_auto_sync',document.getElementById('cfg-auto-sync').checked? '1':'0');
+      speciesDisplayMode=document.getElementById('cfg-species-display').value||'code';
+      localStorage.setItem('ep_species_display_mode',speciesDisplayMode);
+      syncPanelDisplaySelects();
+      if(samplePanelOpen) {
+        renderSpeciesChips();
+        renderSeenSpecies();
+        renderDWRSeenSpecies();
+        renderDWRChips();
+        renderLpiHits();
+        renderSpeciesDrawer();
       }
       renderSummary();
       toast('Settings saved','ok');
@@ -9862,6 +10053,10 @@
 
     document.getElementById('save-cfg-btn').addEventListener('click',saveSettings);
     document.getElementById('save-azure-cfg-btn').addEventListener('click',saveSettings);
+    document.getElementById('cfg-species-display').addEventListener('change',saveSettings);
+    ['freq-display-select','dwr-display-select','lpi-display-select'].forEach(id => {
+      document.getElementById(id).addEventListener('change',function() {applyDisplayModeFromPanel(this.value);});
+    });
 
     // -- Export / Backup --
     function setExportStatus(msg,type='') {
@@ -10355,6 +10550,13 @@
     function esc(s) {return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
     // Species CSV import button
+    document.getElementById('restore-default-species-btn').addEventListener('click',async () => {
+      const btn=document.getElementById('restore-default-species-btn');
+      btn.disabled=true; btn.textContent='Loading…';
+      await seedDefaultSpeciesList();
+      btn.disabled=false; btn.textContent='\u21BB Restore default list';
+    });
+
     document.getElementById('import-species-btn').addEventListener('click',() => {
       document.getElementById('species-csv-input').click();
     });
