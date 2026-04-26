@@ -376,6 +376,10 @@
       margin-bottom: 14px;
     }
 
+    #page-sync>.card:nth-child(even) {
+      background: var(--s2);
+    }
+
     .card-title {
       font-family: var(--font-ui);
       font-weight: 700;
@@ -1137,7 +1141,8 @@
       cursor: pointer;
       font-family: var(--font-mono);
       height: 22px;
-      max-width: 82px;
+      min-width: 90px;
+      max-width: 130px;
       appearance: none;
       -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23888'/%3E%3C/svg%3E");
@@ -1190,9 +1195,36 @@
     }
 
     .seen-chip.in-sample {
-      background: #2e6b2e;
-      border-color: #2e6b2e;
+      background: #2a7a2a;
+      border-color: #2a7a2a;
       color: #fff;
+      font-weight: 600;
+    }
+
+    .seen-chip.in-sample::before {
+      content: '✓ ';
+      font-size: .7em;
+      opacity: .85;
+    }
+
+    .seen-chip.in-sample:hover,
+    .seen-chip.in-sample:active {
+      background: #236123;
+      border-color: #236123;
+      color: #fff;
+    }
+
+    .qp-btn-in-sample {
+      background: #2a7a2a !important;
+      border-color: #2a7a2a !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+    }
+
+    .qp-btn-in-sample::before {
+      content: '✓ ';
+      font-size: .75em;
+      opacity: .85;
     }
 
     .seen-chip.in-sample .seen-sample-dot {
@@ -2518,11 +2550,11 @@
               list</span></div>
           <div style="font-size:.72rem;color:var(--muted);margin-bottom:12px;" id="species-db-info">Loading...</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" id="import-species-btn">&#11014; Import speciesList.csv</button>
             <button class="btn btn-ghost btn-sm" id="restore-default-species-btn" type="button"
               title="Re-load the built-in VGSDefaultSpeciesList.csv">&#8635; Restore default list</button>
             <button class="btn btn-ghost btn-sm" id="species-import-help-btn" type="button"
               title="Show required CSV columns">What CSV works?</button>
+            <button class="btn btn-outline btn-sm" id="import-species-btn">&#11014; Import speciesList.csv</button>
           </div>
           <div id="species-import-help"
             style="display:none;font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.45;">
@@ -2685,7 +2717,7 @@
           <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="save-azure-cfg-btn">Save Azure
             Connection</button>
         </div>
-        <div class="card">
+        <div class="card" style="background:var(--s2);">
           <div class="card-title">Account</div>
           <div id="auth-status" style="font-size:.72rem;color:var(--muted);margin-bottom:12px;">Checking sign-in...
           </div>
@@ -2721,7 +2753,8 @@
           <div id="sync-detail"
             style="display:none;font-size:.7rem;line-height:1.45;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:rgba(255,255,255,.03);">
           </div>
-          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">? Sync All Unsynced</button>
+          <button class="btn btn-primary btn-full" id="sync-btn" style="margin-top:12px;">&#8635; Sync All
+            Unsynced</button>
         </div>
         <div class="card">
           <div class="card-title">Export / Backup</div>
@@ -2803,10 +2836,9 @@
             <span id="quadrat-size-badge" class="badge">40x40 cm</span>
           </span>
           <span style="display:flex;gap:6px;align-items:center;">
-            <button class="seen-toggle-btn" id="species-abc-btn" title="Sort alphabetically">ABC</button>
             <select id="freq-display-select" class="panel-display-select" title="Species display mode">
               <option value="code">Code</option>
-              <option value="species">Name</option>
+              <option value="species">Species Name</option>
               <option value="common">Common</option>
             </select>
           </span>
@@ -2848,10 +2880,9 @@
       <div class="card" id="panel-dwr-card">
         <div class="card-title">Dry Weight Rank (DWR)
           <span style="display:flex;gap:6px;align-items:center;">
-            <button class="seen-toggle-btn" id="dwr-abc-btn" title="Sort alphabetically">ABC</button>
             <select id="dwr-display-select" class="panel-display-select" title="Species display mode">
               <option value="code">Code</option>
-              <option value="species">Name</option>
+              <option value="species">Species Name</option>
               <option value="common">Common</option>
             </select>
             <span id="dwr-count-badge" class="badge">0/3 species</span>
@@ -2897,7 +2928,7 @@
           <span style="display:flex;gap:6px;align-items:center;">
             <select id="lpi-display-select" class="panel-display-select" title="Species display mode">
               <option value="code">Code</option>
-              <option value="species">Name</option>
+              <option value="species">Species Name</option>
               <option value="common">Common</option>
             </select>
             <span id="lpi-hit-count-badge" class="badge">0 hits</span>
@@ -3273,7 +3304,7 @@
     //  USDA PLANT DATABASE ? removed, import via CSV on the Setup tab
     // ------------------------------------------------------
     const APP_BUILD_DATE='2026-04-25';
-    const APP_BUILD_REV=85;
+    const APP_BUILD_REV=92;
     const APP_VERSION=`${APP_BUILD_DATE.replace(/-/g,'.')}.${APP_BUILD_REV}`;
     const DEFAULT_SYNC_URL='https://ecoplot-sync-2026-crc7f8gafdg6hrae.centralus-01.azurewebsites.net/api/observations';
     const DEFAULT_SYNC_KEY='';
@@ -3589,7 +3620,6 @@
     let speciesListOptions=[{key: 'all',label: 'All'}];
     let speciesImportStats={sourceRows: 0,storedRows: 0};
     let selectedSpeciesListKey=localStorage.getItem('ep_species_list_key')||'all';
-    let speciesAlphaSort=false; // toggle: sort chips + seen lists alphabetically
     let speciesDisplayMode=localStorage.getItem('ep_species_display_mode')||'code';
     let msalClient=null;
     let authAccount=null;
@@ -3612,6 +3642,7 @@
       {key: 'lpi',sampleKey: 'lpiHits',badge: 'lpi',label: 'LPI',uniquePerSample: false},
     ];
     const USDA_SPECIES_METHOD_KEYS=USDA_SPECIES_METHODS.map(m => m.key);
+    const USDA_SPECIES_SAMPLE_KEYS=USDA_SPECIES_METHODS.map(m => m.sampleKey||m.key);
     const FEATURED_TWO_CODE_SYMBOLS=['2FP','2FA','2GA','2GP','2SHRUB','2SUBS','2TREE'];
 
     function normalizeCsvHeader(v) {
@@ -4395,7 +4426,7 @@
     // Collect species from BOTH frequency (species) and DWR (dwr) arrays across all event samples
     // Returns deduplicated list in order of first appearance
     function collectEventSpeciesUnified(sampleList) {
-      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
+      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_SAMPLE_KEYS);
     }
 
     function collectSeenSpeciesByMethods(sampleList,methodKeys) {
@@ -4447,12 +4478,12 @@
 
     // Site/event seen list for USDA methods, preserving first-seen order
     function collectSeenSpeciesUnified(sampleList) {
-      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
+      return collectSeenSpeciesByMethods(sampleList,USDA_SPECIES_SAMPLE_KEYS);
     }
 
     // Site/event seen list for USDA methods sorted by per-sample frequency, desc
     function collectSeenSpeciesByFreqUnified(sampleList) {
-      return collectSeenSpeciesByFreqMethods(sampleList,USDA_SPECIES_METHOD_KEYS);
+      return collectSeenSpeciesByFreqMethods(sampleList,USDA_SPECIES_SAMPLE_KEYS);
     }
 
     // Returns species sorted by frequency (# samples they appear in), desc
@@ -4492,6 +4523,7 @@
         sampleIdx: samplePanelState.sampleIdx,
         species: JSON.parse(JSON.stringify(samplePanelState.species||[])),
         dwr: JSON.parse(JSON.stringify(samplePanelState.dwr||[])),
+        lpiHits: JSON.parse(JSON.stringify(samplePanelState.lpiHits||[])),
       };
 
       const idx=evSamples.findIndex(s => s.id===sid);
@@ -4520,16 +4552,13 @@
       const merged=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
       // Frequency map so we can sort most-seen first by default
-      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_METHOD_KEYS);
+      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_SAMPLE_KEYS);
 
-      // ABC toggle: sort by symbol; default: frequency desc then symbol
-      const unifiedCurrent=speciesAlphaSort
-        ? [...merged].sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''))
-        :[...merged].sort((a,b) => {
-          const fa=freqMap[speciesEntryKey(a)]||0;
-          const fb=freqMap[speciesEntryKey(b)]||0;
-          return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
-        });
+      const unifiedCurrent=[...merged].sort((a,b) => {
+        const fa=freqMap[speciesEntryKey(a)]||0;
+        const fb=freqMap[speciesEntryKey(b)]||0;
+        return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
+      });
 
       const freqCurrentSymbols=new Set((samplePanelState.species||[]).map(x => String(x?.symbol||'').trim().toUpperCase()));
 
@@ -4549,7 +4578,7 @@
       let html='';
 
       if(unifiedCurrent.length) {
-        const sortLabel=speciesAlphaSort? 'A-Z':'Most seen';
+        const sortLabel='Most seen';
         html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-current-chips">${unifiedCurrent.map(sp => currentPicksHTML(sp)).join('')}</div>`;
       }
@@ -6753,7 +6782,6 @@
       // -- FIX: always sync state so Save/advance uses the right position --
       samplePanelState.transectIdx=tIdx;
       samplePanelState.sampleIdx=sIdx;
-      speciesAlphaSort=false; // reset ABC toggle per sample
       syncPanelDisplaySelects();
 
       // Ensure activeEvent is loaded (may be null when entering via sample dot click)
@@ -7281,12 +7309,6 @@
       if(methodKey==='species') {
         const sameSymbolIdx=findSpeciesSymbolIndex(list,workingEntry.symbol);
         if(sameSymbolIdx>=0) {
-          const existing=list[sameSymbolIdx];
-          if(preferQualifier&&isAlwaysAvailableTwoCode(existing)&&!speciesQualifierText(existing)) {
-            openSpeciesQualifierModal(methodKey,sameSymbolIdx);
-            toast('Species already added. Add a qualifier to the existing entry if needed','warn');
-            return false;
-          }
           toast('Species already added','warn');
           return false;
         }
@@ -7300,15 +7322,12 @@
           clearSpeciesSearchUi(methodKey);
           refreshSpeciesMethodViews({refreshFreq: false,refreshSeen: false,refreshDrawer: false});
           updateSeenChipStatesInPlace();
-          if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
           return true;
         }
         if(isAlwaysAvailableTwoCode(workingEntry)) {
           const blankIdx=findUngroupedQualifierGapIndex(list,workingEntry);
-          if(preferQualifier&&blankIdx>=0) {
-            openSpeciesQualifierModal(methodKey,blankIdx);
-            toast('Add a qualifier to the existing 2-code entry before adding another','warn');
-            return false;
+          if(blankIdx>=0) {
+            // still allow adding — do not block with qualifier modal
           }
         }
         toast('Already added','warn');
@@ -7320,7 +7339,6 @@
       const skipFreq=methodKey==='dwr';
       refreshSpeciesMethodViews({refreshFreq: !skipFreq,refreshSeen: false,refreshDrawer: false});
       updateSeenChipStatesInPlace();
-      if(isAlwaysAvailableTwoCode(workingEntry)&&!speciesQualifierText(workingEntry)) openSpeciesQualifierModal(methodKey,list.length-1);
       return true;
     }
 
@@ -7832,15 +7850,7 @@
       if(dwrSearchCount) {dwrSearchCount.style.display='none'; dwrSearchCount.textContent='';}
     });
 
-    document.getElementById('dwr-abc-btn').addEventListener('click',() => {
-      const dwrAlphaSort=document.getElementById('dwr-abc-btn').classList.contains('active');
-      if(!dwrAlphaSort) {
-        samplePanelState.dwr.sort(compareSpeciesDisplay);
-      }
-      document.getElementById('dwr-abc-btn').classList.toggle('active');
-      renderDWRChips();
-      renderDWRSeenSpecies();
-    });
+
 
     function renderDWRChips() {
       renderDwrInputArea();
@@ -7959,17 +7969,13 @@
       const merged=mergeWithEventSpeciesPool(collectEventSpeciesUnified(evSamples));
 
       // Frequency map so we can sort most-seen first by default
-      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_METHOD_KEYS);
+      const freqMap=buildSpeciesFreqMapByMethods(evSamples,USDA_SPECIES_SAMPLE_KEYS);
 
-      // DWR ABC toggle: sort by symbol; default: frequency desc then symbol
-      const dwrAlphaSort=document.getElementById('dwr-abc-btn')?.classList.contains('active')??false;
-      const unifiedCurrent=dwrAlphaSort
-        ? [...merged].sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''))
-        :[...merged].sort((a,b) => {
-          const fa=freqMap[speciesEntryKey(a)]||0;
-          const fb=freqMap[speciesEntryKey(b)]||0;
-          return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
-        });
+      const unifiedCurrent=[...merged].sort((a,b) => {
+        const fa=freqMap[speciesEntryKey(a)]||0;
+        const fb=freqMap[speciesEntryKey(b)]||0;
+        return fb-fa||((a.symbol||'').localeCompare(b.symbol||''));
+      });
 
       const dwrCurrentSymbols=new Set((samplePanelState.dwr||[]).map(x => String(x?.symbol||'').trim().toUpperCase()));
 
@@ -7989,7 +7995,7 @@
       let html='';
 
       if(unifiedCurrent.length) {
-        const sortLabel=dwrAlphaSort? 'A-Z':'Most seen';
+        const sortLabel='Most seen';
         html+=`<div class="seen-section-hdr"><div class="seen-section-title"><span>Species List</span><span class="seen-sort-badge">${esc(sortLabel)}</span></div></div>`;
         html+=`<div class="seen-chips" id="seen-dwr-current-chips">${unifiedCurrent.map(sp => currentPickHTML(sp)).join('')}</div>`;
       }
@@ -8007,16 +8013,7 @@
 
     }
 
-    document.getElementById('species-abc-btn').addEventListener('click',() => {
-      speciesAlphaSort=!speciesAlphaSort;
-      if(speciesAlphaSort) {
-        // Also sort current chips in-place so insertion order becomes ABC
-        samplePanelState.species.sort(compareSpeciesDisplay);
-      }
-      renderSpeciesChips();
-      scheduleSeenRefresh(0);
-      renderSpeciesDrawer();
-    });
+
 
     function renderSpeciesChips() {
       renderFreqInputArea();
@@ -8487,11 +8484,14 @@
         const qp=document.getElementById('lpi-quickpicks');
         if(qp) {
           const pool=getEventSpeciesPool().slice().sort((a,b) => (a.symbol||'').localeCompare(b.symbol||''));
+          const lpiCurrentSyms=new Set((samplePanelState.lpiHits||[]).map(h => String(h.symbol||'').trim().toUpperCase()));
           qp.innerHTML=pool.length?
-            pool.map(sp =>
-              `<button class="btn btn-ghost btn-sm" data-lpi-qp="${esc(sp.symbol||'')}" data-lpi-qp-label="${esc(sp.common||'')}"
-                title="${esc(sp.symbol||'')}" style="font-size:.75rem;padding:3px 8px;">${esc(speciesDisplayPrimary(sp))}</button>`
-            ).join(''):
+            pool.map(sp => {
+              const sym=sp.symbol||'';
+              const inSample=lpiCurrentSyms.has(sym.toUpperCase());
+              return `<button class="btn btn-ghost btn-sm${inSample? ' qp-btn-in-sample':''}" data-lpi-qp="${esc(sym)}" data-lpi-qp-label="${esc(sp.common||'')}"
+                title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;">${esc(speciesDisplayPrimary(sp))}</button>`;
+            }).join(''):
             '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via drawer</span>';
           qp.querySelectorAll('[data-lpi-qp]').forEach(btn => {
             btn.addEventListener('click',() => addLpiHit(btn.dataset.lpiQp,btn.dataset.lpiQpLabel));
@@ -8516,8 +8516,8 @@
         pool.map(sp => {
           const sym=sp.symbol||'';
           const inSample=currentSyms.has(sym.toUpperCase());
-          return `<button class="btn btn-ghost btn-sm" data-freq-qp="${esc(sym)}" data-freq-qp-common="${esc(sp.common||'')}" data-freq-qp-sci="${esc(sp.sci||'')}" data-freq-qp-native="${esc(sp.native||'')}"
-            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}">${esc(speciesDisplayPrimary(sp))}</button>`;
+          return `<button class="btn btn-ghost btn-sm${inSample? ' qp-btn-in-sample':''}" data-freq-qp="${esc(sym)}" data-freq-qp-common="${esc(sp.common||'')}" data-freq-qp-sci="${esc(sp.sci||'')}" data-freq-qp-native="${esc(sp.native||'')}"
+            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;">${esc(speciesDisplayPrimary(sp))}</button>`;
         }).join(''):
         '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';
       qp.querySelectorAll('[data-freq-qp]').forEach(btn => {
@@ -8551,8 +8551,8 @@
         pool.map(sp => {
           const sym=sp.symbol||'';
           const inSample=currentSyms.has(sym.toUpperCase());
-          return `<button class="btn btn-ghost btn-sm" data-dwr-qp="${esc(sym)}" data-dwr-qp-common="${esc(sp.common||'')}" data-dwr-qp-sci="${esc(sp.sci||'')}" data-dwr-qp-native="${esc(sp.native||'')}"
-            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;${inSample? 'border-color:var(--accent);font-weight:700;':''}${full&&!inSample? 'opacity:.45;':''}">
+          return `<button class="btn btn-ghost btn-sm${inSample? ' qp-btn-in-sample':''}" data-dwr-qp="${esc(sym)}" data-dwr-qp-common="${esc(sp.common||'')}" data-dwr-qp-sci="${esc(sp.sci||'')}" data-dwr-qp-native="${esc(sp.native||'')}"
+            title="${esc(sym)}" style="font-size:.75rem;padding:3px 8px;${full&&!inSample? 'opacity:.45;':''}">
             ${esc(speciesDisplayPrimary(sp))}</button>`;
         }).join(''):
         '<span style="font-size:.72rem;color:var(--muted);">No species in event list \u2014 add via search</span>';

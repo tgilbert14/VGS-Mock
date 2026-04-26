@@ -1,6 +1,6 @@
 // EcoPlot Field Collector — Service Worker
 // Bump CACHE_VERSION whenever the HTML build revision changes.
-const CACHE_VERSION='2026.04.25.85';
+const CACHE_VERSION='2026.04.26.92';
 const CACHE=`ecoplot-${CACHE_VERSION}`;
 // NOTE: VGSDefaultSpeciesList.csv intentionally excluded from PRECACHE.
 // caches.addAll() is atomic — a failed 8.5 MB download aborts the entire SW install.
