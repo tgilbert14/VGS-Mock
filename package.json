@@ -2,7 +2,7 @@
   "name": "field-observer-api",
   "version": "1.0.0",
   "description": "Azure Function backend for Field Observer app",
-  "main": "index.js",
+  "main": "{index.js,api/**/*.js}",
   "scripts": {
     "start": "func start"
   },

@@ -7,3 +7,14 @@ sql_codeBackups
 .idea
 .vscode
 *.env
+.env.local
+.env.*.local
+test/.env.local
+local.settings.json
+
+
+# Local az CLI scratch dumps
+_*.json
+
+.deploy-stage/
+.deploy-stage.zip

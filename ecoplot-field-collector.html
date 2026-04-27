@@ -17,6 +17,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="vendor/msal-browser.min.js"></script>
   <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+  <script src="cloudClient.js"></script>
   <style>
     :root {
       --bg: #080c09;
@@ -3477,7 +3478,19 @@
     //  INDEXEDDB
     // ------------------------------------------------------
     const DB_NAME='ecoplot2';
-    const DB_VER=6;
+    const DB_VER=7;
+
+    // Mint a v4 GUID for server PKs. Used by the upgrade backfill below and
+    // wherever the UI creates a new site/event/sample/protocol/folder.
+    function newGuid() {
+      if(typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function') {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c => {
+        const r=Math.random()*16|0;
+        return (c==='x'? r:(r&0x3|0x8)).toString(16);
+      });
+    }
 
     function openDB() {
       return new Promise((res,rej) => {
@@ -3485,6 +3498,7 @@
         r.onupgradeneeded=e => {
           const db=e.target.result;
           const tx=e.target.transaction;
+          const fromVersion=e.oldVersion||0;
           if(!db.objectStoreNames.contains('sites'))
             db.createObjectStore('sites',{keyPath: 'id'});
           if(!db.objectStoreNames.contains('samples')) {
@@ -3532,6 +3546,35 @@
           }
           if(!db.objectStoreNames.contains('protocols'))
             db.createObjectStore('protocols',{keyPath: 'id'});
+
+          // ── DB_VER 7 backfill ────────────────────────────────────────────
+          // Mint stable server PK GUIDs for every existing row so the new
+          // relational sync flow has something to push. `id` (the local
+          // keypath) is left untouched so all in-memory references keep
+          // working — pkSite/pkProtocol/pkEvent/pkSample are sync-only.
+          if(fromVersion<7) {
+            const backfill=[
+              ['sites','pkSite'],
+              ['protocols','pkProtocol'],
+              ['events','pkEvent'],
+              ['samples','pkSample']
+            ];
+            backfill.forEach(([storeName,col]) => {
+              if(!db.objectStoreNames.contains(storeName)) return;
+              const store=tx.objectStore(storeName);
+              const req=store.openCursor();
+              req.onsuccess=ev2 => {
+                const cur=ev2.target.result;
+                if(!cur) return;
+                const row=cur.value||{};
+                let dirty=false;
+                if(!row[col]) {row[col]=newGuid(); dirty=true;}
+                if(row.serverSyncState==null) {row.serverSyncState=0; dirty=true;}
+                if(dirty) cur.update(row);
+                cur.continue();
+              };
+            });
+          }
         };
         r.onsuccess=e => res(e.target.result);
         r.onerror=e => rej(e.target.error);
@@ -5201,6 +5244,8 @@
       if(!name) {toast('Site name required','err'); return;}
       const site={
         id: 'site_'+Date.now(),
+        pkSite: newGuid(),
+        serverSyncState: 0,
         name,
         folderId: currentFolderId,
         protocolId: document.getElementById('new-site-protocol').value||null,
@@ -5635,7 +5680,7 @@
     async function confirmNewFolder() {
       const name=document.getElementById('new-folder-input').value.trim();
       if(!name) return;
-      await dbPut('folders',{id: 'folder_'+Date.now(),name,parentId: currentFolderId,createdAt: Date.now()});
+      await dbPut('folders',{id: 'folder_'+Date.now(),pkFolder: newGuid(),name,parentId: currentFolderId,createdAt: Date.now()});
       document.getElementById('new-folder-row').style.display='none';
       document.getElementById('new-folder-input').value='';
       renderSiteList({invalidate: true});
@@ -6737,7 +6782,7 @@
         return;
       }
       const ev={
-        id: 'evt_'+Date.now(),siteId: activeSiteId,name,eventDate: dateVal,notes: '',
+        id: 'evt_'+Date.now(),pkEvent: newGuid(),serverSyncState: 0,siteId: activeSiteId,name,eventDate: dateVal,notes: '',
         transects: +document.getElementById('new-event-transects').value||4,
         samples: +document.getElementById('new-event-samples').value||50,
         length: +document.getElementById('new-event-length').value||100,
@@ -6957,8 +7002,12 @@
       const hasData=species.length>0||freqNone||coverHits.length>0||dwr.length>0||hasFetch||hasLpi;
       if(!force&&!hasData) return;
       const sid=sampleId(activeSiteId,activeEventId,t,s);
+      const existing=await dbGet('samples',sid);
       await dbPut('samples',{
-        id: sid,siteId: activeSiteId,eventId: activeEventId,
+        id: sid,
+        pkSample: existing?.pkSample||newGuid(),
+        serverSyncState: 0,
+        siteId: activeSiteId,eventId: activeEventId,
         transectIdx: t,sampleIdx: s,
         species,freqNone,coverHits,dwr,fetch,lpiHits,lpiSurface,lpiHeight,
         hasData,savedAt: Date.now(),syncStatus: 'pending'
@@ -9554,7 +9603,7 @@
       if(document.getElementById('np-method-height').checked) methods.push('height');
       if(!methods.length) {toast('Select at least one method','warn'); return;}
       const p={
-        id: 'proto_custom_'+Date.now(),definitionPk: generateProtocolDefinitionPk(),name,builtIn: false,
+        id: 'proto_custom_'+Date.now(),pkProtocol: newGuid(),serverSyncState: 0,definitionPk: generateProtocolDefinitionPk(),name,builtIn: false,
         transects: +document.getElementById('np-transects').value||4,
         samples: +document.getElementById('np-samples').value||50,
         length: +document.getElementById('np-length').value||100,
@@ -9599,6 +9648,8 @@
             toast('This protocol is already imported','warn');
             return;
           }
+          if(!parsed.pkProtocol) parsed.pkProtocol=newGuid();
+          if(parsed.serverSyncState==null) parsed.serverSyncState=0;
           await dbPut('protocols',parsed);
           renderProtocols();
           refreshNewEventProtocolSelect();
@@ -10287,13 +10338,142 @@
 
     let isSyncInProgress=false;
 
+    // ── Relational sync (Site → Protocol → EventGroup → Event → Sample) ────
+    // Replaces the legacy /api/observations POST loop. Walks IndexedDB,
+    // builds rowsByTable using each row's pkX GUID, and pushes the batch
+    // through window.cloudClient.runFullSync. On success every touched row
+    // is marked syncStatus='synced'.
+
+    // Default GUIDs you confirmed:
+    //   FK_Type_Protocol  = USFS Region III CNVSP - Field
+    //   FK_Type_EventGroup = FORM/Field
+    //   FK_Type_Event     = method-driven (see EVENT_TYPE_BY_METHOD)
+    const FK_TYPE_PROTOCOL='46DFDAC7-306F-43ED-AA0A-ED1137C7DCB4';
+    const FK_TYPE_EVENTGROUP='B86B417D-C78B-45A2-ABB5-5C2E184D1F59';
+    const EVENT_TYPE_BY_METHOD={
+      cover: '24AFCC2D-8D32-4AC5-8329-416416CA6153', // Point Ground Cover
+      lpi: '50F7F140-1A32-41A4-AE8D-B0D1D37BC30E', // Point Intercept
+      freq: '04ABBC9D-CC3A-4B16-948D-D0D5B685F72E', // Frequency (by quadrat)
+      dwr: '269FD043-6AB5-46FE-8A80-F46E7198FE5E', // DWR (by quadrat)
+      fetch: '38CB4673-D724-43E3-91A6-574E66990151', // Fetch
+      height: 'ACD1834A-5531-4D4C-AB94-8BB1D1F627D8'  // Gap Intercept (fallback)
+    };
+    const STATUS_TO_SPECIES={Active: 'SST_ACTIVE',Inactive: 'SST_INACTIVE',Retired: 'SST_RETIRED'};
+
+    function deriveApiBase(url) {
+      // 'https://x.azurewebsites.net/api/observations' → 'https://x.azurewebsites.net/api'
+      return String(url||'').replace(/\/observations\/?$/,'').replace(/\/+$/,'');
+    }
+
+    function pickFkTypeEvent(methods) {
+      const list=Array.isArray(methods)? methods:[];
+      for(const m of list) {
+        const id=EVENT_TYPE_BY_METHOD[String(m).toLowerCase()];
+        if(id) return id;
+      }
+      return EVENT_TYPE_BY_METHOD.height;
+    }
+
+    function buildSitePayload(site) {
+      return {
+        PK_Site: site.pkSite,
+        FK_Species_Site: 'SITE_KEY',
+        FK_Species_SiteStatus: STATUS_TO_SPECIES[site.status]||'SST_ACTIVE',
+        FK_Species_ElevUnits: 'UNIT_FEET',
+        SiteID: String(site.name||'').slice(0,50)||null,
+        Notes: site.desc||null,
+        Slope: site.slope!=null&&site.slope!==''? Number(site.slope):null,
+        Aspect: site.aspect!=null&&site.aspect!==''? Number(site.aspect):null,
+        Elevation: site.elev!=null&&site.elev!==''? Number(site.elev):null
+      };
+    }
+
+    function buildProtocolPayload(proto) {
+      return {
+        PK_Protocol: proto.pkProtocol,
+        FK_Type_Protocol: FK_TYPE_PROTOCOL,
+        Bailiwick: 'VGS-Mock',
+        ProtocolName: String(proto.name||'').slice(0,200),
+        Date: new Date(proto.createdAt||Date.now()).toISOString(),
+        Notes: null
+      };
+    }
+
+    function buildEventGroupPayload(proto) {
+      return {
+        PK_EventGroup: proto.pkEventGroup,
+        FK_Type_EventGroup: FK_TYPE_EVENTGROUP,
+        FK_Protocol: proto.pkProtocol,
+        GroupName: 'Main',
+        DisplayOrder: 1
+      };
+    }
+
+    function buildEventPayload(ev,site,proto) {
+      return {
+        PK_Event: ev.pkEvent,
+        FK_Type_Event: pickFkTypeEvent(ev.methods),
+        FK_Site: site?.pkSite||null,
+        FK_EventGroup: proto?.pkEventGroup||null,
+        EventName: String(ev.name||'').slice(0,50)||null,
+        PageNumber: 1,
+        EntryOrder: Number.isFinite(+ev.entryOrder)? +ev.entryOrder:1,
+        Attributes: JSON.stringify({
+          eventDate: ev.eventDate||null,
+          methods: ev.methods||[],
+          transects: ev.transects||null,
+          samplesPerTransect: ev.samples||null,
+          length: ev.length||null,
+          unit: ev.unit||null,
+          coverPts: ev.coverPts||null,
+          frameW: ev.frameW||null,
+          frameH: ev.frameH||null,
+          fetchMeasuresPerSample: ev.fetchMeasuresPerSample||null,
+          coverCats: ev.coverCats||null
+        })
+      };
+    }
+
+    function buildSamplePayload(samp,ev) {
+      return {
+        PK_Sample: samp.pkSample,
+        FK_Event: ev?.pkEvent||null,
+        FK_Species: null,
+        Transect: Number.isFinite(+samp.transectIdx)? (+samp.transectIdx)+1:1,
+        SampleNumber: Number.isFinite(+samp.sampleIdx)? (+samp.sampleIdx)+1:1,
+        cValue1: JSON.stringify({
+          species: samp.species||[],
+          freqNone: !!samp.freqNone,
+          coverHits: samp.coverHits||[],
+          dwr: samp.dwr||[],
+          fetch: samp.fetch||[],
+          lpiHits: samp.lpiHits||[],
+          lpiSurface: samp.lpiSurface||'',
+          lpiHeight: samp.lpiHeight??null,
+          savedAt: samp.savedAt? new Date(samp.savedAt).toISOString():null
+        })
+      };
+    }
+
     async function syncPendingSamples({silent=false,source='manual'}={}) {
       if(isSyncInProgress) return;
+      if(!window.cloudClient||typeof window.cloudClient.create!=='function') {
+        saveSyncDetail({type: 'err',status: 'Module missing',message: 'cloudClient.js failed to load'});
+        if(!silent) toast('Sync module missing','err');
+        return;
+      }
+
       const {url,key}=getSettings();
       if(!url) {
         saveSyncDetail({type: 'err',status: 'Not configured',message: 'Set Azure URL first'});
         if(!silent) toast('Set Azure URL first','err');
         renderSync();
+        return;
+      }
+      const baseUrl=deriveApiBase(url);
+      if(!baseUrl) {
+        saveSyncDetail({type: 'err',status: 'Bad URL',message: 'Could not derive API base from Azure URL'});
+        if(!silent) toast('Could not derive API base from URL','err');
         return;
       }
 
@@ -10305,102 +10485,142 @@
         renderSync();
         return;
       }
-      const samples=await dbGetAll('samples');
-      const sites=await dbGetAll('sites');
-      const folders=await dbGetAll('folders');
+
+      const [sites,protocols,events,samples,folders]=await Promise.all([
+        dbGetAll('sites'),dbGetAll('protocols'),dbGetAll('events'),
+        dbGetAll('samples'),dbGetAll('folders')
+      ]);
+
       const archivedSiteIds=new Set(sites.filter(s => s.archived).map(s => s.id));
       const localOnlySiteIds=getLocalOnlySiteIds(folders,sites);
       const excludedSiteIds=new Set([...archivedSiteIds,...localOnlySiteIds]);
-      const unsynced=samples.filter(x => x.hasData&&x.syncStatus!=='synced'&&!excludedSiteIds.has(x.siteId));
-      if(!unsynced.length) {
+
+      const unsyncedSamples=samples.filter(x =>
+        x.hasData&&x.syncStatus!=='synced'&&!excludedSiteIds.has(x.siteId));
+      if(!unsyncedSamples.length) {
         if(!silent&&source==='manual') toast('Nothing to sync');
         return;
+      }
+
+      // Walk dependency graph from samples back to sites/events/protocols.
+      const siteById=new Map(sites.map(s => [s.id,s]));
+      const eventById=new Map(events.map(e => [e.id,e]));
+      const protoById=new Map(protocols.map(p => [p.id,p]));
+
+      const neededSites=new Map();
+      const neededEvents=new Map();
+      const neededProtos=new Map();
+
+      for(const samp of unsyncedSamples) {
+        const ev=eventById.get(samp.eventId);
+        const site=siteById.get(samp.siteId);
+        if(!ev||!site||!ev.pkEvent||!site.pkSite||!samp.pkSample) continue;
+        neededEvents.set(ev.id,ev);
+        neededSites.set(site.id,site);
+        const proto=ev.protocolId? protoById.get(ev.protocolId):null;
+        if(proto&&proto.pkProtocol) neededProtos.set(proto.id,proto);
+      }
+
+      // Auto-mint pkEventGroup per protocol (one EventGroup per protocol) and
+      // persist back so downstream syncs reuse the same GUID.
+      for(const proto of neededProtos.values()) {
+        if(!proto.pkEventGroup) {
+          proto.pkEventGroup=newGuid();
+          await dbPut('protocols',proto);
+        }
+      }
+
+      const rowsByTable={Site: [],Protocol: [],EventGroup: [],Event: [],Sample: []};
+      const wrap=(pk,record) => ({op: 1,pk,record,deviceSyncState: 0});
+
+      for(const site of neededSites.values()) {
+        rowsByTable.Site.push(wrap(site.pkSite,buildSitePayload(site)));
+      }
+      for(const proto of neededProtos.values()) {
+        rowsByTable.Protocol.push(wrap(proto.pkProtocol,buildProtocolPayload(proto)));
+        rowsByTable.EventGroup.push(wrap(proto.pkEventGroup,buildEventGroupPayload(proto)));
+      }
+      for(const ev of neededEvents.values()) {
+        const site=siteById.get(ev.siteId);
+        const proto=ev.protocolId? protoById.get(ev.protocolId):null;
+        rowsByTable.Event.push(wrap(ev.pkEvent,buildEventPayload(ev,site,proto)));
+      }
+      for(const samp of unsyncedSamples) {
+        const ev=eventById.get(samp.eventId);
+        rowsByTable.Sample.push(wrap(samp.pkSample,buildSamplePayload(samp,ev)));
       }
 
       const btn=document.getElementById('sync-btn');
       isSyncInProgress=true;
       btn.disabled=true; btn.textContent='Syncing...';
 
-      let ok=0,fail=0;
-      let lastFailure=null;
+      let result=null;
+      let networkError=null;
       try {
-        for(const samp of unsynced) {
-          const site=sites.find(s => s.id===samp.siteId);
-          const siteLabel=site?.name? `Site ${site.name}`:'Site unknown';
-          const sampleLabel=`Sample ${samp.sampleIdx!=null? samp.sampleIdx+1:samp.id}`;
-          try {
-            const hdrs={'Content-Type': 'application/json'};
-            hdrs.Authorization=`Bearer ${token}`;
-            if(key) hdrs['x-functions-key']=key;
-            const res=await fetch(url,{
-              method: 'POST',headers: hdrs,
-              body: JSON.stringify({
-                id: samp.id,
-                siteId: samp.siteId,
-                siteName: site?.name,
-                transectIdx: samp.transectIdx,
-                sampleIdx: samp.sampleIdx,
-                savedAt: new Date(samp.savedAt).toISOString(),
-                species: samp.species,
-                coverHits: samp.coverHits,
-                fetch: samp.fetch,
-                eventId: samp.eventId,
-                frameW: site?.frameW,
-                frameH: site?.frameH
-              })
-            });
-            const raw=await res.text();
-            const detail=extractSyncServerMessage(raw);
-            const requestId=res.headers.get('x-ms-request-id')||res.headers.get('request-id')||res.headers.get('x-request-id')||'';
-            const statusText=String(res.statusText||'').trim();
-            const statusLabel=`HTTP ${res.status}${statusText? ` ${statusText}`:''}`;
-            samp.syncStatus=res.ok? 'synced':'failed';
-            if(res.ok) {
-              ok++;
-            } else {
-              fail++;
-              const bodyLines=[];
-              if(detail) bodyLines.push(detail);
-              if(requestId) bodyLines.push(`Request ID: ${requestId}`);
-              lastFailure={
-                type: 'err',
-                status: statusLabel,
-                message: `${siteLabel} - ${sampleLabel} failed to sync.`,
-                body: bodyLines.join('\n')||'No response body returned.'
-              };
-            }
-          } catch(err) {
-            samp.syncStatus='failed';
-            fail++;
-            lastFailure={
-              type: 'err',
-              status: 'Network error',
-              message: `${siteLabel} - ${sampleLabel} failed to sync.`,
-              body: err?.message||'Request failed before a response was returned.'
-            };
-          }
-          await dbPut('samples',samp);
-        }
+        const client=window.cloudClient.create({
+          baseUrl,
+          getToken: () => token,
+          getFunctionsKey: () => key||null
+        });
+        result=await client.runFullSync(rowsByTable);
+      } catch(err) {
+        networkError=err;
       } finally {
         isSyncInProgress=false;
         btn.innerHTML='&#8635; Sync All Unsynced';
-        renderSync();
       }
 
-      if(fail===0) {
+      if(networkError) {
+        saveSyncDetail({
+          type: 'err',
+          status: networkError.status? `HTTP ${networkError.status}`:'Network error',
+          message: 'Sync failed before completion.',
+          body: networkError.message||String(networkError)
+        });
+        if(!silent) toast('Sync failed','err');
+        renderSync();
+        return;
+      }
+
+      const failed=result&&result.failed||0;
+      if(!failed) {
+        for(const samp of unsyncedSamples) {samp.syncStatus='synced'; await dbPut('samples',samp);}
+        for(const site of neededSites.values()) {
+          if(site.syncStatus!=='synced') {site.syncStatus='synced'; await dbPut('sites',site);}
+        }
+        for(const ev of neededEvents.values()) {
+          if(ev.syncStatus!=='synced') {ev.syncStatus='synced'; await dbPut('events',ev);}
+        }
+        for(const proto of neededProtos.values()) {
+          if(proto.syncStatus!=='synced') {proto.syncStatus='synced'; await dbPut('protocols',proto);}
+        }
         saveSyncDetail({
           type: 'ok',
           status: 'Success',
-          message: `Synced ${ok} sample${ok!==1? 's':''}`,
-          body: 'All unsynced samples were accepted by the server.'
+          message: `Synced ${result.applied} row${result.applied===1? '':'s'} (processId ${result.processId})`,
+          body: JSON.stringify(result.perTable,null,2)
         });
-      } else if(lastFailure) {
-        saveSyncDetail(lastFailure);
-      }
-
-      if(!silent||fail>0) {
-        if(fail===0) toast(`Synced ${ok} sample${ok!==1? 's':''}`,'ok');
-        else toast(`${ok} synced, ${fail} failed`,'err');
+        if(!silent) toast(`Synced ${result.applied}`,'ok');
+      } else {
+        // Mark only the rows the server reported as applied.
+        const appliedPks=new Set((result.log||[])
+          .filter(l => l.Level==='info')
+          .map(l => String(l.RecordPK||'').toLowerCase()));
+        for(const samp of unsyncedSamples) {
+          if(appliedPks.has(String(samp.pkSample||'').toLowerCase())) {
+            samp.syncStatus='synced';
+            await dbPut('samples',samp);
+          }
+        }
+        saveSyncDetail({
+          type: 'err',
+          status: `${result.applied} applied / ${result.failed} failed / ${result.skipped} skipped`,
+          message: 'Some rows were rejected by the server.',
+          body: JSON.stringify(result.perTable,null,2)+'\n'+
+            (result.log||[]).filter(l => l.Level!=='info')
+              .map(l => `[${l.Level}] ${l.TableName} pk=${l.RecordPK} → ${l.Message}`).join('\n')
+        });
+        if(!silent) toast(`${result.applied} ok / ${result.failed} failed`,'err');
       }
 
       renderSync();
