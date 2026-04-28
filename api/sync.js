@@ -29,10 +29,23 @@ function isValidGuid(s) {
 }
 
 async function getMaxSyncKeys(db,tables) {
-    // Build a single query: SELECT MAX(SyncKey) AS [Site] FROM Site, ...
-    const selects=tables.map(t => `(SELECT ISNULL(MAX(SyncKey), 0) FROM [dbo].[${t}]) AS [${t}]`);
+    // Some tables may not exist or may not have a SyncKey column. Probe schema
+    // first so a single missing column doesn't fail the whole batch.
+    const probe=await db.request().query(`
+        SELECT t.name AS tableName
+        FROM sys.tables t
+        INNER JOIN sys.columns c ON c.object_id = t.object_id
+        WHERE c.name = 'SyncKey' AND SCHEMA_NAME(t.schema_id) = 'dbo'
+    `);
+    const eligible=new Set((probe.recordset||[]).map(r => r.tableName));
+    const out={};
+    const present=tables.filter(t => eligible.has(t));
+    for(const t of tables) out[t]=0;
+    if(!present.length) return out;
+    const selects=present.map(t => `(SELECT ISNULL(MAX(SyncKey), 0) FROM [dbo].[${t}]) AS [${t}]`);
     const result=await db.request().query(`SELECT ${selects.join(', ')}`);
-    return result.recordset[0]||{};
+    Object.assign(out,result.recordset[0]||{});
+    return out;
 }
 
 app.http('syncexchange',{
