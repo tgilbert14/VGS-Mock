@@ -18,3 +18,6 @@ _*.json
 
 .deploy-stage/
 .deploy-stage.zip
+.deploy-func/
+.deploy-func-slim/
+.deploy-func-full/
