@@ -10573,11 +10573,14 @@
       }
 
       if(networkError) {
+        const bodyDetail=networkError.body
+          ? (typeof networkError.body==='string'? networkError.body:JSON.stringify(networkError.body,null,2))
+          :(networkError.message||String(networkError));
         saveSyncDetail({
           type: 'err',
           status: networkError.status? `HTTP ${networkError.status}`:'Network error',
-          message: 'Sync failed before completion.',
-          body: networkError.message||String(networkError)
+          message: networkError.message||'Sync failed before completion.',
+          body: bodyDetail
         });
         if(!silent) toast('Sync failed','err');
         renderSync();

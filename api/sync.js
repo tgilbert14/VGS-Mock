@@ -39,7 +39,7 @@ app.http('syncexchange',{
     methods: ['POST','OPTIONS'],
     route: 'syncexchange',
     authLevel: 'anonymous',
-    handler: async (request) => {
+    handler: async (request,context) => {
         if((request.method||'').toUpperCase()==='OPTIONS') return preflight();
 
         const auth=await requireAuth(request);
@@ -82,6 +82,7 @@ app.http('syncexchange',{
                 syncKeys
             });
         } catch(err) {
+            context.error('syncexchange DB error:',err.message,err.stack);
             return jsonResponse(500,{error: 'Database error',detail: err.message});
         }
     }
@@ -91,7 +92,7 @@ app.http('getlastsynckey',{
     methods: ['POST','OPTIONS'],
     route: 'getlastsynckey',
     authLevel: 'anonymous',
-    handler: async (request) => {
+    handler: async (request,context) => {
         if((request.method||'').toUpperCase()==='OPTIONS') return preflight();
 
         const auth=await requireAuth(request);
@@ -113,6 +114,7 @@ app.http('getlastsynckey',{
             const syncKeys=await getMaxSyncKeys(db,requested);
             return jsonResponse(200,{success: true,syncKeys});
         } catch(err) {
+            context.error('getlastsynckey DB error:',err.message,err.stack);
             return jsonResponse(500,{error: 'Database error',detail: err.message});
         }
     }
